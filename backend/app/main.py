@@ -10,6 +10,7 @@ from app.api.agent_settings import router as agent_settings_router
 from app.api.chat import router as chat_router
 from app.api.kb import router as kb_router
 from app.api.messages import router as messages_router
+from app.api.tool_logs import router as tool_logs_router
 from app.api.resources import router as resources_router
 from app.api.sim import router as sim_router
 from app.api.device_ops import router as device_ops_router
@@ -83,6 +84,7 @@ app.include_router(sops_router, prefix="/api")
 app.include_router(sim_router, prefix="/api")
 app.include_router(device_ops_router, prefix="/api")
 app.include_router(messages_router, prefix="/api")
+app.include_router(tool_logs_router, prefix="/api")
 
 
 @app.get("/healthz")

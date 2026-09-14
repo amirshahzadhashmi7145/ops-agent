@@ -2,6 +2,7 @@ import json
 import re
 from collections.abc import AsyncIterator
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -23,7 +24,8 @@ from app.services.agent_settings_defaults import DEFAULT_GREETING
 from app.services.kb_retrieval import search_knowledge_base
 from app.services.llm.base import ChatMessage, ToolCall
 from app.services.llm.factory import get_llm_provider
-from app.services.resource_executor import execute_resource_request
+from app.services.resource_executor import execute_resource_request, merge_headers
+from app.services.tool_log import record_tool_call, redact_headers
 from app.services.sop_device_routing import (
     choose_sop_process,
     is_confident_match,
@@ -157,6 +159,36 @@ def _history_to_messages(history: list[dict[str, str]]) -> list[ChatMessage]:
     return messages
 
 
+def _log_agent_tool(
+    db: Session,
+    *,
+    tool_name: str,
+    user_email: str,
+    conversation_id: UUID | None,
+    request: dict[str, Any],
+    response: dict[str, Any],
+    success: bool,
+    resource_id: UUID | None = None,
+    http_method: str | None = None,
+    response_status: int | None = None,
+    latency_ms: int | None = None,
+) -> None:
+    record_tool_call(
+        db,
+        tool_name=tool_name,
+        source="agent",
+        created_by=user_email,
+        request=request,
+        response=response,
+        success=success,
+        resource_id=resource_id,
+        conversation_id=conversation_id,
+        http_method=http_method,
+        response_status=response_status,
+        latency_ms=latency_ms,
+    )
+
+
 async def _handle_kb_search(
     db: Session,
     tool_call: ToolCall,
@@ -239,6 +271,7 @@ async def run_agent_turn(
     resources: list[Resource],
     user_email: str,
     db: Session,
+    conversation_id: UUID | None = None,
 ) -> AsyncIterator[dict[str, Any]]:
     provider = get_llm_provider()
     agent_cfg = get_agent_settings(db)
@@ -383,6 +416,16 @@ async def run_agent_turn(
                 }
                 tool_result, trace = await _handle_kb_search(db, tool_call, top_k=kb_top_k)
                 pipeline_trace.append(trace)
+                parsed = json.loads(tool_result)
+                _log_agent_tool(
+                    db,
+                    tool_name=tool_call.name,
+                    user_email=user_email,
+                    conversation_id=conversation_id,
+                    request={"arguments": tool_call.arguments, "query": trace.get("query")},
+                    response=parsed,
+                    success="error" not in parsed,
+                )
                 yield {
                     "type": "kb_search",
                     "query": trace["query"],
@@ -409,6 +452,16 @@ async def run_agent_turn(
                     match_threshold=sop_match_threshold,
                 )
                 pipeline_trace.append(trace)
+                parsed = json.loads(tool_result)
+                _log_agent_tool(
+                    db,
+                    tool_name=tool_call.name,
+                    user_email=user_email,
+                    conversation_id=conversation_id,
+                    request={"arguments": tool_call.arguments, "query": trace.get("query")},
+                    response=parsed,
+                    success="error" not in parsed,
+                )
                 yield {
                     "type": "sop_search",
                     "query": trace["query"],
@@ -454,6 +507,15 @@ async def run_agent_turn(
             resource = resource_by_name.get(tool_call.name)
             if not resource:
                 tool_result = json.dumps({"error": f"Unknown tool: {tool_call.name}"})
+                _log_agent_tool(
+                    db,
+                    tool_name=tool_call.name,
+                    user_email=user_email,
+                    conversation_id=conversation_id,
+                    request={"arguments": tool_call.arguments},
+                    response={"error": f"Unknown tool: {tool_call.name}"},
+                    success=False,
+                )
                 messages.append(
                     ChatMessage(
                         role="tool",
@@ -473,6 +535,17 @@ async def run_agent_turn(
                             f"`{active_sop.get('title')}`. Allowed: {', '.join(active_sop.get('tools') or [])}"
                         ),
                     }
+                )
+                _log_agent_tool(
+                    db,
+                    tool_name=tool_call.name,
+                    user_email=user_email,
+                    conversation_id=conversation_id,
+                    request={"arguments": tool_call.arguments, "active_sop": active_sop.get("title")},
+                    response=json.loads(tool_result),
+                    success=False,
+                    resource_id=resource.id,
+                    http_method=resource.http_method.value,
                 )
                 messages.append(
                     ChatMessage(
@@ -516,6 +589,17 @@ async def run_agent_turn(
                         "message": f"Required parameters missing: {', '.join(missing)}",
                     }
                 )
+                _log_agent_tool(
+                    db,
+                    tool_name=resource.name,
+                    user_email=user_email,
+                    conversation_id=conversation_id,
+                    request={"arguments": tool_call.arguments, "payload": payload},
+                    response=json.loads(tool_result),
+                    success=False,
+                    resource_id=resource.id,
+                    http_method=resource.http_method.value,
+                )
                 pipeline_trace.append(
                     {
                         "type": "resource_result",
@@ -543,6 +627,37 @@ async def run_agent_turn(
                 payload=payload,
                 user_email=user_email,
                 tool_scope=getattr(resource.tool_scope, "value", "external"),
+            )
+            headers = redact_headers(
+                merge_headers(
+                    resource.connection,
+                    resource.fixed_headers or [],
+                    user_email,
+                )
+            )
+            _log_agent_tool(
+                db,
+                tool_name=resource.name,
+                user_email=user_email,
+                conversation_id=conversation_id,
+                request={
+                    "arguments": tool_call.arguments,
+                    "payload": payload,
+                    "method": resource.http_method.value,
+                    "url": resource.url,
+                    "resolved_url": result.get("resolved_url"),
+                    "headers": headers,
+                },
+                response={
+                    "status_code": result.get("status_code"),
+                    "body": result.get("body"),
+                    "error": result.get("error"),
+                },
+                success=bool(result.get("success")),
+                resource_id=resource.id,
+                http_method=resource.http_method.value,
+                response_status=result.get("status_code"),
+                latency_ms=result.get("latency_ms"),
             )
 
             pipeline_trace.append(

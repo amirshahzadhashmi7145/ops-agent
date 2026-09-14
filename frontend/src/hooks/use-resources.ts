@@ -105,6 +105,7 @@ export function useTestResource(resourceId?: string | null) {
         queryClient.invalidateQueries({ queryKey: ["resources"] });
         queryClient.invalidateQueries({ queryKey: ["resources", id] });
       }
+      queryClient.invalidateQueries({ queryKey: ["tool-logs"] });
       return result;
     },
     onError: (error: Error) => toast.error(error.message),

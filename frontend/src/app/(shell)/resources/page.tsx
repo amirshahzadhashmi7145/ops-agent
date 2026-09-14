@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MoreHorizontal, Pencil, Play, Plus, Power, PowerOff, Trash2, Wrench } from "lucide-react";
+import { Activity, MoreHorizontal, Pencil, Play, Plus, Power, PowerOff, Trash2, Wrench } from "lucide-react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -38,6 +40,7 @@ import {
   useSetResourceActive,
   useTestResource,
 } from "@/hooks/use-resources";
+import { useToolLogSummary } from "@/hooks/use-tool-logs";
 import { fetchResource } from "@/lib/api";
 import { buttonMotion, listItemVariants } from "@/lib/motion";
 import { buildTestPayload } from "@/lib/test-query";
@@ -60,8 +63,11 @@ function StatusDot({ success }: { success: boolean | null }) {
 }
 
 export default function ResourcesPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: resources = [], isLoading } = useResources();
+  const { data: usageSummary = [] } = useToolLogSummary();
+  const usageByName = Object.fromEntries(usageSummary.map((item) => [item.tool_name, item.call_count]));
   const deleteMutation = useDeleteResource();
   const setActiveMutation = useSetResourceActive();
   const testMutation = useTestResource();
@@ -196,7 +202,15 @@ export default function ResourcesPage() {
                         animate="visible"
                         className="flex items-center gap-2"
                       >
-                        <span>{resource.name}</span>
+                        <Link
+                          href={`/resources/${resource.id}/logs`}
+                          className="inline-flex items-center gap-2 hover:text-primary"
+                        >
+                          <Badge variant={usageByName[resource.name] ? "secondary" : "outline"} className="font-mono">
+                            {usageByName[resource.name] ?? 0}
+                          </Badge>
+                          <span>{resource.name}</span>
+                        </Link>
                         <Badge
                           variant={resource.tool_scope === "internal" ? "default" : "secondary"}
                           className="text-[10px]"
@@ -259,6 +273,10 @@ export default function ResourcesPage() {
                           <DropdownMenuItem onClick={() => openEdit(resource)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => router.push(`/resources/${resource.id}/logs`)}>
+                            <Activity className="mr-2 h-4 w-4" />
+                            Usage logs
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {

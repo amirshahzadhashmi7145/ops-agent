@@ -346,3 +346,24 @@ export function fetchMessage(id: string): Promise<import("@/types/messages").Out
 export function clearMessages(): Promise<void> {
   return apiFetch("/api/messages", { method: "DELETE" });
 }
+
+export function fetchToolLogSummary(): Promise<import("@/types/tool-log").ToolCallSummary[]> {
+  return apiFetch("/api/tool-logs/summary");
+}
+
+export function fetchToolLogs(options?: {
+  toolName?: string | null;
+  resourceId?: string | null;
+  limit?: number;
+}): Promise<import("@/types/tool-log").ToolCallLogListItem[]> {
+  const params = new URLSearchParams();
+  if (options?.toolName) params.set("tool_name", options.toolName);
+  if (options?.resourceId) params.set("resource_id", options.resourceId);
+  params.set("limit", String(options?.limit ?? 200));
+  const query = params.toString();
+  return apiFetch(`/api/tool-logs${query ? `?${query}` : ""}`);
+}
+
+export function fetchToolLog(id: string): Promise<import("@/types/tool-log").ToolCallLogDetail> {
+  return apiFetch(`/api/tool-logs/${id}`);
+}

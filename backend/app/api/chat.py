@@ -176,6 +176,7 @@ async def chat_stream(
                 resources=resources,
                 user_email=user_email,
                 db=db,
+                conversation_id=conversation.id,
             ):
                 if event.get("type") == "final_answer":
                     final_content = event.get("content", "")

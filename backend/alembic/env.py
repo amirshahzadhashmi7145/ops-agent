@@ -13,6 +13,7 @@ from app.models import (  # noqa: F401
     OutboundMessage,
     Resource,
     ResourceTestLog,
+    ToolCallLog,
     SimCustomer,
     SimDevice,
     SimSubscription,

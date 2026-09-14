@@ -19,6 +19,7 @@ from app.schemas.resource import (
     ResourceUpdate,
 )
 from app.services.resource_executor import execute_resource_request, resolve_resource_url, resolve_test_headers
+from app.services.tool_log import record_tool_call, redact_headers
 
 router = APIRouter()
 
@@ -123,12 +124,36 @@ async def _run_test(
         tested_by=user_email,
     )
     db.add(log)
+    resource = db.get(Resource, resource_id) if resource_id else None
+    record_tool_call(
+        db,
+        tool_name=resource.name if resource else payload.url,
+        source="test",
+        created_by=user_email,
+        resource_id=resource_id,
+        http_method=payload.http_method,
+        request={
+            "method": payload.http_method,
+            "url": payload.url,
+            "resolved_url": result.get("resolved_url"),
+            "payload": payload.test_payload,
+            "headers": redact_headers(
+                {item.get("key"): item.get("value") for item in headers_for_test if item.get("key")}
+            ),
+        },
+        response={
+            "status_code": result.get("status_code"),
+            "body": result.get("body"),
+            "error": result.get("error"),
+        },
+        success=result.get("success", False),
+        response_status=result.get("status_code"),
+        latency_ms=result.get("latency_ms"),
+    )
 
-    if resource_id:
-        resource = db.get(Resource, resource_id)
-        if resource:
-            resource.last_tested_at = datetime.now(timezone.utc)
-            resource.last_test_success = result.get("success", False)
+    if resource:
+        resource.last_tested_at = datetime.now(timezone.utc)
+        resource.last_test_success = result.get("success", False)
 
     db.commit()
     return ResourceTestResponse(**result)
