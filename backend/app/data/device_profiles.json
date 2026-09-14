@@ -1,0 +1,176 @@
+{
+  "NX-PRO-30001": {
+    "segment": "consumer",
+    "camera_family": "classic",
+    "model": "Nexar Pro",
+    "lookup": {
+      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-08-15"},
+      "subscription": {"status": "Active"},
+      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "order_number": "346741"
+    },
+    "classic_diagnostic": {
+      "camera_paired": false,
+      "location_services_off": false,
+      "location_not_always": true,
+      "precise_location_off": true,
+      "bluetooth_off": false,
+      "bluetooth_permission_denied_ios": false,
+      "bluetooth_permission_denied_android": false,
+      "local_network_permission_off": true,
+      "wifi_disabled_android": false,
+      "notifications_off_ios": false,
+      "notifications_off_android": false,
+      "phone_storage_low": false,
+      "app_storage_quota_high": false,
+      "data_sharing_disabled": false,
+      "clip_creation_failures": 0,
+      "app_version": "4.12.1",
+      "phone_os": "iOS 18.2"
+    },
+    "health": null,
+    "sim_triage": null,
+    "sim_data": null
+  },
+  "NX-BEAM-10001": {
+    "segment": "consumer",
+    "camera_family": "classic",
+    "model": "Nexar Beam",
+    "lookup": {
+      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-03-12"},
+      "subscription": {"status": "Active"},
+      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "order_number": "346741"
+    },
+    "classic_diagnostic": {
+      "camera_paired": true,
+      "location_services_off": false,
+      "location_not_always": false,
+      "precise_location_off": false,
+      "bluetooth_off": false,
+      "local_network_permission_off": false,
+      "clip_creation_failures": 0
+    },
+    "health": null,
+    "sim_triage": null,
+    "sim_data": null
+  },
+  "NX-ONE-20022": {
+    "segment": "consumer",
+    "camera_family": "connect",
+    "model": "Nexar One",
+    "lookup": {
+      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2024-11-02"},
+      "subscription": {"status": "Active"},
+      "rear_camera": {"paired": "yes", "interior_facing": "yes"},
+      "order_number": "353893"
+    },
+    "classic_diagnostic": null,
+    "health": {
+      "serial_number": "NX-ONE-20022",
+      "model": "Nexar One",
+      "irq": false,
+      "has_power_issues": false,
+      "has_reset_issues": false,
+      "activation_date": "2024-11-05",
+      "summary": {"health_score": "good"},
+      "power": {"avg_battery_level": 88, "status": "normal"},
+      "lte": {"signal_quality": "good", "avg_daily_heartbeats": 120, "avg_daily_signals": 18},
+      "sd_card": {"status": "healthy", "size_gb": "116.8 GB"},
+      "issues": [],
+      "firmware_version": "7.8.2",
+      "interior_facing": "Yes"
+    },
+    "sim_triage": {"conclusion": "no_lte_issue", "activity_level": "normal"},
+    "sim_data": {
+      "sim": {"status": "active", "last_30d_mb": 4200, "iccid": "8901260123456789012"},
+      "modem": {"connected": true}
+    }
+  },
+  "NX-BEAM-10088": {
+    "segment": "consumer",
+    "camera_family": "connect",
+    "model": "Beam2",
+    "lookup": {
+      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-01-20"},
+      "subscription": {"status": "Active"},
+      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "order_number": "320100"
+    },
+    "classic_diagnostic": null,
+    "health": {
+      "serial_number": "NX-BEAM-10088",
+      "model": "Beam2",
+      "irq": false,
+      "has_power_issues": false,
+      "has_reset_issues": false,
+      "activation_date": "2025-01-22",
+      "summary": {"health_score": "fair"},
+      "power": {"avg_battery_level": 72, "status": "normal"},
+      "lte": {"signal_quality": "moderate", "avg_daily_heartbeats": 95, "avg_daily_signals": 12},
+      "sd_card": {"status": "healthy", "size_gb": "58.1 GB"},
+      "issues": [],
+      "firmware_version": "7.6.1",
+      "interior_facing": "No"
+    },
+    "sim_triage": {
+      "conclusion": "monthly_cap_exceeded",
+      "activity_level": "high",
+      "context": {"last_30d_mb": 18500}
+    },
+    "sim_data": {
+        "sim": {"status": "active", "last_30d_mb": 18500, "iccid": "8901260987654321098", "monthly_cap_mb": 12000},
+      "modem": {"connected": true}
+    }
+  },
+  "B2-MINI-50001": {
+    "segment": "consumer",
+    "camera_family": "connect",
+    "model": "Beam2 mini",
+    "lookup": {
+      "warranty": {"status": "active", "purchase_channel": "amazon", "delivery_date": "2025-05-01"},
+      "subscription": {"status": "Deactivated"},
+      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "order_number": "114-1536531-8448242"
+    },
+    "classic_diagnostic": null,
+    "health": {
+      "serial_number": "B2-MINI-50001",
+      "model": "Beam2 mini",
+      "irq": false,
+      "has_power_issues": false,
+      "has_reset_issues": false,
+      "activation_date": "2025-05-03",
+      "summary": {"health_score": "poor"},
+      "power": {"avg_battery_level": 45, "status": "low"},
+      "lte": {"signal_quality": "poor", "avg_daily_heartbeats": 0, "avg_daily_signals": 0},
+      "sd_card": {"status": "healthy", "size_gb": "58.1 GB"},
+      "issues": ["no_recent_heartbeat"],
+      "firmware_version": "7.5.8",
+      "interior_facing": "No"
+    },
+    "sim_triage": {"conclusion": "sim_inactive", "sim_status": "Deactivated"},
+    "sim_data": {
+      "sim": {"status": "deactivated", "last_30d_mb": 0, "iccid": "8901260111222333444"},
+      "modem": {"connected": false}
+    }
+  },
+  "NX-FLEET-90001": {
+    "segment": "fleets",
+    "camera_family": "connect",
+    "model": "Nexar One",
+    "lookup": {
+      "warranty": {"status": "active", "purchase_channel": "portal", "delivery_date": "2025-02-01"},
+      "subscription": {"status": "Active"},
+      "rear_camera": {"paired": "no", "interior_facing": "no"}
+    },
+    "classic_diagnostic": null,
+    "health": {
+      "serial_number": "NX-FLEET-90001",
+      "model": "Nexar One",
+      "summary": {"health_score": "good"}
+    },
+    "sim_triage": {"conclusion": "no_lte_issue"},
+    "sim_data": {"sim": {"status": "active", "last_30d_mb": 2100}}
+  }
+}

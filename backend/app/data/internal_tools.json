@@ -1,0 +1,803 @@
+[
+  {
+    "name": "lookup_customer_by_email",
+    "description": "Look up a simulated customer by email",
+    "http_method": "GET",
+    "url": "/api/sim/customers/{email}",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "list_subscriptions",
+    "description": "List subscriptions for a customer email",
+    "http_method": "GET",
+    "url": "/api/sim/subscriptions",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "cancel_subscription",
+    "description": "Cancel an active subscription and send confirmation message",
+    "http_method": "POST",
+    "url": "/api/sim/subscriptions/{subscription_id}/cancel",
+    "parameters": [
+      {
+        "name": "subscription_id",
+        "type": "string",
+        "required": true,
+        "description": "Subscription UUID",
+        "default_value": ""
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": false,
+        "description": "Cancel reason",
+        "default_value": "Customer request"
+      }
+    ]
+  },
+  {
+    "name": "create_subscription",
+    "description": "Create a new subscription for a customer",
+    "http_method": "POST",
+    "url": "/api/sim/subscriptions",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      },
+      {
+        "name": "plan_name",
+        "type": "string",
+        "required": true,
+        "description": "Plan name",
+        "default_value": "Nexar Pro Monthly"
+      }
+    ]
+  },
+  {
+    "name": "list_customer_devices",
+    "description": "List devices owned by a customer email",
+    "http_method": "GET",
+    "url": "/api/sim/devices",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "lookup_device",
+    "description": "Look up a device by serial number",
+    "http_method": "GET",
+    "url": "/api/sim/devices/{serial_number}",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Device serial",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "initiate_return",
+    "description": "Start a device return and queue confirmation message",
+    "http_method": "POST",
+    "url": "/api/sim/devices/{serial_number}/return",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Device serial",
+        "default_value": ""
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": false,
+        "description": "Return reason",
+        "default_value": "Customer return"
+      }
+    ]
+  },
+  {
+    "name": "getDeviceSubscription",
+    "description": "Get subscription details for a camera serial number",
+    "http_method": "GET",
+    "url": "/api/sim/billing/device-subscription/{serial_number}",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getDeviceHealth",
+    "description": "Get health/status details for a camera serial number",
+    "http_method": "GET",
+    "url": "/api/sim/billing/device-health/{serial_number}",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getRecurlyInvoices",
+    "description": "Send past invoices for a camera to billing email on file",
+    "http_method": "POST",
+    "url": "/api/sim/billing/recurly/invoices",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      },
+      {
+        "name": "months",
+        "type": "number",
+        "required": false,
+        "description": "Number of months of invoices",
+        "default_value": "6"
+      }
+    ]
+  },
+  {
+    "name": "updateRecurlyEmailAndSendInvoices",
+    "description": "Update billing email and send invoices",
+    "http_method": "POST",
+    "url": "/api/sim/billing/recurly/email-and-send",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "New billing email",
+        "default_value": ""
+      },
+      {
+        "name": "months",
+        "type": "number",
+        "required": false,
+        "description": "Number of months of invoices",
+        "default_value": "6"
+      }
+    ]
+  },
+  {
+    "name": "updateRecurlySubscriptionToAnnual",
+    "description": "Switch subscription plan from monthly to annual",
+    "http_method": "POST",
+    "url": "/api/sim/billing/subscriptions/{serial_number}/to-annual",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "updateRecurlySubscriptionToMonthly",
+    "description": "Switch subscription plan from annual to monthly",
+    "http_method": "POST",
+    "url": "/api/sim/billing/subscriptions/{serial_number}/to-monthly",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "jiraCreateIssue",
+    "description": "Create Jira back-office task",
+    "http_method": "POST",
+    "url": "/api/sim/ops/jira/issues",
+    "parameters": [
+      {
+        "name": "projectId",
+        "type": "string",
+        "required": true,
+        "description": "Jira project id",
+        "default_value": "11612"
+      },
+      {
+        "name": "issueTypeId",
+        "type": "string",
+        "required": true,
+        "description": "Jira issue type id",
+        "default_value": "10696"
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "required": true,
+        "description": "Status",
+        "default_value": "On B&L"
+      },
+      {
+        "name": "summary",
+        "type": "string",
+        "required": true,
+        "description": "Issue summary",
+        "default_value": ""
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": true,
+        "description": "Issue description",
+        "default_value": ""
+      },
+      {
+        "name": "custom_fields",
+        "type": "string",
+        "required": true,
+        "description": "JSON string custom fields",
+        "default_value": "{}"
+      }
+    ]
+  },
+  {
+    "name": "ticketEscalate",
+    "description": "Escalate ticket to a human queue",
+    "http_method": "POST",
+    "url": "/api/sim/ops/tickets/escalate",
+    "parameters": [
+      {
+        "name": "queue_parameters",
+        "type": "string",
+        "required": true,
+        "description": "Queue parameter JSON string",
+        "default_value": "{\"assignee_id\":9662360}"
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "required": false,
+        "description": "Escalation reason",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "ticketInternalNote",
+    "description": "Create an internal ticket note",
+    "http_method": "POST",
+    "url": "/api/sim/ops/tickets/internal-note",
+    "parameters": [
+      {
+        "name": "note",
+        "type": "string",
+        "required": true,
+        "description": "Internal note body",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "ticketResolve",
+    "description": "Resolve a ticket directly (spam or unwanted outreach)",
+    "http_method": "POST",
+    "url": "/api/sim/ops/tickets/resolve",
+    "parameters": [
+      {
+        "name": "reason",
+        "type": "string",
+        "required": false,
+        "description": "Resolution reason",
+        "default_value": "Spam or unwanted marketing/voicemail"
+      }
+    ]
+  },
+  {
+    "name": "ticketMessageResponse",
+    "description": "Identify purchase channel from customer message or order number",
+    "http_method": "POST",
+    "url": "/api/sim/ops/tickets/message-response",
+    "parameters": [
+      {
+        "name": "message",
+        "type": "string",
+        "required": true,
+        "description": "Customer message text containing order info if available",
+        "default_value": ""
+      },
+      {
+        "name": "customer_email",
+        "type": "string",
+        "required": false,
+        "description": "Customer email for follow-up message",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "verifyReturnEligibility",
+    "description": "Check whether a Shopify order is eligible for return",
+    "http_method": "POST",
+    "url": "/api/sim/returns/verify-eligibility",
+    "parameters": [
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      },
+      {
+        "name": "customer_email",
+        "type": "string",
+        "required": true,
+        "description": "Email used at checkout",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getOrderShippingAddressAndPhoneNumber",
+    "description": "Get shipping address and phone on file for an order",
+    "http_method": "GET",
+    "url": "/api/sim/returns/orders/{order_number}/shipping",
+    "parameters": [
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "createReturnForOrder",
+    "description": "Create an RMA and prepaid return label for a Shopify order",
+    "http_method": "POST",
+    "url": "/api/sim/returns/create",
+    "parameters": [
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      },
+      {
+        "name": "customer_email",
+        "type": "string",
+        "required": true,
+        "description": "Email used at checkout",
+        "default_value": ""
+      },
+      {
+        "name": "return_reason",
+        "type": "string",
+        "required": true,
+        "description": "Return reason code",
+        "default_value": "no_longer_needed"
+      },
+      {
+        "name": "conversation_id",
+        "type": "string",
+        "required": false,
+        "description": "Support conversation id",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getOrderStatusShopify",
+    "description": "Get Shopify order status including fulfillment, delivery, tracking, and return/refund info",
+    "http_method": "GET",
+    "url": "/api/sim/returns/orders/{order_number}/status",
+    "parameters": [
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "cancelShopifyOrder",
+    "description": "Cancel an unfulfilled Shopify order",
+    "http_method": "POST",
+    "url": "/api/sim/shipping/orders/cancel",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email on the order",
+        "default_value": ""
+      },
+      {
+        "name": "orderNumber",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      },
+      {
+        "name": "intercomConversationId",
+        "type": "string",
+        "required": false,
+        "description": "Current Intercom conversation id",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getClassicDiagnostic",
+    "description": "Get Classic app permission and pairing diagnostic flags for a customer",
+    "http_method": "POST",
+    "url": "/api/sim/devices/classic/diagnostic",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": false,
+        "description": "Customer email linked to Nexar account",
+        "default_value": ""
+      },
+      {
+        "name": "phone",
+        "type": "string",
+        "required": false,
+        "description": "Customer phone linked to Nexar account",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getDeviceLookup",
+    "description": "Look up devices by email, phone, or serial number",
+    "http_method": "GET",
+    "url": "/api/sim/devices/lookup",
+    "parameters": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Email, phone, or serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getSimTriage",
+    "description": "Run SIM triage for a Connect camera serial number",
+    "http_method": "GET",
+    "url": "/api/sim/devices/{serial_number}/sim-triage",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getSimData",
+    "description": "Get SIM usage data for a Connect camera",
+    "http_method": "GET",
+    "url": "/api/sim/devices/{serial_number}/sim-data",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getValidateSerial",
+    "description": "Validate that a camera serial is registered",
+    "http_method": "POST",
+    "url": "/api/sim/devices/{serial_number}/validate",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "reactivateSim",
+    "description": "Reactivate a deactivated camera SIM",
+    "http_method": "POST",
+    "url": "/api/sim/devices/{serial_number}/reactivate-sim",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "createLTEQuota25GB",
+    "description": "Uplift monthly LTE data cap to 25GB for a device",
+    "http_method": "POST",
+    "url": "/api/sim/devices/{serial_number}/lte-quota-25gb",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getDeviceOrder",
+    "description": "Get order and purchase channel info for a device serial",
+    "http_method": "GET",
+    "url": "/api/sim/devices/{serial_number}/order",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getWarrantyEligibility",
+    "description": "Check warranty eligibility for a Shopify order",
+    "http_method": "POST",
+    "url": "/api/sim/warranty/eligibility",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      },
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "getShopifyOrderItems",
+    "description": "Get Shopify order line items for hardware replacement matching",
+    "http_method": "POST",
+    "url": "/api/sim/shopify/order-items",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      },
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "changeAddressShopify",
+    "description": "Update shipping address on a Shopify order",
+    "http_method": "POST",
+    "url": "/api/sim/shopify/change-address",
+    "parameters": [
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      },
+      {
+        "name": "customer_email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      },
+      {
+        "name": "new_address",
+        "type": "string",
+        "required": true,
+        "description": "JSON address object",
+        "default_value": "{}"
+      }
+    ]
+  },
+  {
+    "name": "createShopifyReplacement",
+    "description": "Create faulty hardware replacement RMA for Shopify order",
+    "http_method": "POST",
+    "url": "/api/sim/shopify/replacement",
+    "parameters": [
+      {
+        "name": "camera_model",
+        "type": "string",
+        "required": true,
+        "description": "Camera model",
+        "default_value": ""
+      },
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Shopify order number",
+        "default_value": ""
+      },
+      {
+        "name": "issue_summary",
+        "type": "string",
+        "required": true,
+        "description": "Issue summary",
+        "default_value": ""
+      },
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Camera serial",
+        "default_value": ""
+      },
+      {
+        "name": "customer_email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      },
+      {
+        "name": "hardware_fault",
+        "type": "string",
+        "required": true,
+        "description": "Confirmed fault type",
+        "default_value": ""
+      },
+      {
+        "name": "lines_item_ids",
+        "type": "string",
+        "required": false,
+        "description": "Matched line item ids JSON array",
+        "default_value": "[]"
+      },
+      {
+        "name": "intercom_conversation_id",
+        "type": "string",
+        "required": false,
+        "description": "Intercom conversation id",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "createShopifyCoupon",
+    "description": "Generate a Shopify discount coupon for out-of-warranty customers",
+    "http_method": "POST",
+    "url": "/api/sim/shopify/coupon",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      },
+      {
+        "name": "discount",
+        "type": "number",
+        "required": false,
+        "description": "Discount percent",
+        "default_value": "25"
+      }
+    ]
+  },
+  {
+    "name": "getAccessoriesCoupon",
+    "description": "Generate accessory replacement coupon",
+    "http_method": "POST",
+    "url": "/api/sim/shopify/accessories-coupon",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "intercomSendMessageToContact",
+    "description": "Send a message to customer via Intercom",
+    "http_method": "POST",
+    "url": "/api/sim/intercom/send-message",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": false,
+        "description": "Customer email",
+        "default_value": ""
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "required": true,
+        "description": "Message body",
+        "default_value": ""
+      }
+    ]
+  }
+]
