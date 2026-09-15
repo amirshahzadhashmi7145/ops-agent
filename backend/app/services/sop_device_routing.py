@@ -122,15 +122,29 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
     if _has_any(msg, CLASSIC_MODEL_MARKERS) or "nexar pro" in model:
         family = "classic"
 
+    # Email-only lookups can return mixed Classic + Connect cameras. Do not pick
+    # a family (and lock a diagnostic SOP) from whichever device came back first.
+    if email and not serial and len(matches) > 1:
+        families = {
+            (profile.get("camera_family") or "").lower()
+            for _device, _customer, profile in matches
+        }
+        families.discard("")
+        if len(families) > 1:
+            family = None
+            routing["camera_family"] = None
+
     is_hardware = _has_any(msg, HARDWARE_MARKERS)
     is_connectivity = _has_any(msg, CONNECTIVITY_MARKERS)
+    # An account lookup ("list devices for this email") is not a pairing/LTE ticket.
+    should_lock_diagnostic_sop = bool(is_hardware or is_connectivity)
 
     preferred_doc: str | None = None
     preferred_process: str | None = None
     mandatory_tools: list[str] = []
     instructions: list[str] = []
 
-    if family == "classic":
+    if should_lock_diagnostic_sop and family == "classic":
         if is_hardware:
             preferred_doc = DOC_HARDWARE
             preferred_process = "Hardware Malfunction"
@@ -145,7 +159,7 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
             instructions.append(
                 "Classic camera app connectivity issue. Do NOT use getSimTriage or Connect-only tools."
             )
-    elif family == "connect":
+    elif should_lock_diagnostic_sop and family == "connect":
         if is_hardware:
             preferred_doc = DOC_HARDWARE
             preferred_process = "Hardware Malfunction"
@@ -170,6 +184,13 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
 
     if routing.get("segment") == "fleets":
         instructions.append("Fleet customer — escalate to fleet queue per SOP.")
+
+    if not should_lock_diagnostic_sop and (routing.get("email") or routing.get("serial")):
+        instructions.append(
+            "This is an account or device lookup, not a diagnostic ticket. "
+            "Use lookup_customer_by_email / list_customer_devices / getDeviceLookup. "
+            "Do not follow a connectivity or hardware SOP unless the customer describes a pairing, LTE, or hardware issue."
+        )
 
     routing["preferred_document_title"] = preferred_doc
     routing["preferred_process_hint"] = preferred_process
@@ -276,6 +297,14 @@ def choose_sop_process(
             if match.get("document_title") == preferred_doc:
                 match = {**match, "score": float(match.get("score", 0)) + 0.2, "routing": routing}
                 return {"best": match, "matches": matches, "confident": True, "routing": routing}
+
+    # Plain account lookups ("list devices for this email") must not auto-lock a
+    # pairing/LTE/hardware SOP just because embeddings are close.
+    if not routing.get("is_connectivity") and not routing.get("is_hardware"):
+        diagnostic_titles = { "Nexar Classic App Connectivity", "Sim Triage", "Hardware Malfunction"}
+        filtered = [m for m in matches if m.get("title") not in diagnostic_titles]
+        if filtered:
+            matches = filtered
 
     best = {**matches[0], "routing": routing}
     confident = is_confident_match(best, matches, threshold=threshold, margin=margin)

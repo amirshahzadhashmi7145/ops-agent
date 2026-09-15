@@ -14,6 +14,7 @@ def test_playbook_covers_device_routing_sops():
     assert "Nexar Classic App Connectivity" in processes
     assert "Sim Triage" in processes
     assert "Hardware Malfunction" in processes
+    assert "Look up customer devices" in processes
 
 
 def test_kb_articles_chunk_into_headed_sections():

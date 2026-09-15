@@ -12,7 +12,6 @@ from app.models.sim import (
     OutboundMessage,
     SimCustomer,
     SimDevice,
-    SimDeviceProfile,
     SimDeviceStatus,
     SimFulfillmentStatus,
     SimOrder,
@@ -104,22 +103,6 @@ class CancelBody(BaseModel):
 
 class ReturnBody(BaseModel):
     reason: str = "Customer return"
-
-
-class CustomerCatalogOut(BaseModel):
-    id: uuid.UUID
-    email: str
-    full_name: str
-    phone: str | None
-    subscriptions: list[SubscriptionOut]
-    devices: list[DeviceOut]
-
-
-class SimCatalogOut(BaseModel):
-    customers: list[CustomerCatalogOut]
-    orders: list[OrderOut] = []
-    device_profiles: list[dict] = []
-    outbound_messages: list[dict] = []
 
 
 def _customer_by_email(db: Session, email: str) -> SimCustomer:
@@ -220,126 +203,6 @@ def _queue_message(
     )
     db.add(message)
     return message
-
-
-@router.get("/catalog", response_model=SimCatalogOut)
-def list_catalog(db: Session = Depends(get_db)) -> SimCatalogOut:
-    """Full simulated dataset for QA / chat testing (not used by the agent tools)."""
-    customers = db.query(SimCustomer).order_by(SimCustomer.full_name.asc()).all()
-    result: list[CustomerCatalogOut] = []
-    for customer in customers:
-        subscriptions = (
-            db.query(SimSubscription)
-            .filter(SimSubscription.customer_id == customer.id)
-            .order_by(SimSubscription.created_at.desc())
-            .all()
-        )
-        devices = (
-            db.query(SimDevice)
-            .filter(SimDevice.customer_id == customer.id)
-            .order_by(SimDevice.serial_number.asc())
-            .all()
-        )
-        result.append(
-            CustomerCatalogOut(
-                id=customer.id,
-                email=customer.email,
-                full_name=customer.full_name,
-                phone=customer.phone,
-                subscriptions=[
-                    SubscriptionOut(
-                        id=row.id,
-                        customer_id=row.customer_id,
-                        plan_name=row.plan_name,
-                        status=row.status.value,
-                        monthly_price_usd=row.monthly_price_usd,
-                        cancelled_at=row.cancelled_at,
-                    )
-                    for row in subscriptions
-                ],
-                devices=[
-                    DeviceOut(
-                        id=row.id,
-                        customer_id=row.customer_id,
-                        serial_number=row.serial_number,
-                        model=row.model,
-                        status=row.status.value,
-                        purchase_date=row.purchase_date,
-                        return_reason=row.return_reason,
-                    )
-                    for row in devices
-                ],
-            )
-        )
-    messages = (
-        db.query(OutboundMessage)
-        .order_by(OutboundMessage.created_at.desc())
-        .limit(200)
-        .all()
-    )
-    outbox = [
-        {
-            "id": str(m.id),
-            "to_address": m.to_address,
-            "subject": m.subject,
-            "related_entity_type": m.related_entity_type,
-            "message_kind": (m.message_metadata or {}).get("message_kind"),
-            "created_at": m.created_at.isoformat() if m.created_at else None,
-        }
-        for m in messages
-    ]
-    order_rows = db.query(SimOrder).order_by(SimOrder.order_number.asc()).all()
-    orders = [
-        OrderOut(
-            id=row.id,
-            customer_id=row.customer_id,
-            order_number=row.order_number,
-            channel=row.channel.value,
-            customer_email=row.customer_email,
-            order_date=row.order_date,
-            delivery_date=row.delivery_date,
-            fulfillment_status=row.fulfillment_status.value,
-            delivery_status=row.delivery_status,
-            deliver_by=row.deliver_by,
-            tags=row.tags or [],
-            shipping_name=row.shipping_name,
-            shipping_line1=row.shipping_line1,
-            shipping_line2=row.shipping_line2,
-            shipping_city=row.shipping_city,
-            shipping_state=row.shipping_state,
-            shipping_postal_code=row.shipping_postal_code,
-            shipping_country=row.shipping_country,
-            phone=row.phone,
-            return_status=row.return_status.value,
-            refund_status=row.refund_status.value,
-            return_reason=row.return_reason,
-            rma_url=row.rma_url,
-            tracking_number=row.tracking_number,
-        )
-        for row in order_rows
-    ]
-    profile_rows = (
-        db.query(SimDeviceProfile, SimDevice, SimCustomer)
-        .join(SimDevice, SimDeviceProfile.device_id == SimDevice.id)
-        .join(SimCustomer, SimDevice.customer_id == SimCustomer.id)
-        .order_by(SimDevice.serial_number.asc())
-        .all()
-    )
-    device_profiles = [
-        {
-            "serial_number": device.serial_number,
-            "customer_email": customer.email,
-            "segment": profile.segment,
-            "camera_family": profile.camera_family,
-            "model": profile.model,
-            "sim_triage_conclusion": (profile.sim_triage_json or {}).get("conclusion"),
-            "health_score": (profile.health_json or {}).get("summary", {}).get("health_score"),
-        }
-        for profile, device, customer in profile_rows
-    ]
-    return SimCatalogOut(
-        customers=result, orders=orders, device_profiles=device_profiles, outbound_messages=outbox
-    )
 
 
 class InvoiceRequest(BaseModel):

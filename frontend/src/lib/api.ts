@@ -331,10 +331,6 @@ export function reprocessSopDocument(id: string): Promise<import("@/types/sop").
   return apiFetch(`/api/sops/documents/${id}/reprocess`, { method: "POST" });
 }
 
-export function fetchSimCatalog(): Promise<import("@/types/sim").SimCatalog> {
-  return apiFetch("/api/sim/catalog");
-}
-
 export function fetchMessages(): Promise<import("@/types/messages").OutboundMessageListItem[]> {
   return apiFetch("/api/messages");
 }

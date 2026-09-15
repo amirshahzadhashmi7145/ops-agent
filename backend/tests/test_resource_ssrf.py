@@ -91,7 +91,7 @@ async def test_execute_resource_request_blocks_url_param_injection():
 async def test_internal_tool_cannot_leave_internal_base():
     result = await execute_resource_request(
         connection_mode="direct",
-        url="/api/sim/catalog",
+        url="/api/sim/devices",
         http_method="GET",
         connection=None,
         fixed_headers=[],

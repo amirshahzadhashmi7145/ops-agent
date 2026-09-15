@@ -361,6 +361,14 @@ When a customer wants to start a plan or check status:
 3. Call @list_subscriptions to show current plans.
 4. If they want a new plan, confirm plan name then call @create_subscription.
 5. Summarize the result for the user.
+
+## Look up customer devices
+When a customer or agent asks to look up an account or list cameras for an email:
+1. Call @lookup_customer_by_email with the email.
+2. Call @list_customer_devices with the same email.
+3. Present every serial, model, and status. Do not start a pairing or LTE SOP.
+
+Triggers: look up, list their devices, list devices, customer account, find customer
 """,
         "processes": [
             {
@@ -394,6 +402,29 @@ When a customer wants to start a plan or check status:
                     _step("lookup", "call_tool", "Verify customer", "lookup_customer_by_email"),
                     _step("list", "call_tool", "List current subscriptions", "list_subscriptions"),
                     _step("create", "call_tool", "Create subscription if requested", "create_subscription"),
+                ],
+            },
+            {
+                "process_key": "lookup_customer_devices",
+                "title": "Look up customer devices",
+                "description": "Look up a customer by email and list every camera they own.",
+                "trigger_phrases": [
+                    "look up",
+                    "list their devices",
+                    "list devices",
+                    "customer account",
+                    "find customer",
+                    "devices for this email",
+                ],
+                "tools": [
+                    "lookup_customer_by_email",
+                    "list_customer_devices",
+                    "getDeviceLookup",
+                ],
+                "steps": [
+                    _step("lookup", "call_tool", "Verify the customer exists", "lookup_customer_by_email"),
+                    _step("list", "call_tool", "List every device on the account", "list_customer_devices"),
+                    _step("inform", "inform", "Present serial, model, and status for each camera"),
                 ],
             },
         ],
