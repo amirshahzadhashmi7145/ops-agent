@@ -13,7 +13,7 @@ const options = [
   { value: "system", label: "System", icon: Monitor },
 ] as const;
 
-export function ThemeToggle() {
+export function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -21,11 +21,32 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
+  const current = options.find((option) => option.value === theme) ?? options[2];
+
+  if (compact) {
+    const CompactIcon = current.icon;
+    return (
+      <button
+        type="button"
+        aria-label={`Theme: ${current.label}. Click to change.`}
+        title={`Theme: ${current.label}`}
+        onClick={() => {
+          const index = options.findIndex((option) => option.value === current.value);
+          const next = options[(index + 1) % options.length];
+          setTheme(next.value);
+        }}
+        className="mx-auto flex h-7 w-7 items-center justify-center rounded-lg border border-sidebar-border bg-sidebar-accent/50 text-sidebar-foreground transition-colors hover:text-foreground"
+      >
+        <CompactIcon className="h-3.5 w-3.5" />
+      </button>
+    );
+  }
+
   return (
     <div
       role="group"
       aria-label="Theme"
-      className="relative flex rounded-xl border border-sidebar-border bg-sidebar-accent/50 p-1"
+      className="relative flex rounded-lg border border-sidebar-border bg-sidebar-accent/50 p-0.5"
     >
       {options.map(({ value, label, icon: Icon }) => {
         const active = mounted && theme === value;
@@ -38,7 +59,7 @@ export function ThemeToggle() {
             title={label}
             onClick={() => setTheme(value)}
             className={cn(
-              "relative flex h-8 flex-1 items-center justify-center rounded-lg transition-colors",
+              "relative flex h-7 flex-1 items-center justify-center rounded-md transition-colors",
               active
                 ? "text-sidebar-accent-foreground"
                 : "text-muted-foreground hover:text-foreground",

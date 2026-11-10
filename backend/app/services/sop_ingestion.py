@@ -122,12 +122,17 @@ def _normalize_tools(process: dict, mentioned: set[str]) -> list[str]:
 
 
 async def extract_processes(raw_text: str) -> dict:
+    from app.services.usage.meter import metered_chat
+
     llm = get_llm_provider()
-    response = await llm.chat(
+    response = await metered_chat(
+        None,
+        llm,
         [
             ChatMessage(role="system", content=EXTRACT_PROMPT),
             ChatMessage(role="user", content=raw_text),
         ],
+        purpose="sop_format",
         tool_choice="none",
         max_tokens=settings.kb_format_max_tokens,
         temperature=settings.kb_format_temperature,

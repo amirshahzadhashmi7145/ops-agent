@@ -153,7 +153,7 @@ export default function KbPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-8 py-10">
+      <div className="w-full px-5 py-5">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h2 className="page-header">Knowledge Base</h2>
@@ -210,7 +210,7 @@ export default function KbPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <BookOpen className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">No references yet</h3>
+            <h3 className="text-sm font-semibold text-foreground">No references yet</h3>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Add your first reference so the agent can answer policy and product questions.
             </p>

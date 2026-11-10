@@ -363,3 +363,7 @@ export function fetchToolLogs(options?: {
 export function fetchToolLog(id: string): Promise<import("@/types/tool-log").ToolCallLogDetail> {
   return apiFetch(`/api/tool-logs/${id}`);
 }
+
+export function fetchUsageStats(days = 30): Promise<import("@/types/usage").UsageStats> {
+  return apiFetch(`/api/usage/stats?days=${days}`);
+}

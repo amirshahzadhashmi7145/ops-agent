@@ -1,6 +1,6 @@
 export default function ShellLoading() {
   return (
-    <div className="mx-auto max-w-6xl animate-pulse px-8 py-10">
+    <div className="w-full animate-pulse px-5 py-5">
       <div className="mb-8 space-y-3">
         <div className="h-8 w-48 rounded-lg bg-muted/60" />
         <div className="h-4 w-full max-w-xl rounded-md bg-muted/40" />

@@ -15,6 +15,7 @@ from app.api.resources import router as resources_router
 from app.api.sim import router as sim_router
 from app.api.device_ops import router as device_ops_router
 from app.api.sops import router as sops_router
+from app.api.usage import router as usage_router
 from app.core.config import settings
 from app.services.internal_tools_seed import sync_internal_tools
 from app.services.nexar_content_seed import sync_nexar_content
@@ -28,22 +29,22 @@ async def lifespan(_app: FastAPI):
         sync_internal_tools()
     except Exception:  # noqa: BLE001
         logger.exception("Internal tools sync skipped (DB may not be ready yet)")
-    seed_task = asyncio.create_task(asyncio.to_thread(_seed_nexar_playbook))
+    seed_task = asyncio.create_task(asyncio.to_thread(_seed_playbook))
     yield
     seed_task.cancel()
 
 
-def _seed_nexar_playbook() -> None:
+def _seed_playbook() -> None:
     uv_log = logging.getLogger("uvicorn.error")
     try:
-        uv_log.info("Indexing Nexar knowledge base and SOPs...")
+        uv_log.info("Indexing knowledge base and SOPs...")
         counts = sync_nexar_content()
-        uv_log.info("Nexar playbook ready: %s", counts)
+        uv_log.info("Support playbook ready: %s", counts)
     except Exception:  # noqa: BLE001
-        logger.exception("Nexar playbook seed skipped (DB or embeddings may not be ready yet)")
+        logger.exception("Support playbook seed skipped (DB or embeddings may not be ready yet)")
 
 
-app = FastAPI(title="Nexar Ops Agent API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Ops Agent API", version="0.1.0", lifespan=lifespan)
 
 # Wildcard origins are never honored: this API uses credentialed requests, and
 # "*" + credentials would expose every endpoint to any website.
@@ -85,6 +86,7 @@ app.include_router(device_ops_router, prefix="/api")
 app.include_router(sim_router, prefix="/api")
 app.include_router(messages_router, prefix="/api")
 app.include_router(tool_logs_router, prefix="/api")
+app.include_router(usage_router, prefix="/api")
 
 
 @app.get("/healthz")

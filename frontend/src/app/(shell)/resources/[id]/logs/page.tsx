@@ -39,7 +39,7 @@ export default function ResourceLogsPage() {
 
   if (resourceLoading) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-10">
+      <div className="w-full px-5 py-5">
         <div className="h-8 w-48 animate-pulse rounded-lg bg-muted" />
         <div className="mt-6 h-40 animate-pulse rounded-2xl bg-muted/60" />
       </div>
@@ -48,7 +48,7 @@ export default function ResourceLogsPage() {
 
   if (isError || !resource) {
     return (
-      <div className="mx-auto max-w-6xl px-8 py-10">
+      <div className="w-full px-5 py-5">
         <Link href="/resources" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Tools & Resources
@@ -59,7 +59,7 @@ export default function ResourceLogsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-8 py-10">
+    <div className="w-full px-5 py-5">
       <Link href="/resources" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2 mb-4")}>
         <ArrowLeft className="mr-2 h-4 w-4" />
         Tools & Resources
@@ -215,7 +215,7 @@ function StatCard({
           <LocalTime value={timestamp} />
         </p>
       ) : (
-        <p className="mt-1 text-lg font-semibold">{value}</p>
+        <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
       )}
     </div>
   );

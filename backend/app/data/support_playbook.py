@@ -1,15 +1,15 @@
-"""Canonical Nexar support playbook: KB articles, SOP documents, and agent rules.
+"""Canonical support playbook: KB articles, SOP documents, and agent rules.
 
 Seeded on API startup. Edit this file and restart the backend to reindex.
 """
 
-SEED_USER = "system@nexar.ops"
+SEED_USER = "system@ops.internal"
 
 CATEGORIES = [
     {
         "slug": "subscription",
         "name": "Subscription",
-        "description": "Billing, plans, and Recurly subscription procedures",
+        "description": "Billing, plans, and subscription procedures",
     },
     {
         "slug": "returns",
@@ -19,7 +19,7 @@ CATEGORIES = [
     {
         "slug": "connectivity",
         "name": "Connectivity",
-        "description": "Nexar Connect pairing and LTE connectivity",
+        "description": "LTE pairing and connectivity for Connect devices",
     },
     {
         "slug": "hardware",
@@ -29,7 +29,7 @@ CATEGORIES = [
     {
         "slug": "classic-connectivity",
         "name": "Classic Connectivity",
-        "description": "Nexar Classic app pairing and WiFi issues",
+        "description": "Classic app pairing and Wi-Fi issues",
     },
     {
         "slug": "orders",
@@ -45,18 +45,18 @@ CATEGORIES = [
 
 KB_ARTICLES = [
     {
-        "title": "Nexar Company Overview",
-        "summary": "Who Nexar is, what we sell, and how internal support should represent the company.",
-        "source_url": "https://www.getnexar.com",
+        "title": "Company Overview",
+        "summary": "What we sell and how internal support should represent the company.",
+        "source_url": "https://help.example.com/company",
         "markdown": """# Company
 
-Nexar builds AI dash cams and connected-vehicle software for drivers and fleets. Support's job is to help customers with cameras, the Nexar app, Connect LTE, subscriptions, orders, and warranty — never to guess about account or device state.
+We sell connected cameras and a cloud subscription for consumers and fleets. Support's job is to help with devices, the mobile app, LTE, subscriptions, orders, and warranty — never to guess about account or device state.
 
 # How we help
 
-- Consumer customers buy on **Shopify** (Nexar shop) or **Amazon**.
-- Fleet customers are a separate segment. Escalate fleet billing, installs, and multi-vehicle issues to the fleet queue.
-- Internal tools in this agent talk to a simulation of Nexar systems (devices, Recurly, Shopify, Intercom). Treat tool results as source of truth.
+- Consumer customers buy on **Shopify** (our web shop) or **Amazon**.
+- Fleet customers are a separate segment. Escalate fleet billing, installs, and multi-device issues to the fleet queue.
+- Internal tools in this agent talk to a simulation of our systems (devices, Recurly, Shopify, Intercom). Treat tool results as source of truth.
 
 # Tone
 
@@ -64,27 +64,27 @@ Be concise, calm, and practical. Use the customer's name when tools return it. D
 """,
     },
     {
-        "title": "Nexar Product Line",
-        "summary": "Nexar camera families, models, and which app or connectivity stack each one uses.",
-        "source_url": "https://www.getnexar.com/products",
+        "title": "Product Line",
+        "summary": "Camera families, models, and which app or connectivity stack each one uses.",
+        "source_url": "https://help.example.com/products",
         "markdown": """# Product families
 
-Nexar cameras fall into two families. Routing SOPs depend on this split.
+Cameras fall into two families. Routing SOPs depend on this split.
 
 # Classic cameras
 
-Classic cameras pair over Bluetooth/Wi-Fi to the **Nexar Classic app**. They do not have an onboard LTE SIM.
+Classic cameras pair over Bluetooth/Wi-Fi to the **Classic app**. They do not have an onboard LTE SIM.
 
-- **Nexar Beam** — compact consumer Classic camera.
-- **Nexar Pro** — Classic camera with more storage and cabin options.
+- **Beam** — compact consumer Classic camera.
+- **Pro** — Classic camera with more storage and cabin options.
 
 Diagnostics for Classic pairing use `getClassicDiagnostic`. Do not run SIM triage on Classic cameras.
 
 # Connect cameras
 
-Connect cameras use **Nexar Connect** with an onboard LTE SIM and the Connect/V2 experience.
+Connect cameras use an onboard LTE SIM and the Connect app.
 
-- **Nexar One** — flagship Connect camera; often paired with a rear camera.
+- **One** — flagship Connect camera; often paired with a rear camera.
 - **Beam2 mini** (serial prefix B2-MINI) — compact Connect camera.
 
 Connectivity issues use `getDeviceLookup` then `getSimTriage`. Hardware issues use `getDeviceHealth`.
@@ -95,9 +95,9 @@ A rear (or interior-facing) camera is an accessory paired to a Connect primary c
 """,
     },
     {
-        "title": "Nexar Connect vs Classic",
+        "title": "Connect vs Classic",
         "summary": "How to tell Connect from Classic and which tools are allowed for each.",
-        "source_url": "https://help.getnexar.com/connect-vs-classic",
+        "source_url": "https://help.example.com/connect-vs-classic",
         "markdown": """# Quick identification
 
 - Serials like `NX-PRO-*` or older Beam units without LTE → **Classic**.
@@ -113,22 +113,22 @@ A rear (or interior-facing) camera is an accessory paired to a Connect primary c
 
 # App names
 
-- Classic → **Nexar Classic** app.
-- Connect → **Nexar** / Connect app and **MyNexar** portal for subscription self-serve.
+- Classic → **Classic** app.
+- Connect → **Connect** app and the **customer portal** for subscription self-serve.
 """,
     },
     {
         "title": "Subscription Plans and Billing",
-        "summary": "Nexar plans, Recurly billing, invoice resend, and monthly vs annual switches.",
-        "source_url": "https://help.getnexar.com/billing",
+        "summary": "Plans, Recurly billing, invoice resend, and monthly vs annual switches.",
+        "source_url": "https://help.example.com/billing",
         "markdown": """# Plans
 
 Typical consumer plans in this environment:
 
-- **Nexar Basic Monthly** — cloud clips with a lower monthly price.
-- **Nexar Pro Monthly** — full cloud + extra AI features.
-- **Nexar Pro Annual** / **Nexar Annual Plan** — prepaid year; cheaper than 12 months of Pro Monthly.
-- **Nexar Monthly Plan** — generic monthly after a plan switch.
+- **Basic Monthly** — cloud clips with a lower monthly price.
+- **Pro Monthly** — full cloud + extra AI features.
+- **Pro Annual** / **Annual Plan** — prepaid year; cheaper than 12 months of Pro Monthly.
+- **Monthly Plan** — generic monthly after a plan switch.
 
 # Billing system
 
@@ -141,7 +141,7 @@ Subscriptions are billed in **Recurly**, keyed by camera serial for Connect and 
 
 # Cancellation
 
-Always look up the customer, list subscriptions, and get explicit confirmation before `cancel_subscription`. After a hardware return, remind the customer that an **activated Connect subscription** must also be cancelled in MyNexar if they no longer want to be billed.
+Always look up the customer, list subscriptions, and get explicit confirmation before `cancel_subscription`. After a hardware return, remind the customer that an **activated Connect subscription** must also be cancelled in the customer portal if they no longer want to be billed.
 
 # What support cannot do
 
@@ -151,10 +151,10 @@ Do not issue goodwill credits outside approved coupons (`createShopifyCoupon`, `
     {
         "title": "Warranty Policy",
         "summary": "Warranty window, in-warranty replacement, and out-of-warranty coupon options.",
-        "source_url": "https://help.getnexar.com/warranty",
+        "source_url": "https://help.example.com/warranty",
         "markdown": """# Coverage
 
-Consumer cameras purchased from the **Nexar Shopify shop** carry a limited hardware warranty from the delivery date on the order. Warranty status is returned by `getDeviceLookup` / `getWarrantyEligibility` — never guess from the customer's memory of the purchase date.
+Consumer cameras purchased from the **Shopify shop** carry a limited hardware warranty from the delivery date on the order. Warranty status is returned by `getDeviceLookup` / `getWarrantyEligibility` — never guess from the customer's memory of the purchase date.
 
 # In warranty
 
@@ -171,16 +171,16 @@ Offer a discount coupon via `createShopifyCoupon` (typical 15–25% off a replac
 
 # Amazon purchases
 
-Nexar cannot run Shopify warranty RMAs on Amazon orders. Direct the customer to Amazon returns/A-to-Z for the original purchase. We can still diagnose the camera and advise.
+We cannot run Shopify warranty RMAs on Amazon orders. Direct the customer to Amazon returns/A-to-Z for the original purchase. We can still diagnose the camera and advise.
 """,
     },
     {
         "title": "Returns and RMA Policy",
         "summary": "30-day returns, Shopify-only RMAs, and what happens after a device is sent back.",
-        "source_url": "https://help.getnexar.com/returns",
+        "source_url": "https://help.example.com/returns",
         "markdown": """# Eligibility
 
-Shopify orders may be returned within the window returned by `verifyReturnEligibility`. Amazon orders must be returned through Amazon — Nexar cannot create a prepaid label for them.
+Shopify orders may be returned within the window returned by `verifyReturnEligibility`. Amazon orders must be returned through Amazon — we cannot create a prepaid label for them.
 
 # Device vs order return
 
@@ -189,7 +189,7 @@ Shopify orders may be returned within the window returned by `verifyReturnEligib
 
 # After the RMA
 
-Tell the customer to print the prepaid label, drop the package at USPS, and wait for inspection before a refund. If they already activated Nexar Connect, they must cancel the subscription in MyNexar to stop billing.
+Tell the customer to print the prepaid label, drop the package at USPS, and wait for inspection before a refund. If they already activated a Connect subscription, they must cancel it in the customer portal to stop billing.
 
 # Reasons we refuse
 
@@ -201,10 +201,10 @@ Tell the customer to print the prepaid label, drop the package at USPS, and wait
     {
         "title": "LTE Data and SIM Policy",
         "summary": "Connect SIM reactivation, 25GB LTE uplift, and when to escalate data issues.",
-        "source_url": "https://help.getnexar.com/lte",
+        "source_url": "https://help.example.com/lte",
         "markdown": """# Who this applies to
 
-Only **Connect** cameras (Nexar One, Beam2 mini, fleet Connect). Classic cameras have no SIM.
+Only **Connect** cameras (One, Beam2 mini, fleet Connect). Classic cameras have no SIM.
 
 # Triage
 
@@ -228,10 +228,10 @@ Fleet Connect devices: do not apply consumer 25GB uplifts as a permanent fix. Es
     {
         "title": "Rear Camera Support",
         "summary": "Pairing, interior-facing mode, and when a rear camera is out of scope for LTE tools.",
-        "source_url": "https://help.getnexar.com/rear-camera",
+        "source_url": "https://help.example.com/rear-camera",
         "markdown": """# Prerequisites
 
-A rear camera requires a working **Connect primary** camera, the Nexar app, and Bluetooth/Wi-Fi during pairing. Lookup fields: `rear_camera.paired` and `rear_camera.interior_facing`.
+A rear camera requires a working **Connect primary** camera, the Connect app, and Bluetooth/Wi-Fi during pairing. Lookup fields: `rear_camera.paired` and `rear_camera.interior_facing`.
 
 # Pairing
 
@@ -248,10 +248,10 @@ If the primary is healthy and pairing still fails after a power cycle, treat the
     {
         "title": "Orders Shipping and Purchase Channels",
         "summary": "Shopify vs Amazon, tracking, address changes, and order cancellation rules.",
-        "source_url": "https://help.getnexar.com/orders",
+        "source_url": "https://help.example.com/orders",
         "markdown": """# Channels
 
-- **Shopify** (Nexar shop): we can look up status, change the shipping address on unfulfilled orders, cancel unfulfilled orders, and create RMAs.
+- **Shopify** (web shop): we can look up status, change the shipping address on unfulfilled orders, cancel unfulfilled orders, and create RMAs.
 - **Amazon**: we can identify the channel from an order number or customer message (`ticketMessageResponse` / `getDeviceOrder`) but we cannot cancel, relabel, or refund Amazon orders. Send the customer to Amazon order history.
 
 # Status
@@ -270,7 +270,7 @@ Unfulfilled Shopify only, via `cancelShopifyOrder`. If the order is already fulf
     {
         "title": "Support Hours and Escalation",
         "summary": "When to stay in self-serve tools vs escalate to a human queue or Jira.",
-        "source_url": "https://help.getnexar.com/escalation",
+        "source_url": "https://help.example.com/escalation",
         "markdown": """# Stay in the agent
 
 Diagnostic lookups, SIM reactivation, LTE uplift, invoice resend, eligible Shopify RMAs, and in-warranty replacements that tools can complete.
@@ -300,11 +300,11 @@ Spam, duplicate outreach, or a customer who already confirmed they are done: `ti
 AGENT_RULES = [
     {
         "category": "business_context",
-        "content": "Nexar sells AI dash cams (Classic: Beam/Pro; Connect: Nexar One and Beam2 mini) plus cloud subscriptions billed in Recurly. Consumer orders come from Shopify or Amazon.",
+        "content": "We sell connected cameras (Classic: Beam/Pro; Connect: One and Beam2 mini) plus cloud subscriptions billed in Recurly. Consumer orders come from Shopify or Amazon.",
     },
     {
         "category": "business_context",
-        "content": "Classic cameras use the Nexar Classic app (Bluetooth/Wi-Fi). Connect cameras use LTE SIM + Connect app. Never mix Classic diagnostic tools with Connect SIM tools.",
+        "content": "Classic cameras use the Classic app (Bluetooth/Wi-Fi). Connect cameras use LTE SIM + Connect app. Never mix Classic diagnostic tools with Connect SIM tools.",
     },
     {
         "category": "escalations",
@@ -312,7 +312,7 @@ AGENT_RULES = [
     },
     {
         "category": "escalations",
-        "content": "Amazon orders cannot be cancelled, relabeled, or refunded by Nexar. Direct those customers to Amazon. Shopify-only tools must not be used on Amazon channel orders.",
+        "content": "Amazon orders cannot be cancelled, relabeled, or refunded by us. Direct those customers to Amazon. Shopify-only tools must not be used on Amazon channel orders.",
     },
     {
         "category": "response_tone_style",
@@ -340,7 +340,7 @@ SOP_DOCUMENTS = [
     {
         "category_slug": "subscription",
         "title": "Subscription Handling",
-        "summary": "Look up a Nexar customer, review Recurly plans, cancel or create a subscription.",
+        "summary": "Look up a customer, review Recurly plans, cancel or create a subscription.",
         "raw_text": """# Subscription Operations
 
 ## Cancel subscription
@@ -352,7 +352,7 @@ When a customer asks to cancel their subscription or stop billing:
 5. Call @cancel_subscription with the subscription_id.
 6. Tell the user a confirmation message was written to the Messages outbox.
 
-Triggers: cancel my subscription, stop my subscription, cancel nexar plan
+Triggers: cancel my subscription, stop my subscription, cancel my plan
 
 ## Create or get subscription
 When a customer wants to start a plan or check status:
@@ -378,7 +378,7 @@ Triggers: look up, list their devices, list devices, customer account, find cust
                 "trigger_phrases": [
                     "cancel my subscription",
                     "stop my subscription",
-                    "cancel nexar plan",
+                    "cancel my plan",
                     "stop billing",
                 ],
                 "tools": ["lookup_customer_by_email", "list_subscriptions", "cancel_subscription"],
@@ -436,7 +436,7 @@ Triggers: look up, list their devices, list devices, customer account, find cust
         "raw_text": """# Device Return Operations
 
 ## Return my device
-When a customer wants to return a dash cam:
+When a customer wants to return a camera:
 1. Ask for the customer email.
 2. Call @lookup_customer_by_email.
 3. Call @list_customer_devices and present the devices.
@@ -445,7 +445,7 @@ When a customer wants to return a dash cam:
 6. After confirmation, call @initiate_return.
 7. Tell the user a return confirmation was logged in Messages.
 
-Triggers: return my device, return my dash cam, start an RMA, send device back
+Triggers: return my device, return my camera, start an RMA, send device back
 """,
         "processes": [
             {
@@ -454,7 +454,7 @@ Triggers: return my device, return my dash cam, start an RMA, send device back
                 "description": "Identify customer devices, confirm, and initiate a return.",
                 "trigger_phrases": [
                     "return my device",
-                    "return my dash cam",
+                    "return my camera",
                     "start an RMA",
                     "send device back",
                 ],
@@ -477,9 +477,9 @@ Triggers: return my device, return my dash cam, start an RMA, send device back
     },
     {
         "category_slug": "classic-connectivity",
-        "title": "SOP - Nexar Classic App Connectivity & Pairing",
+        "title": "SOP - Classic App Connectivity & Pairing",
         "summary": "Pairing and permission diagnostics for Classic cameras using getClassicDiagnostic.",
-        "raw_text": """# Nexar Classic App Connectivity
+        "raw_text": """# Classic App Connectivity
 
 When a Classic camera (Beam, Pro) will not pair or stay connected to the Classic app:
 1. Collect email or phone.
@@ -490,13 +490,13 @@ When a Classic camera (Beam, Pro) will not pair or stay connected to the Classic
         "processes": [
             {
                 "process_key": "classic_app_connectivity",
-                "title": "Nexar Classic App Connectivity",
+                "title": "Classic App Connectivity",
                 "description": "Diagnose Classic app pairing using permission flags. Never use SIM tools.",
                 "trigger_phrases": [
                     "classic app",
                     "won't pair",
                     "camera not pairing",
-                    "nexar pro wifi",
+                    "pro wifi",
                     "local network permission",
                     "bluetooth pairing",
                 ],
@@ -522,11 +522,11 @@ When a Classic camera (Beam, Pro) will not pair or stay connected to the Classic
     },
     {
         "category_slug": "connectivity",
-        "title": "SOP - Connectivity for Nexar Connect V2",
+        "title": "SOP - Connect LTE Connectivity",
         "summary": "LTE/SIM triage for Connect cameras: lookup, sim triage, reactivate or 25GB uplift.",
         "raw_text": """# Sim Triage
 
-Connect camera connectivity (Nexar One, Beam2 mini):
+Connect camera connectivity (One, Beam2 mini):
 1. Call @getDeviceLookup with serial, email, or phone.
 2. Call @getSimTriage with the serial.
 3. Follow recommended_action: reactivate_sim → @reactivateSim; uplift_25gb → @createLTEQuota25GB; escalate → note + @ticketEscalate.
@@ -543,7 +543,7 @@ Connect camera connectivity (Nexar One, Beam2 mini):
                     "no live view",
                     "turquoise light",
                     "data cap",
-                    "nexar one not connecting",
+                    "one not connecting",
                 ],
                 "tools": [
                     "getDeviceLookup",
@@ -660,7 +660,7 @@ Unfulfilled Shopify only: @cancelShopifyOrder. Fulfilled orders use the return S
                     _step("channel", "call_tool", "If the customer pasted a message or order number, identify the channel", "ticketMessageResponse"),
                     _step("status", "call_tool", "Get Shopify order status", "getOrderStatusShopify"),
                     _step("address", "call_tool", "If they ask where it is going, fetch the shipping address", "getOrderShippingAddressAndPhoneNumber"),
-                    _step("amazon", "inform", "If the channel is Amazon, explain Nexar cannot change Amazon shipments"),
+                    _step("amazon", "inform", "If the channel is Amazon, explain we cannot change Amazon shipments"),
                 ],
             },
             {
@@ -722,7 +722,7 @@ Amazon orders must go through Amazon.
                     _step(
                         "inform",
                         "inform",
-                        "Give tracking, RMA URL, USPS drop-off, and remind them to cancel Connect billing in MyNexar if the camera was activated",
+                        "Give tracking, RMA URL, USPS drop-off, and remind them to cancel Connect billing in the customer portal if the camera was activated",
                     ),
                 ],
             }
@@ -745,7 +745,7 @@ Out of warranty: @createShopifyCoupon or @getAccessoriesCoupon.
                     "warranty replacement",
                     "replace my camera",
                     "defective unit",
-                    "swap the dash cam",
+                    "swap the camera",
                 ],
                 "tools": [
                     "getDeviceLookup",

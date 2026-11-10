@@ -34,9 +34,9 @@ interface ChatMessageListProps {
 }
 
 const SUGGESTIONS = [
-  "Hi there",
-  "What can you help me with?",
-  "Get device health for my dash cam",
+  { label: "Look up an account", text: "Look up alex.rivera@example.com and list their devices." },
+  { label: "Triage LTE", text: "Camera NX-BEAM-10088 has no LTE. What’s going on?" },
+  { label: "Return policy", text: "What's our return policy?" },
 ];
 
 function formatTime(value: string) {
@@ -108,38 +108,43 @@ export function ChatMessageList({
     <div className="relative min-h-0 flex-1">
       <div
         ref={scrollContainerRef}
-        className="h-full overflow-y-auto scroll-smooth px-4 py-6 md:px-8"
+        className="h-full overflow-y-auto scroll-smooth px-4 py-4 md:px-5"
       >
-        <div className="mx-auto flex min-h-full max-w-6xl flex-col">
+        <div className="flex min-h-full w-full flex-col">
           {showEmptyState ? (
-            <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Bot className="h-7 w-7" />
+            <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Bot className="h-5 w-5" />
               </div>
-              <h3 className="text-xl font-semibold tracking-tight text-foreground">
-                Ops Agent
+              <h3 className="text-base font-semibold tracking-tight text-foreground">
+                Start a ticket
               </h3>
-              <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-                Ask about device health, operations, or start with a greeting. I&apos;ll call
-                registered APIs only when your request needs them.
+              <p className="mt-1.5 max-w-md text-xs leading-snug text-muted-foreground">
+                Ask in plain language. The agent matches an SOP, calls registered tools, and
+                cites the knowledge base — it will not invent device or order status.
               </p>
               {onSuggestionClick && (
-                <div className="mt-6 flex flex-wrap justify-center gap-2">
+                <div className="mt-5 grid w-full max-w-xl gap-2 sm:grid-cols-3">
                   {SUGGESTIONS.map((suggestion) => (
                     <button
-                      key={suggestion}
+                      key={suggestion.label}
                       type="button"
-                      onClick={() => onSuggestionClick(suggestion)}
-                      className="rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground/90 shadow-sm transition-colors hover:bg-muted"
+                      onClick={() => onSuggestionClick(suggestion.text)}
+                      className="rounded-lg border border-border bg-card px-3 py-2.5 text-left shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/60"
                     >
-                      {suggestion}
+                      <span className="block text-xs font-medium text-foreground">
+                        {suggestion.label}
+                      </span>
+                      <span className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+                        {suggestion.text}
+                      </span>
                     </button>
                   ))}
                 </div>
               )}
             </div>
           ) : (
-            <div className="space-y-6 pb-4">
+            <div className="space-y-4 pb-3">
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
@@ -147,22 +152,22 @@ export function ChatMessageList({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                   className={cn(
-                    "flex gap-3",
+                    "flex gap-2",
                     message.role === "user" ? "flex-row-reverse" : "flex-row",
                   )}
                 >
                   <div
                     className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
                       message.role === "user"
                         ? "bg-primary text-primary-foreground"
                         : "border border-border bg-card text-primary",
                     )}
                   >
                     {message.role === "user" ? (
-                      <User className="h-4 w-4" />
+                      <User className="h-3.5 w-3.5" />
                     ) : (
-                      <Bot className="h-4 w-4" />
+                      <Bot className="h-3.5 w-3.5" />
                     )}
                   </div>
                   <div
@@ -173,7 +178,7 @@ export function ChatMessageList({
                   >
                     <div
                       className={cn(
-                        "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
+                        "rounded-xl px-3 py-2 text-[13px] leading-snug shadow-sm",
                         message.role === "user"
                           ? "bg-primary text-primary-foreground"
                           : "border border-border/80 bg-card text-foreground",
@@ -214,12 +219,12 @@ export function ChatMessageList({
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex gap-3"
+                  className="flex gap-2"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-primary">
-                    <Bot className="h-4 w-4" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-card text-primary">
+                    <Bot className="h-3.5 w-3.5" />
                   </div>
-                  <div className="max-w-[85%] rounded-2xl border border-border/80 bg-card px-4 py-3 text-sm shadow-sm">
+                  <div className="max-w-[85%] rounded-xl border border-border/80 bg-card px-3 py-2 text-[13px] shadow-sm">
                     {streamingStatus && !pendingAssistant && (
                       <div className="space-y-2">
                         <p className="text-xs font-medium text-muted-foreground">

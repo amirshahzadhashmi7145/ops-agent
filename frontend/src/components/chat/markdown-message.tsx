@@ -17,17 +17,17 @@ function buildComponents(variant: "chat" | "document"): Components {
 
   return {
     p: ({ children }) => (
-      <p className="my-2 first:mt-0 last:mb-0 leading-relaxed text-sm">{children}</p>
+      <p className="my-1.5 first:mt-0 last:mb-0 text-[13px] leading-snug">{children}</p>
     ),
     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     ul: ({ children }) => (
-      <ul className="my-2 list-disc space-y-1 pl-5 first:mt-0 last:mb-0 text-sm">{children}</ul>
+      <ul className="my-1.5 list-disc space-y-0.5 pl-4 first:mt-0 last:mb-0 text-[13px]">{children}</ul>
     ),
     ol: ({ children }) => (
-      <ol className="my-2 list-decimal space-y-1 pl-5 first:mt-0 last:mb-0 text-sm">{children}</ol>
+      <ol className="my-1.5 list-decimal space-y-0.5 pl-4 first:mt-0 last:mb-0 text-[13px]">{children}</ol>
     ),
-    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+    li: ({ children }) => <li className="leading-snug">{children}</li>,
     h1: ({ children }) => (
       <h1
         className={cn(

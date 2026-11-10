@@ -123,6 +123,7 @@ def build_tool_definitions(
     if enable_sop_matching:
         built.append(sop_processes_tool_definition())
     built.extend(resource_tools)
+    built.sort(key=lambda tool: str(tool.get("function", {}).get("name") or ""))
     return built
 
 

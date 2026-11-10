@@ -9,6 +9,7 @@ from app.services.llm.base import (
     LLMProvider,
     LLMResponse,
     ToolCall,
+    extract_token_usage,
     with_llm_retry,
 )
 
@@ -98,13 +99,7 @@ class GroqProvider(LLMProvider):
                     )
                 )
 
-        usage = {}
-        if response.usage:
-            usage = {
-                "prompt_tokens": response.usage.prompt_tokens or 0,
-                "completion_tokens": response.usage.completion_tokens or 0,
-                "total_tokens": response.usage.total_tokens or 0,
-            }
+        usage = extract_token_usage(response.usage)
 
         return LLMResponse(
             content=choice.content,

@@ -119,7 +119,7 @@ export default function AgentRulesPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-8 py-10">
+      <div className="w-full px-5 py-5">
         <div className="mb-6">
           <h2 className="page-header">Agent Rules</h2>
           <p className="page-description">
@@ -147,21 +147,21 @@ export default function AgentRulesPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
-                className="surface-card p-6"
+                className="surface-card p-4"
               >
-                <div className="mb-4 flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="h-5 w-5" />
+                <div className="mb-3 flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-2.5">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Icon className="h-4 w-4" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-foreground">
+                      <h3 className="text-sm font-semibold text-foreground">
                         {category.label}
                         <span className="ml-2 text-xs font-normal text-muted-foreground">
                           {categoryRules.length}
                         </span>
                       </h3>
-                      <p className="mt-0.5 text-sm text-muted-foreground">{category.description}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{category.description}</p>
                     </div>
                   </div>
                   <motion.div {...buttonMotion}>

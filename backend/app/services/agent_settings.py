@@ -16,7 +16,7 @@ def get_agent_settings(db: Session) -> AgentSettings:
 
     row = AgentSettings(
         id=SETTINGS_ROW_ID,
-        agent_name="Nexar Ops Agent",
+        agent_name="Ops Agent",
         system_prompt=DEFAULT_SYSTEM_PROMPT,
         greeting_message=DEFAULT_GREETING,
         escalation_message="",
@@ -79,7 +79,7 @@ def filter_resources_for_settings(resources: list[Resource], agent: AgentSetting
 def build_system_prompt(db: Session, agent: AgentSettings) -> str:
     base = (agent.system_prompt or DEFAULT_SYSTEM_PROMPT).strip()
     if agent.agent_name.strip():
-        base = base.replace("Nexar Ops Agent", agent.agent_name.strip(), 1)
+        base = base.replace("Ops Agent", agent.agent_name.strip(), 1)
 
     escalation = (agent.escalation_message or "").strip()
     if escalation:

@@ -1,4 +1,4 @@
-from app.data.nexar_playbook import AGENT_RULES, CATEGORIES, KB_ARTICLES, SOP_DOCUMENTS
+from app.data.support_playbook import AGENT_RULES, CATEGORIES, KB_ARTICLES, SOP_DOCUMENTS
 from app.services.kb_chunker import chunk_markdown
 from app.services.sop_device_routing import DOC_CLASSIC, DOC_CONNECT, DOC_HARDWARE
 from app.services.sop_ingestion import _build_chunk_content
@@ -11,7 +11,7 @@ def test_playbook_covers_device_routing_sops():
     assert DOC_HARDWARE in titles
 
     processes = [process["title"] for document in SOP_DOCUMENTS for process in document["processes"]]
-    assert "Nexar Classic App Connectivity" in processes
+    assert "Classic App Connectivity" in processes
     assert "Sim Triage" in processes
     assert "Hardware Malfunction" in processes
     assert "Look up customer devices" in processes

@@ -127,7 +127,7 @@ export default function SopsPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-8 py-10">
+      <div className="w-full px-5 py-5">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h2 className="page-header">SOPs</h2>
@@ -206,7 +206,7 @@ export default function SopsPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <Bot className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">No SOPs yet</h3>
+            <h3 className="text-sm font-semibold text-foreground">No SOPs yet</h3>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Add your first SOP document. Use @tool mentions so each process binds to real tools.
             </p>

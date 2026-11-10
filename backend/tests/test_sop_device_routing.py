@@ -21,14 +21,14 @@ class _Customer:
 
 
 CLASSIC = (
-    _Device("NX-BEAM-10001", "Nexar Beam"),
+    _Device("NX-BEAM-10001", "Beam"),
     _Customer(),
-    {"camera_family": "classic", "model": "Nexar Beam", "segment": "consumer", "lookup": {}},
+    {"camera_family": "classic", "model": "Beam", "segment": "consumer", "lookup": {}},
 )
 CONNECT = (
-    _Device("NX-ONE-20022", "Nexar One"),
+    _Device("NX-ONE-20022", "One"),
     _Customer(),
-    {"camera_family": "connect", "model": "Nexar One", "segment": "consumer", "lookup": {}},
+    {"camera_family": "connect", "model": "One", "segment": "consumer", "lookup": {}},
 )
 
 
@@ -63,7 +63,7 @@ def test_choose_sop_does_not_autolock_diagnostic_on_account_lookup(monkeypatch):
     monkeypatch.setattr(
         "app.services.sop_device_routing.search_sop_processes",
         lambda db, query, top_k=None: [
-            {"process_id": "classic", "title": "Nexar Classic App Connectivity", "score": 0.95},
+            {"process_id": "classic", "title": "Classic App Connectivity", "score": 0.95},
             {"process_id": "lookup", "title": "Look up customer devices", "score": 0.70},
         ],
     )

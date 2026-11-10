@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Poppins } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Ops Agent",
-  description: "Internal AI operations platform for Nexar dash cam support",
+  description: "Internal AI copilot for customer support operations",
   icons: {
     icon: "/icon.svg",
   },
@@ -32,7 +32,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${poppins.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${inter.className} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background font-sans text-foreground">
         <Providers>

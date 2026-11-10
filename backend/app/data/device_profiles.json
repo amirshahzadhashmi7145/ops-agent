@@ -2,7 +2,7 @@
   "NX-PRO-30001": {
     "segment": "consumer",
     "camera_family": "classic",
-    "model": "Nexar Pro",
+    "model": "Pro",
     "lookup": {
       "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-08-15"},
       "subscription": {"status": "Active"},
@@ -35,7 +35,7 @@
   "NX-BEAM-10001": {
     "segment": "consumer",
     "camera_family": "classic",
-    "model": "Nexar Beam",
+    "model": "Beam",
     "lookup": {
       "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-03-12"},
       "subscription": {"status": "Active"},
@@ -58,7 +58,7 @@
   "NX-ONE-20022": {
     "segment": "consumer",
     "camera_family": "connect",
-    "model": "Nexar One",
+    "model": "One",
     "lookup": {
       "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2024-11-02"},
       "subscription": {"status": "Active"},
@@ -68,7 +68,7 @@
     "classic_diagnostic": null,
     "health": {
       "serial_number": "NX-ONE-20022",
-      "model": "Nexar One",
+      "model": "One",
       "irq": false,
       "has_power_issues": false,
       "has_reset_issues": false,
@@ -158,7 +158,7 @@
   "NX-FLEET-90001": {
     "segment": "fleets",
     "camera_family": "connect",
-    "model": "Nexar One",
+    "model": "One",
     "lookup": {
       "warranty": {"status": "active", "purchase_channel": "portal", "delivery_date": "2025-02-01"},
       "subscription": {"status": "Active"},
@@ -167,7 +167,7 @@
     "classic_diagnostic": null,
     "health": {
       "serial_number": "NX-FLEET-90001",
-      "model": "Nexar One",
+      "model": "One",
       "summary": {"health_score": "good"}
     },
     "sim_triage": {"conclusion": "no_lte_issue"},

@@ -24,6 +24,14 @@ from app.services.agent_settings_defaults import DEFAULT_GREETING
 from app.services.kb_retrieval import search_knowledge_base
 from app.services.llm.base import ChatMessage, ToolCall
 from app.services.llm.factory import get_llm_provider
+from app.services.usage.meter import metered_chat
+from app.services.usage.semantic_cache import (
+    cache_fingerprint,
+    last_chat_usage,
+    lookup_semantic_cache,
+    record_semantic_hit,
+    store_semantic_cache,
+)
 from app.services.resource_executor import execute_resource_request, merge_headers
 from app.services.tool_log import record_tool_call, redact_headers
 from app.services.sop_device_routing import (
@@ -55,6 +63,29 @@ def _llm_kwargs(agent_cfg: AgentSettings) -> dict[str, float | int]:
         "temperature": resolved_llm_temperature(agent_cfg),
         "max_tokens": resolved_llm_max_tokens(agent_cfg),
     }
+
+
+def _set_dynamic_system(messages: list[ChatMessage], content: str) -> None:
+    """Keep messages[0] as the static cacheable prefix; SOP/routing goes in slot 1."""
+    dynamic = ChatMessage(role="system", content=content)
+    if len(messages) > 1 and messages[1].role == "system":
+        messages[1] = dynamic
+    else:
+        messages.insert(1, dynamic)
+
+
+def _build_turn_messages(
+    static_system: str,
+    dynamic_system: str | None,
+    history: list[dict[str, str]],
+    user_message: str,
+) -> list[ChatMessage]:
+    messages = [ChatMessage(role="system", content=static_system)]
+    if dynamic_system:
+        messages.append(ChatMessage(role="system", content=dynamic_system))
+    messages.extend(_history_to_messages(history))
+    messages.append(ChatMessage(role="user", content=user_message))
+    return messages
 
 
 def _build_tools(
@@ -286,22 +317,43 @@ async def run_agent_turn(
     sop_auto_threshold = resolved_sop_auto_match_threshold(agent_cfg)
     max_tool_rounds = resolved_max_tool_rounds(agent_cfg)
 
-    system_content = build_system_prompt(db, agent_cfg) + PROMPT_INJECTION_GUARD
+    static_system = build_system_prompt(db, agent_cfg) + PROMPT_INJECTION_GUARD
     greeting_fallback = (agent_cfg.greeting_message or DEFAULT_GREETING).strip()
+    dynamic_system: str | None = None
+    used_live_tools = False
 
     if is_greeting_message(user_message):
         pipeline_trace.append({"type": "mode", "mode": "general_chat", "reason": "greeting_short_circuit"})
-        response = await provider.chat(
-            [
-                ChatMessage(role="system", content=system_content),
-                *_history_to_messages(history),
-                ChatMessage(role="user", content=user_message),
-            ],
+        fingerprint = cache_fingerprint(sop_process_id=None, greeting=True)
+        cached = lookup_semantic_cache(db, query=user_message, fingerprint=fingerprint)
+        if cached:
+            record_semantic_hit(db, cached, conversation_id=conversation_id, user_email=user_email)
+            pipeline_trace.append({"type": "cache", "kind": "semantic", "hits": cached.hit_count})
+            pipeline_trace.append({"type": "final_answer", "content": cached.response_text, "mode": "general_chat"})
+            yield {"type": "status_update", "message": "Answered from cache…"}
+            yield {"type": "final_answer", "content": cached.response_text, "pipeline_trace": pipeline_trace}
+            return
+        response = await metered_chat(
+            db,
+            provider,
+            _build_turn_messages(static_system, None, history, user_message),
+            purpose="greeting",
+            conversation_id=conversation_id,
+            user_email=user_email,
             tools=None,
             tool_choice="none",
             **llm_kwargs,
         )
         content = response.content or greeting_fallback
+        store_semantic_cache(
+            db,
+            query=user_message,
+            fingerprint=fingerprint,
+            response_text=content,
+            model=response.model,
+            prompt_tokens=int((response.usage or {}).get("prompt_tokens") or 0),
+            completion_tokens=int((response.usage or {}).get("completion_tokens") or 0),
+        )
         pipeline_trace.append({"type": "final_answer", "content": content, "mode": "general_chat"})
         yield {"type": "final_answer", "content": content, "pipeline_trace": pipeline_trace}
         return
@@ -320,9 +372,7 @@ async def run_agent_turn(
             allowed = set(auto_best.get("tools") or [])
             tools = _build_tools(filtered_resources, agent_cfg, allowed_tool_names=allowed)
             routing_block = routing_prompt_block(device_routing)
-            system_content = (
-                f"{system_content}\n\n{routing_block}\n\n{process_to_prompt_block(auto_best)}"
-            )
+            dynamic_system = f"{routing_block}\n\n{process_to_prompt_block(auto_best)}"
             pipeline_trace.append(
                 {
                     "type": "sop_matched",
@@ -346,11 +396,22 @@ async def run_agent_turn(
                 "message": f"Following the “{auto_best['title']}” SOP…",
             }
 
-    messages: list[ChatMessage] = [
-        ChatMessage(role="system", content=system_content),
-        *_history_to_messages(history),
-        ChatMessage(role="user", content=user_message),
-    ]
+    fingerprint = cache_fingerprint(
+        sop_process_id=str(active_sop["process_id"]) if active_sop else None,
+        greeting=False,
+    )
+    cached = lookup_semantic_cache(db, query=user_message, fingerprint=fingerprint)
+    if cached:
+        record_semantic_hit(db, cached, conversation_id=conversation_id, user_email=user_email)
+        pipeline_trace.append({"type": "cache", "kind": "semantic", "hits": cached.hit_count})
+        pipeline_trace.append({"type": "final_answer", "content": cached.response_text, "mode": "sop" if active_sop else "general_chat"})
+        yield {"type": "status_update", "message": "Answered from cache…"}
+        yield {"type": "final_answer", "content": cached.response_text, "pipeline_trace": pipeline_trace}
+        return
+
+    messages: list[ChatMessage] = _build_turn_messages(
+        static_system, dynamic_system, history, user_message
+    )
 
     final_content = ""
     for round_idx in range(max_tool_rounds):
@@ -360,8 +421,13 @@ async def run_agent_turn(
             "type": "status_update",
             "message": "Thinking…" if round_idx == 0 else "Putting your answer together…",
         }
-        response = await provider.chat(
+        response = await metered_chat(
+            db,
+            provider,
             messages,
+            purpose="chat",
+            conversation_id=conversation_id,
+            user_email=user_email,
             tools=tools if tools else None,
             tool_choice="auto" if tools else "none",
             **llm_kwargs,
@@ -377,8 +443,13 @@ async def run_agent_turn(
             and _looks_like_unfulfilled_search(response.content)
         ):
             pipeline_trace.append({"type": "mode", "mode": "forced_tool_call"})
-            response = await provider.chat(
+            response = await metered_chat(
+                db,
+                provider,
                 messages,
+                purpose="chat",
+                conversation_id=conversation_id,
+                user_email=user_email,
                 tools=tools,
                 tool_choice="required",
                 **llm_kwargs,
@@ -390,6 +461,21 @@ async def run_agent_turn(
             final_content = response.content or (
                 "I'm not sure I follow — could you rephrase that or add a bit more detail so I can help?"
             )
+            if not used_live_tools:
+                last = last_chat_usage(db, conversation_id)
+                store_semantic_cache(
+                    db,
+                    query=user_message,
+                    fingerprint=fingerprint,
+                    response_text=final_content,
+                    model=response.model,
+                    prompt_tokens=int((last.prompt_tokens if last else 0) or (response.usage or {}).get("prompt_tokens") or 0),
+                    completion_tokens=int(
+                        (last.completion_tokens if last else 0)
+                        or (response.usage or {}).get("completion_tokens")
+                        or 0
+                    ),
+                )
             pipeline_trace.append({"type": "final_answer", "content": final_content, "mode": mode})
             yield {
                 "type": "final_answer",
@@ -471,9 +557,9 @@ async def run_agent_turn(
                     active_sop = matched
                     allowed = set(matched.get("tools") or [])
                     tools = _build_tools(filtered_resources, agent_cfg, allowed_tool_names=allowed)
-                    messages[0] = ChatMessage(
-                        role="system",
-                        content=f"{system_content}\n\n{process_to_prompt_block(matched)}",
+                    _set_dynamic_system(messages, process_to_prompt_block(matched))
+                    fingerprint = cache_fingerprint(
+                        sop_process_id=str(matched["process_id"]), greeting=False
                     )
                     pipeline_trace.append(
                         {
@@ -505,6 +591,7 @@ async def run_agent_turn(
                 continue
 
             resource = resource_by_name.get(tool_call.name)
+            used_live_tools = True
             if not resource:
                 tool_result = json.dumps({"error": f"Unknown tool: {tool_call.name}"})
                 _log_agent_tool(

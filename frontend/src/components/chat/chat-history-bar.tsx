@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MessageSquare, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,20 @@ function formatRelativeTime(value: string) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function RelativeTime({ value }: { value: string }) {
+  const [label, setLabel] = useState("");
+
+  useEffect(() => {
+    setLabel(formatRelativeTime(value));
+  }, [value]);
+
+  return (
+    <span className="shrink-0 text-[10px] text-muted-foreground" suppressHydrationWarning>
+      {label}
+    </span>
+  );
+}
+
 export function ChatHistoryBar({
   conversations,
   activeId,
@@ -49,11 +63,11 @@ export function ChatHistoryBar({
 
   return (
     <section className="shrink-0 border-t border-border/80 bg-card/80 backdrop-blur-sm">
-      <div className="flex items-center gap-3 px-4 py-3 md:px-6">
+      <div className="flex items-center gap-2 px-4 py-2 md:px-5">
 
         <Button
           size="sm"
-          className="h-9 shrink-0 rounded-full px-4 shadow-sm"
+          className="h-7 shrink-0 rounded-full px-3 shadow-sm"
           onClick={onNewChat}
         >
           <Plus className="mr-1.5 h-3.5 w-3.5" />
@@ -66,7 +80,7 @@ export function ChatHistoryBar({
             className="flex gap-2 overflow-x-auto px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {conversations.length === 0 ? (
-              <div className="flex h-9 items-center gap-2 rounded-full border border-dashed border-border px-4 text-xs text-muted-foreground">
+              <div className="flex h-7 items-center gap-2 rounded-full border border-dashed border-border px-3 text-[11px] text-muted-foreground">
                 <MessageSquare className="h-3.5 w-3.5" />
                 No past conversations yet
               </div>
@@ -89,7 +103,7 @@ export function ChatHistoryBar({
                     <button
                       type="button"
                       onClick={() => onSelect(conversation.id)}
-                      className="flex max-w-[220px] items-center gap-2 rounded-full px-3 py-1.5 text-left sm:max-w-[260px]"
+                      className="flex max-w-[220px] items-center gap-1.5 rounded-full px-2.5 py-1 text-left sm:max-w-[260px]"
                     >
                       <MessageSquare
                         className={cn(
@@ -99,15 +113,13 @@ export function ChatHistoryBar({
                       />
                       <span
                         className={cn(
-                          "truncate text-sm font-medium",
+                          "truncate text-xs font-medium",
                           isActive ? "text-foreground" : "text-foreground/80",
                         )}
                       >
                         {conversation.title}
                       </span>
-                      <span className="shrink-0 text-[10px] text-muted-foreground">
-                        {formatRelativeTime(conversation.updated_at)}
-                      </span>
+                      <RelativeTime value={conversation.updated_at} />
                     </button>
                     <Button
                       type="button"

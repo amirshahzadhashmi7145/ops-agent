@@ -54,6 +54,52 @@ class ToolCall:
     arguments: dict[str, Any]
 
 
+def extract_token_usage(usage: Any) -> dict[str, int]:
+    """Normalize provider usage objects into prompt/completion/cached token counts."""
+    empty = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "cached_tokens": 0}
+    if usage is None:
+        return empty
+
+    if isinstance(usage, dict):
+        prompt = int(usage.get("prompt_tokens") or usage.get("prompt_token_count") or 0)
+        completion = int(
+            usage.get("completion_tokens")
+            or usage.get("candidates_token_count")
+            or 0
+        )
+        total = int(usage.get("total_tokens") or usage.get("total_token_count") or prompt + completion)
+        cached = int(usage.get("cached_tokens") or 0)
+        details = usage.get("prompt_tokens_details") or {}
+        if isinstance(details, dict):
+            cached = int(details.get("cached_tokens") or cached)
+        cached = int(usage.get("cached_content_token_count") or cached)
+        return {
+            "prompt_tokens": prompt,
+            "completion_tokens": completion,
+            "total_tokens": total,
+            "cached_tokens": cached,
+        }
+
+    prompt = int(getattr(usage, "prompt_tokens", 0) or getattr(usage, "prompt_token_count", 0) or 0)
+    completion = int(
+        getattr(usage, "completion_tokens", 0) or getattr(usage, "candidates_token_count", 0) or 0
+    )
+    total = int(getattr(usage, "total_tokens", 0) or getattr(usage, "total_token_count", 0) or prompt + completion)
+    cached = 0
+    details = getattr(usage, "prompt_tokens_details", None)
+    if isinstance(details, dict):
+        cached = int(details.get("cached_tokens") or 0)
+    elif details is not None:
+        cached = int(getattr(details, "cached_tokens", 0) or 0)
+    cached = int(getattr(usage, "cached_content_token_count", 0) or cached)
+    return {
+        "prompt_tokens": prompt,
+        "completion_tokens": completion,
+        "total_tokens": total,
+        "cached_tokens": cached,
+    }
+
+
 @dataclass
 class LLMResponse:
     content: str | None

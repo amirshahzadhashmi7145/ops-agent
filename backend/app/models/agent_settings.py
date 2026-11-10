@@ -14,7 +14,7 @@ class AgentSettings(Base):
     __tablename__ = "agent_settings"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=SETTINGS_ROW_ID)
-    agent_name: Mapped[str] = mapped_column(String(255), nullable=False, default="Nexar Ops Agent")
+    agent_name: Mapped[str] = mapped_column(String(255), nullable=False, default="Ops Agent")
     system_prompt: Mapped[str] = mapped_column(Text, nullable=False)
     greeting_message: Mapped[str] = mapped_column(
         Text,

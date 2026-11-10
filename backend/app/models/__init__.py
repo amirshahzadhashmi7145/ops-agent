@@ -4,6 +4,7 @@ from app.models.conversation import Conversation, Message, MessageRole
 from app.models.kb import KbChunk, KbProcessingStatus, KbReference
 from app.models.resource import ApiConnection, Resource, ResourceTestLog, ToolScope
 from app.models.tool_log import ToolCallLog
+from app.models.usage import LlmUsageEvent, SemanticCacheEntry
 from app.models.sim import (
     OutboundMessage,
     SimCustomer,
@@ -33,6 +34,7 @@ __all__ = [
     "ApiConnection",
     "Conversation",
     "KbChunk",
+    "LlmUsageEvent",
     "KbProcessingStatus",
     "KbReference",
     "Message",
@@ -52,6 +54,7 @@ __all__ = [
     "SimReturnStatus",
     "SimSubscription",
     "SimSubscriptionStatus",
+    "SemanticCacheEntry",
     "SopCategory",
     "SopDocument",
     "SopProcess",

@@ -243,11 +243,16 @@ async def format_reference_text(raw_text: str) -> dict[str, str]:
     """
     provider = get_llm_provider()
     try:
-        response = await provider.chat(
+        from app.services.usage.meter import metered_chat
+
+        response = await metered_chat(
+            None,
+            provider,
             [
                 ChatMessage(role="system", content=FORMAT_PROMPT),
                 ChatMessage(role="user", content=raw_text),
             ],
+            purpose="kb_format",
             tools=None,
             tool_choice="none",
             max_tokens=settings.kb_format_max_tokens,

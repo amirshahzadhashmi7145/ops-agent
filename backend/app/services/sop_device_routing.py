@@ -51,8 +51,8 @@ HARDWARE_MARKERS = (
     "bloated",
 )
 
-DOC_CLASSIC = "SOP - Nexar Classic App Connectivity & Pairing"
-DOC_CONNECT = "SOP - Connectivity for Nexar Connect V2"
+DOC_CLASSIC = "SOP - Classic App Connectivity & Pairing"
+DOC_CONNECT = "SOP - Connect LTE Connectivity"
 DOC_HARDWARE = "SOP - Hardware Malfunction"
 
 
@@ -116,10 +116,10 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
     model = str(routing.get("model") or "").lower()
 
     if _has_any(msg, CONNECT_MODEL_MARKERS) or any(
-        token in model for token in ("beam2", "nexar one")
-    ):
+        token in model for token in ("beam2", "nexar one", " one")
+    ) or model.strip() == "one":
         family = "connect"
-    if _has_any(msg, CLASSIC_MODEL_MARKERS) or "nexar pro" in model:
+    if _has_any(msg, CLASSIC_MODEL_MARKERS) or "nexar pro" in model or model.strip() == "pro":
         family = "classic"
 
     # Email-only lookups can return mixed Classic + Connect cameras. Do not pick
@@ -154,7 +154,7 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
             )
         else:
             preferred_doc = DOC_CLASSIC
-            preferred_process = "Nexar Classic App Connectivity"
+            preferred_process = "Classic App Connectivity"
             mandatory_tools = ["getClassicDiagnostic"]
             instructions.append(
                 "Classic camera app connectivity issue. Do NOT use getSimTriage or Connect-only tools."
@@ -301,7 +301,7 @@ def choose_sop_process(
     # Plain account lookups ("list devices for this email") must not auto-lock a
     # pairing/LTE/hardware SOP just because embeddings are close.
     if not routing.get("is_connectivity") and not routing.get("is_hardware"):
-        diagnostic_titles = { "Nexar Classic App Connectivity", "Sim Triage", "Hardware Malfunction"}
+        diagnostic_titles = {"Classic App Connectivity", "Sim Triage", "Hardware Malfunction"}
         filtered = [m for m in matches if m.get("title") not in diagnostic_titles]
         if filtered:
             matches = filtered

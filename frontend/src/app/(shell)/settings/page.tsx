@@ -51,15 +51,15 @@ function SectionCard({
       variants={listItemVariants}
       initial="hidden"
       animate="visible"
-      className="surface-card p-6"
+      className="surface-card p-4"
     >
-      <div className="mb-5 flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Icon className="h-5 w-5" />
+      <div className="mb-4 flex items-start gap-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="h-4 w-4" />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-foreground">{title}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         </div>
       </div>
       {children}
@@ -162,7 +162,7 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-6xl space-y-5 px-8 py-10">
+      <div className="w-full space-y-4 px-5 py-5">
         <div className="space-y-2">
           <Skeleton className="h-8 w-52" />
           <Skeleton className="h-4 w-full max-w-2xl" />
@@ -189,7 +189,7 @@ export default function SettingsPage() {
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-3xl px-8 py-16">
+      <div className="w-full px-5 py-10">
         <div className="surface-card space-y-4 p-6 text-center">
           <h3 className="text-lg font-semibold text-foreground">Couldn&apos;t load agent settings</h3>
           <p className="text-sm text-muted-foreground">
@@ -213,7 +213,7 @@ export default function SettingsPage() {
 
   return (
     <motion.div
-      className="mx-auto max-w-6xl px-8 py-10"
+      className="w-full px-5 py-5"
       variants={fadeSlideUp}
       initial="hidden"
       animate="visible"

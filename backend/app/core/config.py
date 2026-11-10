@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql://nexar:nexar@db:5432/nexar_ops"
-    dev_user_email: str = "ahmad.shafqat@getnexar.com"
+    dev_user_email: str = "ops@example.com"
     # When true, outbound URL checks (private/loopback ranges etc.) are bypassed so
     # resources can target localhost during development. Must stay OFF in production;
     # docker-compose enables it explicitly for local dev.
@@ -53,6 +53,14 @@ class Settings(BaseSettings):
     # temperature 0 for maximum determinism and to minimize heading paraphrasing/merging.
     kb_format_temperature: float = 0.0
 
+    # OpenAI automatic prefix caching (cached_tokens). Keep the static system
+    # prompt as the first message so later tickets reuse the prefix at ~50% input cost.
+    prompt_cache_enabled: bool = True
+    # Embedding similarity cache for repeat policy/FAQ questions (no live tools).
+    semantic_cache_enabled: bool = True
+    semantic_cache_max_distance: float = 0.08
+    semantic_cache_ttl_hours: int = 24
+
     embedding_provider: str = "local"
     embedding_model_local: str = "BAAI/bge-small-en-v1.5"
     embedding_model_google: str = "text-embedding-004"
@@ -67,6 +75,22 @@ class Settings(BaseSettings):
     # How many candidate chunks to pull before section dedup + diversity selection.
     # Larger pool => better chance of surfacing other articles before dedup.
     kb_candidate_multiplier: int = 6
+
+    # Hosting COGS for pricing (configured plan, not a live cloud bill).
+    # Defaults = one Docker host running API + UI + local embeddings + Postgres.
+    hosting_profile: str = "single_vm_docker"
+    hosting_provider_hint: str = "Generic cloud VM (DO / Hetzner / AWS-like list)"
+    hosting_compute_usd: float = 48.0
+    hosting_compute_specs: str = "4 vCPU · 8 GB RAM"
+    hosting_disk_usd: float = 10.0
+    hosting_disk_specs: str = "100 GB SSD"
+    hosting_backup_usd: float = 5.0
+    hosting_egress_usd: float = 8.0
+    hosting_egress_specs: str = "~1 TB egress"
+    hosting_other_usd: float = 0.0
+    hosting_other_label: str = ""
+    # Used only to show $/ticket at a full box — not a hard capacity limit.
+    hosting_assumed_capacity_tickets: int = 5000
 
 
 settings = Settings()

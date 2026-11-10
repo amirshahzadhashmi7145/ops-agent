@@ -9,6 +9,7 @@ from app.services.llm.base import (
     LLMProvider,
     LLMResponse,
     ToolCall,
+    extract_token_usage,
     with_llm_retry,
 )
 
@@ -128,13 +129,7 @@ class GeminiProvider(LLMProvider):
                         )
                     )
 
-        usage: dict[str, int] = {}
-        if response.usage_metadata:
-            usage = {
-                "prompt_tokens": response.usage_metadata.prompt_token_count or 0,
-                "completion_tokens": response.usage_metadata.candidates_token_count or 0,
-                "total_tokens": response.usage_metadata.total_token_count or 0,
-            }
+        usage = extract_token_usage(response.usage_metadata)
 
         return LLMResponse(
             content="\n".join(text_parts) if text_parts else None,

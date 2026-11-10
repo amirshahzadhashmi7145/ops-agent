@@ -21,7 +21,7 @@ from app.services.sim_diagnostics import (
 
 router = APIRouter(prefix="/sim", tags=["simulation-devices"])
 
-FROM_ADDRESS = "ops-agent@nexar.internal"
+FROM_ADDRESS = "ops-agent@internal"
 RETURN_WINDOW_DAYS = 30
 
 
@@ -204,7 +204,7 @@ def reactivate_sim(serial_number: str, db: Session = Depends(get_db)) -> dict:
         db,
         to_address=customer.email,
         subject=f"SIM reactivated for {serial_number}",
-        body="Your camera SIM has been reactivated. Please reconnect the camera in the Nexar Connect app.",
+        body="Your camera SIM has been reactivated. Please reconnect the camera in the Connect app.",
         related_entity_type="email",
         related_entity_id=str(device.id),
         metadata={"message_kind": "email", "serial_number": serial_number, "action": "sim_reactivated"},
@@ -292,7 +292,7 @@ def get_shopify_order_items(payload: ShopifyOrderItemsRequest, db: Session = Dep
         get_profile_for_serial(db, device.serial_number) if device else None,
         device.serial_number if device else "",
     )
-    model = profile.get("model") or (device.model if device else "Nexar Dash Cam")
+    model = profile.get("model") or (device.model if device else "Camera")
     sd = (profile.get("health") or {}).get("sd_card", {}).get("size_gb", "64 GB")
     item_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{order.order_number}-{model}"))
     return {
@@ -336,7 +336,7 @@ def create_shopify_replacement(payload: CreateShopifyReplacementRequest, db: Ses
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     tracking = f"1Z999AA10{secrets.randbelow(10**8):08d}"
-    rma_url = f"https://returns.getnexar.com/rma/{order.order_number}"
+    rma_url = f"https://returns.example.com/rma/{order.order_number}"
     _queue_message(
         db,
         to_address=payload.customer_email,
@@ -372,8 +372,8 @@ def create_shopify_coupon(payload: CreateShopifyCouponRequest, db: Session = Dep
     _queue_message(
         db,
         to_address=payload.email,
-        subject=f"Your {payload.discount}% Nexar discount code",
-        body=f"Discount code: {code}\nValid for 60 days on main dashcams at getnexar.com.",
+        subject=f"Your {payload.discount}% discount code",
+        body=f"Discount code: {code}\nValid for 60 days on cameras at the web shop.",
         related_entity_type="email",
         related_entity_id=str(uuid.uuid4()),
         metadata={"message_kind": "email", "discount_code": code, "discount_percent": payload.discount},
@@ -388,8 +388,8 @@ def get_accessories_coupon(payload: AccessoriesCouponRequest, db: Session = Depe
     _queue_message(
         db,
         to_address=payload.email,
-        subject="Your Nexar accessory replacement coupon",
-        body=f"Accessory coupon: {code}\nValid 7 days at shop.getnexar.com/collections/accessories",
+        subject="Your accessory replacement coupon",
+        body=f"Accessory coupon: {code}\nValid 7 days on accessories in the web shop.",
         related_entity_type="email",
         related_entity_id=str(uuid.uuid4()),
         metadata={"message_kind": "email", "product_discount_code": code},
@@ -400,11 +400,11 @@ def get_accessories_coupon(payload: AccessoriesCouponRequest, db: Session = Depe
 
 @router.post("/intercom/send-message")
 def intercom_send_message_to_contact(payload: IntercomMessageRequest, db: Session = Depends(get_db)) -> dict:
-    to_address = payload.email or payload.contact_id or "customer@nexar.invalid"
+    to_address = payload.email or payload.contact_id or "customer@invalid"
     _queue_message(
         db,
         to_address=to_address,
-        subject="Message from Nexar Support",
+        subject="Message from Support",
         body=payload.message,
         related_entity_type="ticket",
         related_entity_id=str(uuid.uuid4()),

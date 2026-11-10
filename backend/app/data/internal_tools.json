@@ -69,7 +69,7 @@
         "type": "string",
         "required": true,
         "description": "Plan name",
-        "default_value": "Nexar Pro Monthly"
+        "default_value": "Pro Monthly"
       }
     ]
   },
@@ -487,14 +487,14 @@
         "name": "email",
         "type": "string",
         "required": false,
-        "description": "Customer email linked to Nexar account",
+        "description": "Customer email linked to the account",
         "default_value": ""
       },
       {
         "name": "phone",
         "type": "string",
         "required": false,
-        "description": "Customer phone linked to Nexar account",
+        "description": "Customer phone linked to the account",
         "default_value": ""
       }
     ]

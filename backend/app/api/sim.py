@@ -24,7 +24,7 @@ from app.models.sim import (
 
 router = APIRouter(prefix="/sim", tags=["simulation"])
 
-FROM_ADDRESS = "ops-agent@nexar.internal"
+FROM_ADDRESS = "ops-agent@internal"
 RETURN_WINDOW_DAYS = 30
 AMAZON_ORDER_PATTERN = re.compile(r"^\d{3}-\d{7}-\d{7}$")
 SHOPIFY_ORDER_PATTERN = re.compile(r"^\d{4,8}$")
@@ -93,7 +93,7 @@ class OrderOut(BaseModel):
 
 class CreateSubscriptionBody(BaseModel):
     email: str
-    plan_name: str = "Nexar Pro Monthly"
+    plan_name: str = "Pro Monthly"
     monthly_price_usd: str = "12.99"
 
 
@@ -303,7 +303,7 @@ def get_recurly_invoices(payload: InvoiceRequest, db: Session = Depends(get_db))
     has_email = bool(customer.email)
     _queue_message(
         db,
-        to_address=customer.email or "unknown@nexar.invalid",
+        to_address=customer.email or "unknown@invalid",
         subject=f"Invoices sent for {device.serial_number}",
         body=(
             f"Sent the last {payload.months} invoice(s) for serial {device.serial_number} "
@@ -345,7 +345,7 @@ def to_annual(serial_number: str, db: Session = Depends(get_db)) -> dict:
     )
     if not sub:
         return {"success": False, "paymentRequired": False, "message": "No active subscription found"}
-    sub.plan_name = "Nexar Annual Plan"
+    sub.plan_name = "Annual Plan"
     sub.monthly_price_usd = "95.88"
     _queue_message(
         db,
@@ -371,7 +371,7 @@ def to_monthly(serial_number: str, db: Session = Depends(get_db)) -> dict:
     )
     if not sub:
         return {"success": False, "paymentRequired": False, "message": "No subscription found"}
-    sub.plan_name = "Nexar Monthly Plan"
+    sub.plan_name = "Monthly Plan"
     sub.monthly_price_usd = "9.99"
     _queue_message(
         db,
@@ -391,7 +391,7 @@ def jira_create_issue(payload: JiraIssueRequest, db: Session = Depends(get_db)) 
     issue_key = f"NX-{int(datetime.now(timezone.utc).timestamp())}"
     _queue_message(
         db,
-        to_address="backoffice@nexar.internal",
+        to_address="backoffice@internal",
         subject=f"Jira ticket created: {issue_key} · {payload.summary}",
         body=payload.description,
         related_entity_type="jira",
@@ -413,7 +413,7 @@ def jira_create_issue(payload: JiraIssueRequest, db: Session = Depends(get_db)) 
 def ticket_escalate(payload: TicketEscalateRequest, db: Session = Depends(get_db)) -> dict:
     _queue_message(
         db,
-        to_address="human-agent-queue@nexar.internal",
+        to_address="human-agent-queue@internal",
         subject="Ticket escalated to human queue",
         body=payload.reason or "Escalation requested by SOP.",
         related_entity_type="ticket",
@@ -428,7 +428,7 @@ def ticket_escalate(payload: TicketEscalateRequest, db: Session = Depends(get_db
 def ticket_internal_note(payload: TicketInternalNoteRequest, db: Session = Depends(get_db)) -> dict:
     _queue_message(
         db,
-        to_address="internal-notes@nexar.internal",
+        to_address="internal-notes@internal",
         subject="Internal ticket note added",
         body=payload.note,
         related_entity_type="ticket_note",
@@ -445,7 +445,7 @@ def ticket_resolve(payload: TicketResolveRequest | None = None, db: Session = De
     reason = body.reason or "Spam or unwanted marketing/voicemail"
     _queue_message(
         db,
-        to_address="support-automation@nexar.internal",
+        to_address="support-automation@internal",
         subject="Ticket resolved automatically",
         body=f"Ticket resolved by SOP automation. Reason: {reason}",
         related_entity_type="ticket",
@@ -462,14 +462,14 @@ def ticket_message_response(payload: TicketMessageResponseRequest, db: Session =
     text = payload.message.strip()
     order_match = re.search(r"#?\s*(\d{3}-\d{7}-\d{7}|\d{4,8})", text)
     if not order_match:
-        to_address = payload.customer_email or "customer@nexar.invalid"
+        to_address = payload.customer_email or "customer@invalid"
         _queue_message(
             db,
             to_address=to_address,
-            subject="Help us locate your Nexar order",
+            subject="Help us locate your order",
             body=(
-                "To help with your return, please share where you purchased your dash cam "
-                "(Nexar shop or Amazon) or your order number.\n\n"
+                "To help with your return, please share where you purchased your camera "
+                "(our web shop or Amazon) or your order number.\n\n"
                 "Shopify orders look like #346741. Amazon orders look like #114-1536531-8448242."
             ),
             related_entity_type="ticket",
@@ -579,7 +579,7 @@ def create_return_for_order(payload: CreateReturnForOrderRequest, db: Session = 
         raise HTTPException(status_code=404, detail="Order not found")
 
     tracking_number = f"9434650895206{secrets.randbelow(10**8):08d}"
-    rma_url = f"https://returns.getnexar.com/rma/{order.order_number}"
+    rma_url = f"https://returns.example.com/rma/{order.order_number}"
     order.return_status = SimReturnStatus.return_in_progress
     order.return_reason = payload.return_reason
     order.tracking_number = tracking_number
@@ -627,8 +627,8 @@ def create_return_for_order(payload: CreateReturnForOrderRequest, db: Session = 
             f"outside of the package containing the items you're returning, then drop it off at "
             f"any nearby USPS location.\n\n"
             f"Once we receive and inspect the returned items, your refund will be processed.\n\n"
-            f"Important: If you've already activated your Nexar Connect subscription, please log "
-            f"in to your MyNexar portal to cancel the subscription."
+            f"Important: If you've already activated your Connect subscription, please log "
+            f"in to the customer portal to cancel the subscription."
         ),
     }
 
@@ -642,7 +642,7 @@ def get_order_status_shopify(order_number: str, db: Session = Depends(get_db)) -
         return {
             "order_number": order.order_number,
             "channel": order.channel.value,
-            "message": "Nexar can only manage Shopify orders. Amazon orders must be handled through Amazon directly.",
+            "message": "We can only manage Shopify orders. Amazon orders must be handled through Amazon directly.",
         }
     customer = db.get(SimCustomer, order.customer_id)
     return _order_status_payload(order, customer)
@@ -656,7 +656,7 @@ def cancel_shopify_order(payload: CancelShopifyOrderRequest, db: Session = Depen
     if order.channel != SimOrderChannel.shopify:
         return {
             "success": False,
-            "message": "Only Shopify orders can be cancelled through Nexar. Amazon orders must be handled through Amazon.",
+            "message": "Only Shopify orders can be cancelled here. Amazon orders must be handled through Amazon.",
         }
     if order.customer_email.lower() != payload.email.strip().lower():
         return {"success": False, "message": "Email does not match order on file"}
@@ -743,7 +743,7 @@ def create_subscription(payload: CreateSubscriptionBody, db: Session = Depends(g
         body=(
             f"Hi {customer.full_name},\n\n"
             f"Your subscription to {payload.plan_name} (${payload.monthly_price_usd}/mo) is now active.\n\n"
-            f"— Nexar Ops Agent"
+            f"— Ops Agent"
         ),
         related_entity_type="subscription",
         related_entity_id="pending",
@@ -798,7 +798,7 @@ def cancel_subscription(
             f"Your {sub.plan_name} subscription has been cancelled.\n"
             f"Reason: {body.reason}\n"
             f"Subscription ID: {sub.id}\n\n"
-            f"— Nexar Ops Agent"
+            f"— Ops Agent"
         ),
         related_entity_type="subscription",
         related_entity_id=str(sub.id),
@@ -883,7 +883,7 @@ def initiate_return(
             f"Serial: {device.serial_number}\n"
             f"Reason: {body.reason}\n\n"
             f"A prepaid label will arrive in a follow-up message.\n\n"
-            f"— Nexar Ops Agent"
+            f"— Ops Agent"
         ),
         related_entity_type="device",
         related_entity_id=str(device.id),
