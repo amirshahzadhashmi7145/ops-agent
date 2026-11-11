@@ -4,6 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, R
 from sqlalchemy import delete, or_
 from sqlalchemy.orm import Session
 
+from app.core.auth import get_user_email
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.kb import KbChunk, KbProcessingStatus, KbReference
@@ -20,8 +21,6 @@ from app.services.kb_ingestion import count_chunks, run_ingestion_task, should_r
 router = APIRouter(prefix="/kb", tags=["knowledge-base"])
 
 
-def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 def _reference_or_404(db: Session, reference_id: uuid.UUID) -> KbReference:

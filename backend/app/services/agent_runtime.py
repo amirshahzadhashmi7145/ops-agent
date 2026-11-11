@@ -231,7 +231,19 @@ async def _handle_kb_search(
         result = {"error": "missing_query", "message": "A search query is required."}
         return json.dumps(result), {"type": "kb_search", "query": query, "match_count": 0, "reference_ids": []}
 
-    matches = search_knowledge_base(db, query, top_k=top_k)
+    # Local embeddings are CPU-heavy; run search on a worker with its own DB session.
+    import asyncio
+
+    from app.core.database import SessionLocal
+
+    def _run_kb_search() -> list[dict[str, Any]]:
+        local_db = SessionLocal()
+        try:
+            return search_knowledge_base(local_db, query, top_k=top_k)
+        finally:
+            local_db.close()
+
+    matches = await asyncio.to_thread(_run_kb_search)
     reference_ids = list({item["reference_id"] for item in matches})
     trace = {
         "type": "kb_search",
@@ -254,7 +266,18 @@ async def _handle_sop_search(
         result = {"error": "missing_query", "message": "A search query is required."}
         return json.dumps(result), {"type": "sop_search", "query": query, "match_count": 0}, None
 
-    matches = search_sop_processes(db, query)
+    import asyncio
+
+    from app.core.database import SessionLocal
+
+    def _run_sop_search():
+        local_db = SessionLocal()
+        try:
+            return search_sop_processes(local_db, query)
+        finally:
+            local_db.close()
+
+    matches = await asyncio.to_thread(_run_sop_search)
     top = matches[0] if matches else None
     # Only auto-lock a process when it clearly beats the runner-up (same margin gate
     # as the auto-match path); otherwise hand the shortlist to the model to disambiguate.

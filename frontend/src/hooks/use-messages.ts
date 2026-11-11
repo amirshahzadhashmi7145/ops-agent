@@ -9,7 +9,8 @@ export function useMessages() {
   return useQuery({
     queryKey: ["messages"],
     queryFn: fetchMessages,
-    refetchInterval: 5000,
+    refetchInterval: 15_000,
+    refetchIntervalInBackground: false,
   });
 }
 

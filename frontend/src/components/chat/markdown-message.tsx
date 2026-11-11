@@ -61,16 +61,23 @@ function buildComponents(variant: "chat" | "document"): Components {
     h4: ({ children }) => (
       <h4 className="mb-1.5 mt-3 text-base font-semibold first:mt-0">{children}</h4>
     ),
-    a: ({ href, children }) => (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
-      >
-        {children}
-      </a>
-    ),
+    a: ({ href, children }) => {
+      const safeHref =
+        typeof href === "string" && /^(https?:|mailto:)/i.test(href) ? href : undefined;
+      if (!safeHref) {
+        return <span className="font-medium text-primary">{children}</span>;
+      }
+      return (
+        <a
+          href={safeHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
+        >
+          {children}
+        </a>
+      );
+    },
     code: ({ className, children }) => {
       const isBlock = (className ?? "").includes("language-");
       if (isBlock) {

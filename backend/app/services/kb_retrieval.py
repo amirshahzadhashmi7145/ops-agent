@@ -31,11 +31,15 @@ def _keyword_candidates(db: Session, query: str, *, limit: int) -> list["KbSearc
     """Token-overlap fallback used when embedding/vector search is unavailable, so a KB
     question still returns grounded results instead of failing the whole turn."""
     tokens = [t for t in query.lower().replace("?", " ").split() if len(t) > 2]
+    # Bound the scan so large corpora cannot pull every chunk into memory.
+    scan_limit = max(limit * 20, 200)
     rows = (
         db.execute(
             select(KbChunk, KbReference)
             .join(KbReference, KbChunk.reference_id == KbReference.id)
             .where(*_searchable_filter())
+            .order_by(KbChunk.chunk_index.asc())
+            .limit(scan_limit)
         )
         .all()
     )
@@ -143,23 +147,35 @@ def _select_diverse_sections(
 
 
 def _expand_sections(db: Session, hits: list[KbSearchResult]) -> list[dict[str, Any]]:
+    if not hits:
+        return []
+
+    ref_ids = {hit.reference_id for hit in hits}
+    siblings = (
+        db.execute(
+            select(KbChunk)
+            .join(KbReference, KbChunk.reference_id == KbReference.id)
+            .where(
+                KbChunk.reference_id.in_(ref_ids),
+                *_searchable_filter(),
+            )
+            .order_by(KbChunk.chunk_index.asc())
+        )
+        .scalars()
+        .all()
+    )
+    wanted = {(hit.reference_id, tuple(hit.heading_path)) for hit in hits}
+    by_section: dict[tuple[Any, tuple[str, ...]], list[str]] = {}
+    for chunk in siblings:
+        key = (chunk.reference_id, tuple(chunk.heading_path or []))
+        if key not in wanted:
+            continue
+        by_section.setdefault(key, []).append(chunk.content)
+
     expanded: list[dict[str, Any]] = []
     for hit in hits:
-        siblings = (
-            db.execute(
-                select(KbChunk)
-                .join(KbReference, KbChunk.reference_id == KbReference.id)
-                .where(
-                    KbChunk.reference_id == hit.reference_id,
-                    KbChunk.heading_path == hit.heading_path,
-                    *_searchable_filter(),
-                )
-                .order_by(KbChunk.chunk_index.asc())
-            )
-            .scalars()
-            .all()
-        )
-        content = "\n\n".join(chunk.content for chunk in siblings)
+        key = (hit.reference_id, tuple(hit.heading_path))
+        content = "\n\n".join(by_section.get(key, [hit.content]))
         expanded.append(
             {
                 "reference_id": str(hit.reference_id),

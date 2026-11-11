@@ -12,13 +12,29 @@ import type {
   ResourceTestResult,
 } from "@/types/resource";
 
+const DEFAULT_TIMEOUT_MS = 30_000;
+
+function opsHeaders(extra?: HeadersInit): Headers {
+  const headers = new Headers(extra);
+  if (typeof window !== "undefined") {
+    const user = window.localStorage.getItem("ops-agent.user-email");
+    const token = window.localStorage.getItem("ops-agent.api-token");
+    if (user && !headers.has("X-Ops-User")) headers.set("X-Ops-User", user);
+    if (token && !headers.has("Authorization")) headers.set("Authorization", `Bearer ${token}`);
+  }
+  return headers;
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = opsHeaders(init?.headers);
+  if (init?.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const response = await fetch(path, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
+    headers,
+    signal: init?.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -127,7 +143,7 @@ export async function* streamChat(
 ): AsyncGenerator<ChatStreamEvent> {
   const response = await fetch("/api/chat/stream", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: opsHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
     signal,
   });
@@ -159,12 +175,20 @@ export async function* streamChat(
     buffer = lines.pop() || "";
     for (const line of lines) {
       if (!line.trim()) continue;
-      yield JSON.parse(line) as ChatStreamEvent;
+      try {
+        yield JSON.parse(line) as ChatStreamEvent;
+      } catch {
+        // Skip malformed NDJSON lines instead of aborting the whole turn.
+      }
     }
   }
 
   if (buffer.trim()) {
-    yield JSON.parse(buffer) as ChatStreamEvent;
+    try {
+      yield JSON.parse(buffer) as ChatStreamEvent;
+    } catch {
+      // ignore trailing garbage
+    }
   }
 }
 

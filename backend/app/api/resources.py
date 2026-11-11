@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from app.core.auth import get_user_email
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.resource import ApiConnection, ConnectionMode, HttpMethod, Resource, ResourceTestLog, ToolScope
@@ -26,8 +27,6 @@ router = APIRouter()
 MAX_LOG_BODY = 10000
 
 
-def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 def _headers_to_json(headers: list) -> list[dict]:

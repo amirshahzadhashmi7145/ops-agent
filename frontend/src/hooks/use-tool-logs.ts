@@ -8,7 +8,8 @@ export function useToolLogSummary() {
   return useQuery({
     queryKey: ["tool-logs", "summary"],
     queryFn: fetchToolLogSummary,
-    refetchInterval: 5000,
+    refetchInterval: 15_000,
+    refetchIntervalInBackground: false,
   });
 }
 
@@ -25,7 +26,8 @@ export function useToolLogs(options: {
     queryKey: ["tool-logs", "list", toolName, resourceId],
     queryFn: () => fetchToolLogs({ toolName, resourceId, limit: 200 }),
     enabled,
-    refetchInterval: 5000,
+    refetchInterval: 15_000,
+    refetchIntervalInBackground: false,
   });
 }
 

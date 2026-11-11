@@ -8,8 +8,9 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.auth import get_user_email
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database import SessionLocal, get_db
 from app.models.conversation import Conversation, Message, MessageRole
 from app.models.resource import Resource
 from app.schemas.chat import ChatStreamRequest, ConversationCreate, ConversationDetail, ConversationListItem
@@ -20,8 +21,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 def _conversation_or_404(db: Session, conversation_id: uuid.UUID, user_email: str) -> Conversation:
@@ -42,12 +41,15 @@ def _title_from_message(message: str) -> str:
 def list_conversations(
     request: Request,
     db: Session = Depends(get_db),
+    limit: int = 50,
 ) -> list[ConversationListItem]:
     user_email = get_user_email(request)
+    capped = max(1, min(limit, 100))
     conversations = (
         db.query(Conversation)
         .filter(Conversation.user_email == user_email)
         .order_by(Conversation.updated_at.desc())
+        .limit(capped)
         .all()
     )
     return conversations
@@ -133,9 +135,11 @@ async def chat_stream(
     prior_messages = (
         db.query(Message)
         .filter(Message.conversation_id == conversation.id)
-        .order_by(Message.created_at.asc())
+        .order_by(Message.created_at.desc())
+        .limit(settings.chat_history_max_messages)
         .all()
     )
+    prior_messages = list(reversed(prior_messages))
     history = [
         {"role": message.role.value, "content": message.content}
         for message in prior_messages
@@ -166,49 +170,57 @@ async def chat_stream(
     db.commit()
     db.refresh(user_message)
 
+    conversation_id = conversation.id
+
     async def event_stream():
         final_content = ""
         pipeline_trace: list = []
+        stream_db = SessionLocal()
         try:
-            async for event in run_agent_turn(
-                user_message=message_text,
-                history=history,
-                resources=resources,
-                user_email=user_email,
-                db=db,
-                conversation_id=conversation.id,
-            ):
-                if event.get("type") == "final_answer":
-                    final_content = event.get("content", "")
-                    pipeline_trace = event.get("pipeline_trace", [])
-                yield json.dumps(event) + "\n"
-        except Exception:  # noqa: BLE001
-            # Log the real error server-side; never leak raw exception detail to the client.
-            logger.exception("Chat turn failed for conversation %s", conversation.id)
-            friendly = "Sorry, something went wrong while processing your request. Please try again."
-            yield json.dumps({"type": "error", "message": friendly}) + "\n"
-            final_content = friendly
-            pipeline_trace = [{"type": "error", "message": friendly}]
+            try:
+                async for event in run_agent_turn(
+                    user_message=message_text,
+                    history=history,
+                    resources=resources,
+                    user_email=user_email,
+                    db=stream_db,
+                    conversation_id=conversation_id,
+                ):
+                    if event.get("type") == "final_answer":
+                        final_content = event.get("content", "")
+                        pipeline_trace = event.get("pipeline_trace", [])
+                    yield json.dumps(event) + "\n"
+            except Exception:  # noqa: BLE001
+                # Log the real error server-side; never leak raw exception detail to the client.
+                logger.exception("Chat turn failed for conversation %s", conversation_id)
+                friendly = "Sorry, something went wrong while processing your request. Please try again."
+                yield json.dumps({"type": "error", "message": friendly}) + "\n"
+                final_content = friendly
+                pipeline_trace = [{"type": "error", "message": friendly}]
 
-        assistant_message = Message(
-            conversation_id=conversation.id,
-            role=MessageRole.assistant,
-            content=final_content or (
-                "Sorry, I couldn't put together a response just now. Please try again."
-            ),
-            pipeline_trace=pipeline_trace,
-        )
-        db.add(assistant_message)
-        conversation.updated_at = datetime.now(timezone.utc)
-        db.commit()
-        db.refresh(assistant_message)
+            assistant_message = Message(
+                conversation_id=conversation_id,
+                role=MessageRole.assistant,
+                content=final_content or (
+                    "Sorry, I couldn't put together a response just now. Please try again."
+                ),
+                pipeline_trace=pipeline_trace,
+            )
+            stream_db.add(assistant_message)
+            conv = stream_db.get(Conversation, conversation_id)
+            if conv is not None:
+                conv.updated_at = datetime.now(timezone.utc)
+            stream_db.commit()
+            stream_db.refresh(assistant_message)
 
-        yield json.dumps(
-            {
-                "type": "done",
-                "conversation_id": str(conversation.id),
-                "message_id": str(assistant_message.id),
-            }
-        ) + "\n"
+            yield json.dumps(
+                {
+                    "type": "done",
+                    "conversation_id": str(conversation_id),
+                    "message_id": str(assistant_message.id),
+                }
+            ) + "\n"
+        finally:
+            stream_db.close()
 
     return StreamingResponse(event_stream(), media_type="application/x-ndjson")

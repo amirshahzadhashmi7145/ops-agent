@@ -6,6 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, R
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.auth import get_user_email
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.sop import SopCategory, SopDocument, SopProcessingStatus
@@ -29,8 +30,6 @@ from app.services.sop_ingestion import (
 router = APIRouter(prefix="/sops", tags=["sops"])
 
 
-def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 def _document_or_404(db: Session, document_id: uuid.UUID) -> SopDocument:

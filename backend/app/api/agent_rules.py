@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.auth import get_user_email
 from app.core.database import get_db
 from app.models.agent_rule import AgentRule, AgentRuleCategory
 from app.schemas.agent_rules import AgentRuleCreate, AgentRuleResponse, AgentRuleUpdate
@@ -13,8 +13,6 @@ from app.schemas.agent_rules import AgentRuleCreate, AgentRuleResponse, AgentRul
 router = APIRouter()
 
 
-def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 @router.get("/agent-rules", response_model=list[AgentRuleResponse])

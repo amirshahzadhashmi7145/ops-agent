@@ -4,12 +4,28 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # development | production — production rejects unsafe defaults at startup.
+    app_env: str = "development"
     database_url: str = "postgresql://nexar:nexar@db:5432/nexar_ops"
+    # Pool sizing for concurrent chat streams + API workers.
+    db_pool_size: int = 10
+    db_max_overflow: int = 20
+    db_pool_timeout: int = 30
+    db_pool_recycle: int = 1800
     dev_user_email: str = "ops@example.com"
+    # When true, require Authorization: Bearer <OPS_API_KEYS> + X-Ops-User.
+    require_auth: bool = False
+    ops_api_keys: str = ""
     # When true, outbound URL checks (private/loopback ranges etc.) are bypassed so
     # resources can target localhost during development. Must stay OFF in production;
     # docker-compose enables it explicitly for local dev.
     allow_local_test: bool = False
+    # Seed Meridian demo content on API startup (disable on scaled replicas).
+    seed_playbook_on_startup: bool = True
+    # Soft per-IP request budget for mutating/expensive traffic (0 disables).
+    rate_limit_per_minute: int = 120
+    # Cap chat history sent to the LLM each turn.
+    chat_history_max_messages: int = 40
     cors_origins: str = "http://localhost:3000,http://frontend:3000"
     # Prefix for internal tools (path-only urls), e.g. http://backend:8000
     internal_api_base_url: str = "http://backend:8000"

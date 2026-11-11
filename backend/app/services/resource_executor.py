@@ -15,6 +15,20 @@ MAX_RESPONSE_BYTES = 256 * 1024
 MAX_REDIRECTS = 3
 _ENV_KEY_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
+# Shared client keeps connection pooling across tool calls in a worker process.
+_http_client: httpx.AsyncClient | None = None
+
+
+def _get_http_client() -> httpx.AsyncClient:
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(
+            follow_redirects=False,
+            timeout=30.0,
+            limits=httpx.Limits(max_connections=50, max_keepalive_connections=20),
+        )
+    return _http_client
+
 
 def resolve_resource_url(tool_scope: str, url: str) -> str:
     """Resolve stored url/path into an absolute URL using env base for internal tools."""
@@ -183,28 +197,28 @@ async def execute_resource_request(
         # Redirects are followed manually: same-origin only, each hop re-validated,
         # so a 3xx from the target can't bounce the request (and its auth headers)
         # to an internal or attacker-chosen host.
-        async with httpx.AsyncClient(follow_redirects=False) as client:
-            response = await client.request(method, resolved_url, **request_kwargs)
-            for _ in range(MAX_REDIRECTS):
-                if not response.is_redirect:
-                    break
-                location = response.headers.get("location")
-                if not location:
-                    break
-                current = urlparse(str(response.request.url))
-                next_url = urljoin(str(response.request.url), location)
-                nxt = urlparse(next_url)
-                if (nxt.scheme, nxt.hostname, nxt.port) != (
-                    current.scheme,
-                    current.hostname,
-                    current.port,
-                ):
-                    break
-                _validate_target(next_url, tool_scope)
-                if response.status_code in {307, 308}:
-                    response = await client.request(method, next_url, **request_kwargs)
-                else:
-                    response = await client.get(next_url, headers=headers, timeout=30.0)
+        client = _get_http_client()
+        response = await client.request(method, resolved_url, **request_kwargs)
+        for _ in range(MAX_REDIRECTS):
+            if not response.is_redirect:
+                break
+            location = response.headers.get("location")
+            if not location:
+                break
+            current = urlparse(str(response.request.url))
+            next_url = urljoin(str(response.request.url), location)
+            nxt = urlparse(next_url)
+            if (nxt.scheme, nxt.hostname, nxt.port) != (
+                current.scheme,
+                current.hostname,
+                current.port,
+            ):
+                break
+            _validate_target(next_url, tool_scope)
+            if response.status_code in {307, 308}:
+                response = await client.request(method, next_url, **request_kwargs)
+            else:
+                response = await client.get(next_url, headers=headers, timeout=30.0)
         latency_ms = int((time.perf_counter() - start) * 1000)
         raw = response.content
         body_text = _truncate_body(raw)
