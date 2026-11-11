@@ -74,7 +74,7 @@ export function ReferenceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{reference ? "Edit reference" : "Add reference"}</DialogTitle>
+          <DialogTitle>{reference ? "Edit article" : "Add article"}</DialogTitle>
           <DialogDescription>
             Paste policy or FAQ text — we&apos;ll structure it without changing facts.
           </DialogDescription>
@@ -95,7 +95,7 @@ export function ReferenceDialog({
               id="raw_text"
               {...form.register("raw_text")}
               rows={14}
-              placeholder="Paste the full reference text here..."
+              placeholder="Paste the full article text here..."
               className="max-h-80 min-h-48 resize-y overflow-y-auto text-sm"
             />
             {form.formState.errors.raw_text && (
@@ -117,7 +117,7 @@ export function ReferenceDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : reference ? "Save changes" : "Add reference"}
+              {loading ? "Saving..." : reference ? "Save changes" : "Add article"}
             </Button>
           </DialogFooter>
         </form>

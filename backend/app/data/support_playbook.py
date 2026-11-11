@@ -69,7 +69,7 @@ Be concise, calm, and practical. Use the customer's name when tools return it. D
         "source_url": "https://help.example.com/products",
         "markdown": """# Product families
 
-Meridian locks fall into two families. Routing SOPs depend on this split.
+Meridian locks fall into two families. Routing workflows depend on this split.
 
 # Classic locks
 
@@ -164,7 +164,7 @@ If eligibility is active and the issue is a confirmed hardware fault:
 1. Confirm the Shopify order number and lock model.
 2. Call `getShopifyOrderItems` so the replacement SKU matches.
 3. Create the replacement with `createShopifyReplacement`.
-4. Do not also create a return RMA unless the SOP says to collect the old unit.
+4. Do not also create a return RMA unless the workflow says to collect the old unit.
 
 # Out of warranty
 
@@ -219,7 +219,7 @@ Optional: `getSimData` to explain usage to the customer.
 
 # What we tell customers
 
-LTE is for lock events and remote unlock features, not a phone hotspot. Repeated cap hits may mean a faulty unit (hardware SOP) or a multi-door site that needs a fleet data plan.
+LTE is for lock events and remote unlock features, not a phone hotspot. Repeated cap hits may mean a faulty unit (hardware workflow) or a multi-door site that needs a fleet data plan.
 
 # Fleet
 
@@ -243,7 +243,7 @@ A keypad accessory requires a working **Connect primary** lock, the Connect app,
 
 # Hardware
 
-If the primary is healthy and pairing still fails after a power cycle, treat the keypad under the Hardware Malfunction SOP and warranty path.
+If the primary is healthy and pairing still fails after a power cycle, treat the keypad under the Hardware Malfunction workflow and warranty path.
 """,
     },
     {
@@ -265,7 +265,7 @@ Only unfulfilled Shopify orders. Collect the new address, then `changeAddressSho
 
 # Cancellation
 
-Unfulfilled Shopify only, via `cancelShopifyOrder`. If the order is already fulfilled, use the return SOP instead.
+Unfulfilled Shopify only, via `cancelShopifyOrder`. If the order is already fulfilled, use the return workflow instead.
 """,
     },
     {
@@ -321,7 +321,7 @@ AGENT_RULES = [
     },
     {
         "category": "agent_capabilities",
-        "content": "Search the knowledge base for policy/product questions. Search SOP processes for multi-step work (returns, SIM, hardware, warranty, billing). Follow a matched SOP's tools only.",
+        "content": "Search Articles for policy/product questions. Search Workflows for multi-step work (returns, SIM, hardware, warranty, billing). Follow a matched workflow's tools only.",
     },
     {
         "category": "agent_capabilities",
@@ -367,7 +367,7 @@ When a customer wants to start a plan or check status:
 When a customer or agent asks to look up an account or list locks for an email:
 1. Call @lookup_customer_by_email with the email.
 2. Call @list_customer_devices with the same email.
-3. Present every serial, model, and status. Do not start a pairing or LTE SOP.
+3. Present every serial, model, and status. Do not start a pairing or LTE workflow.
 
 Triggers: look up, list their devices, list devices, customer account, find customer
 """,
@@ -478,7 +478,7 @@ Triggers: return my device, return my lock, start an RMA, send device back
     },
     {
         "category_slug": "classic-connectivity",
-        "title": "SOP - Classic App Connectivity & Pairing",
+        "title": "Workflow - Classic App Connectivity & Pairing",
         "summary": "Pairing and permission diagnostics for Classic locks using getClassicDiagnostic.",
         "raw_text": """# Classic App Connectivity
 
@@ -515,7 +515,7 @@ When a Classic lock (Key, Latch) will not pair or stay connected to the Classic 
                     _step(
                         "escalate",
                         "inform",
-                        "If camera_paired (paired flag) stays false after permissions are healthy, switch to the Hardware Malfunction SOP — do not run getSimTriage",
+                        "If camera_paired (paired flag) stays false after permissions are healthy, switch to the Hardware Malfunction workflow — do not run getSimTriage",
                     ),
                 ],
             }
@@ -523,7 +523,7 @@ When a Classic lock (Key, Latch) will not pair or stay connected to the Classic 
     },
     {
         "category_slug": "connectivity",
-        "title": "SOP - Connect LTE Connectivity",
+        "title": "Workflow - Connect LTE Connectivity",
         "summary": "LTE/SIM triage for Connect locks: lookup, sim triage, reactivate or 25GB uplift.",
         "raw_text": """# Sim Triage
 
@@ -570,14 +570,14 @@ Connect lock connectivity (Guard, Guard 2, Guard Mini):
     },
     {
         "category_slug": "hardware",
-        "title": "SOP - Hardware Malfunction",
+        "title": "Workflow - Hardware Malfunction",
         "summary": "Power, motor, and hardware faults: health check, troubleshooting, then warranty or escalate.",
         "raw_text": """# Hardware Malfunction
 
 When a lock has power, battery, red LED, motor, or unlock failures:
 1. Call @getDeviceLookup and @getDeviceHealth.
 2. If has_power_issues is false, complete power troubleshooting (cable, fuse, 12V, reboot) before escalating.
-3. In-warranty Shopify hardware → warranty replacement SOP. Otherwise escalate with an internal note.
+3. In-warranty Shopify hardware → warranty replacement workflow. Otherwise escalate with an internal note.
 """,
         "processes": [
             {
@@ -637,7 +637,7 @@ Use @getOrderStatusShopify. Amazon orders cannot be managed here.
 Unfulfilled Shopify only: @changeAddressShopify.
 
 ## Cancel order
-Unfulfilled Shopify only: @cancelShopifyOrder. Fulfilled orders use the return SOP.
+Unfulfilled Shopify only: @cancelShopifyOrder. Fulfilled orders use the return workflow.
 """,
         "processes": [
             {

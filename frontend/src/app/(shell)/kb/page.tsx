@@ -97,7 +97,7 @@ export default function KbPage() {
       setEditingReference(reference);
       setDialogOpen(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to load reference");
+      toast.error(error instanceof Error ? error.message : "Failed to load article");
     }
   };
 
@@ -114,7 +114,7 @@ export default function KbPage() {
     if (editingReference) {
       const updated = await updateMutation.mutateAsync(values);
       if (updated.processing_status !== "ready") {
-        toast.info("Reference updated and queued for processing");
+        toast.info("Article updated and queued for processing");
       }
       return;
     }
@@ -156,15 +156,15 @@ export default function KbPage() {
       <div className="w-full px-5 py-5">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="page-header">Knowledge Base</h2>
+            <h2 className="page-header">Articles</h2>
             <p className="page-description">
-              Manage references the agent can search for policies, FAQs, and product docs.
+              Help docs, FAQs, and policies the assistant can search when answering tickets.
             </p>
           </div>
           <motion.div {...buttonMotion}>
             <Button onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />
-              Add reference
+              Add article
             </Button>
           </motion.div>
         </div>
@@ -175,7 +175,7 @@ export default function KbPage() {
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search references..."
+              placeholder="Search articles..."
               className="pl-9"
             />
           </div>
@@ -210,13 +210,13 @@ export default function KbPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <BookOpen className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-medium text-foreground">No references yet</h3>
+            <h3 className="text-sm font-medium text-foreground">No articles yet</h3>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Add your first reference so the agent can answer policy and product questions.
+              Add your first article so the assistant can answer policy and product questions.
             </p>
             <Button className="mt-6" onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />
-              Add reference
+              Add article
             </Button>
           </motion.div>
         ) : (
@@ -275,9 +275,9 @@ export default function KbPage() {
       <Dialog open={Boolean(deleteTarget)} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete reference?</DialogTitle>
+            <DialogTitle>Delete article?</DialogTitle>
             <DialogDescription>
-              This will remove <strong>{deleteTarget?.title}</strong> from the knowledge base.
+              This will remove <strong>{deleteTarget?.title}</strong> from Articles.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

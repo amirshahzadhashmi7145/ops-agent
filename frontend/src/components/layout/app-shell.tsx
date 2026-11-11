@@ -26,17 +26,17 @@ import { cn } from "@/lib/utils";
 const SIDEBAR_KEY = "ops-agent.sidebar-collapsed";
 
 const workspaceNav = [
-  { href: "/agent-overview", label: "Overview", icon: Compass },
+  { href: "/agent-overview", label: "Home", icon: Compass },
   { href: "/chat", label: "Chat", icon: MessageSquare },
-  { href: "/messages", label: "Messages", icon: Inbox },
-  { href: "/usage", label: "Usage", icon: CircleDollarSign },
+  { href: "/messages", label: "Outbox", icon: Inbox },
+  { href: "/usage", label: "Costs", icon: CircleDollarSign },
 ];
 
 const configureNav = [
-  { href: "/sops", label: "SOPs", icon: Bot },
-  { href: "/kb", label: "Knowledge Base", icon: BookOpen },
+  { href: "/sops", label: "Workflows", icon: Bot },
+  { href: "/kb", label: "Articles", icon: BookOpen },
   { href: "/resources", label: "Tools", icon: Wrench },
-  { href: "/agent-rules", label: "Agent Rules", icon: ScrollText },
+  { href: "/agent-rules", label: "Rules", icon: ScrollText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -133,7 +133,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   Ops Agent
                 </h1>
                 <p className="text-[11px] font-normal leading-tight text-muted-foreground">
-                  Support copilot
+                  Support assistant
                 </p>
               </div>
             )}
@@ -151,18 +151,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <nav className={cn("flex flex-1 flex-col overflow-y-auto py-1.5", collapsed ? "px-1.5" : "px-2")}>
-          <NavGroup label="Workspace" items={workspaceNav} pathname={pathname} collapsed={collapsed} />
-          <NavGroup label="Configure" items={configureNav} pathname={pathname} collapsed={collapsed} />
+          <NavGroup label="Work" items={workspaceNav} pathname={pathname} collapsed={collapsed} />
+          <NavGroup label="Setup" items={configureNav} pathname={pathname} collapsed={collapsed} />
         </nav>
         <div className={cn("space-y-2 border-t border-sidebar-border py-2.5", collapsed ? "px-1.5" : "px-2.5")}>
           {!collapsed ? (
             <div className="flex items-center justify-between rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-2.5 py-1.5">
               <div>
                 <p className="text-[12px] font-medium leading-tight text-foreground">
-                  Workspace
+                  Demo mode
                 </p>
                 <p className="text-[11px] font-normal leading-tight text-muted-foreground">
-                  Simulated tools
+                  Safe test tools
                 </p>
               </div>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-normal text-emerald-700 dark:text-emerald-300">
@@ -173,7 +173,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ) : (
             <div
               className="flex justify-center"
-              title="Workspace ready"
+              title="Demo ready"
             >
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
             </div>

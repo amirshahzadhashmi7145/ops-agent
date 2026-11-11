@@ -14,7 +14,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   general_chat: "Chat",
   tool_call: "Tools",
   forced_tool_call: "Tools",
-  sop: "SOP",
+  sop: "Workflow",
 };
 
 const DETAIL_TYPES = new Set([
@@ -63,7 +63,7 @@ export function ChatTracePanel({ trace }: ChatTracePanelProps) {
             if (event.type === "sop_matched") {
               return (
                 <p key={`sop-matched-${index}`} className="text-primary">
-                  Matched SOP: <span className="font-medium">{event.title}</span>
+                  Matched workflow: <span className="font-medium">{event.title}</span>
                   {typeof event.score === "number" ? ` · ${Math.round(event.score * 100)}% match` : ""}
                 </p>
               );
@@ -71,7 +71,7 @@ export function ChatTracePanel({ trace }: ChatTracePanelProps) {
             if (event.type === "sop_search") {
               return (
                 <p key={`sop-search-${index}`}>
-                  SOP search: <span className="font-mono text-foreground">{event.query}</span>
+                  Workflow search: <span className="font-mono text-foreground">{event.query}</span>
                   {event.match_count ? ` · ${event.match_count} match(es)` : " · no match"}
                 </p>
               );
@@ -79,14 +79,14 @@ export function ChatTracePanel({ trace }: ChatTracePanelProps) {
             if (event.type === "sop_step") {
               return (
                 <p key={`sop-step-${index}`}>
-                  SOP step → <span className="font-mono text-foreground">{event.tool}</span>
+                  Workflow step → <span className="font-mono text-foreground">{event.tool}</span>
                 </p>
               );
             }
             if (event.type === "kb_search") {
               return (
                 <p key={`kb-${index}`}>
-                  KB search: <span className="font-mono text-foreground">{event.query}</span>
+                  Article search: <span className="font-mono text-foreground">{event.query}</span>
                   {event.match_count ? ` · ${event.match_count} match(es)` : ""}
                 </p>
               );

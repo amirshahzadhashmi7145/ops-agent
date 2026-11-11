@@ -121,7 +121,7 @@ export default function SopsPage() {
       setEditing(document);
       setDialogOpen(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to load SOP");
+      toast.error(error instanceof Error ? error.message : "Failed to load workflow");
     }
   };
 
@@ -130,9 +130,9 @@ export default function SopsPage() {
       <div className="w-full px-5 py-5">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="page-header">SOPs</h2>
+            <h2 className="page-header">Workflows</h2>
             <p className="page-description">
-              Executable procedures the agent auto-matches and follows step by step.
+              Step-by-step workflows the assistant matches and follows on a ticket.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -145,7 +145,7 @@ export default function SopsPage() {
             <motion.div {...buttonMotion}>
               <Button onClick={openCreate}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add SOP
+                Add workflow
               </Button>
             </motion.div>
           </div>
@@ -157,7 +157,7 @@ export default function SopsPage() {
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search SOPs..."
+              placeholder="Search workflows..."
               className="pl-9"
             />
           </div>
@@ -206,13 +206,13 @@ export default function SopsPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <Bot className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-medium text-foreground">No SOPs yet</h3>
+            <h3 className="text-sm font-medium text-foreground">No workflows yet</h3>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Add your first SOP document. Use @tool mentions so each process binds to real tools.
+              Add your first workflow. Use @tool mentions so each step can call real tools.
             </p>
             <Button className="mt-6" onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />
-              Add SOP
+              Add workflow
             </Button>
           </motion.div>
         ) : (
@@ -310,7 +310,7 @@ export default function SopsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>New category</DialogTitle>
-            <DialogDescription>Create a category for grouping SOP documents.</DialogDescription>
+            <DialogDescription>Create a category for grouping workflows.</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
             <Input
@@ -393,9 +393,9 @@ export default function SopsPage() {
       <Dialog open={Boolean(deleteTarget)} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete SOP?</DialogTitle>
+            <DialogTitle>Delete workflow?</DialogTitle>
             <DialogDescription>
-              This will remove <strong>{deleteTarget?.title}</strong> from searchable procedures.
+              This will remove <strong>{deleteTarget?.title}</strong> from Workflows.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

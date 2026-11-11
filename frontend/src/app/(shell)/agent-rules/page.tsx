@@ -48,26 +48,26 @@ interface CategoryMeta {
 const CATEGORIES: CategoryMeta[] = [
   {
     key: "business_context",
-    label: "Business Context",
-    description: "Facts about the business the agent should always know.",
+    label: "Company",
+    description: "Facts about the company the assistant should always know.",
     icon: Building2,
   },
   {
     key: "escalations",
     label: "Escalations",
-    description: "When and how the agent should escalate to a human.",
+    description: "When to hand a ticket to a human.",
     icon: AlertTriangle,
   },
   {
     key: "response_tone_style",
-    label: "Response Tone & Style",
-    description: "How the agent should sound and format its replies.",
+    label: "Tone",
+    description: "How replies should sound and look.",
     icon: MessageSquare,
   },
   {
     key: "agent_capabilities",
-    label: "Agent Capabilities",
-    description: "What the agent can and cannot do.",
+    label: "Limits",
+    description: "What the assistant can and cannot do.",
     icon: Zap,
   },
 ];
@@ -121,10 +121,9 @@ export default function AgentRulesPage() {
     <>
       <div className="w-full px-5 py-5">
         <div className="mb-6">
-          <h2 className="page-header">Agent Rules</h2>
+          <h2 className="page-header">Rules</h2>
           <p className="page-description">
-            Define rules the agent always follows. Every rule below is added to the agent&apos;s
-            system prompt on each message.
+            Standing instructions the assistant always follows on every ticket.
           </p>
         </div>
 
@@ -132,8 +131,8 @@ export default function AgentRulesPage() {
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="text-sm text-muted-foreground">
             {totalRules === 0
-              ? "No rules yet. Rules you add here are grouped by category and sent to the agent with every request."
-              : `${totalRules} rule${totalRules === 1 ? "" : "s"} are sent to the agent with every request, grouped by category.`}
+              ? "No rules yet. Add a few under Company, Escalations, Tone, or Limits."
+              : `${totalRules} rule${totalRules === 1 ? "" : "s"} apply on every reply.`}
           </p>
         </div>
 

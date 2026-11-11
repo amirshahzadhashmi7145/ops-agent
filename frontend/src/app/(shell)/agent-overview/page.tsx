@@ -36,29 +36,29 @@ interface CategoryMeta {
 const CATEGORIES: CategoryMeta[] = [
   {
     key: "business_context",
-    label: "Business Context",
-    description: "Core company facts and policies the agent should always keep in context.",
+    label: "Company",
+    description: "Company facts and policies always kept in mind.",
     icon: Building2,
     accentClass: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
   },
   {
     key: "escalations",
     label: "Escalations",
-    description: "Conditions and handoff rules for routing sensitive cases to humans quickly.",
+    description: "When to hand sensitive cases to a human.",
     icon: AlertTriangle,
     accentClass: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
   },
   {
     key: "response_tone_style",
-    label: "Response Tone & Style",
-    description: "Voice, clarity, and answer formatting standards used in every response.",
+    label: "Tone",
+    description: "How replies should sound and look.",
     icon: MessageSquare,
     accentClass: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
   },
   {
     key: "agent_capabilities",
-    label: "Agent Capabilities",
-    description: "Boundaries for what the agent can do, cannot do, and must avoid.",
+    label: "Limits",
+    description: "What the assistant can and cannot do.",
     icon: Zap,
     accentClass: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
@@ -100,14 +100,14 @@ export default function AgentOverviewPage() {
           <div className="flex flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between">
             <div className="max-w-2xl">
               <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-primary">
-                Support copilot
+                Support assistant
               </p>
               <h2 className="mt-1 text-xl font-medium tracking-tight text-foreground">
-                Ready to take the next ticket.
+                Ready for the next ticket.
               </h2>
               <p className="page-description max-w-xl">
-                Looks up accounts, follows SOPs, calls registered tools, and leaves an audit trail.
-                Load your playbooks — same runtime for any support desk.
+                Follows Workflows, searches Articles, calls Tools, and keeps a clear trail — set up once,
+                use on any support desk.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
@@ -122,7 +122,7 @@ export default function AgentOverviewPage() {
               <motion.div {...buttonMotion}>
                 <Link href="/agent-rules">
                   <Button variant="outline">
-                    Manage rules
+                    Edit rules
                   </Button>
                 </Link>
               </motion.div>
@@ -133,24 +133,24 @@ export default function AgentOverviewPage() {
         <div className="mb-5 grid gap-3 md:grid-cols-3">
           <div className="surface-card p-4">
             <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              Rule Groups Configured
+              Rules
             </p>
             <p className="mt-1.5 text-2xl font-medium tracking-tight text-foreground tabular-nums">
               {populatedCount}
               <span className="ml-1 text-sm font-medium text-muted-foreground">/ {CATEGORIES.length}</span>
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Groups that currently have at least one rule.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Rule groups with at least one rule.</p>
           </div>
           <div className="surface-card p-4">
             <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              SOPs / Processes
+              Workflows
             </p>
             <p className="mt-1.5 text-2xl font-medium tracking-tight text-foreground tabular-nums">
               {sopDocuments.length}
               <span className="mx-1 text-sm font-medium text-muted-foreground">/</span>
               <span>{totalProcesses}</span>
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Total SOP documents and extracted processes.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Workflows and steps ready to follow.</p>
           </div>
           <div className="surface-card p-4">
             <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
@@ -158,10 +158,10 @@ export default function AgentOverviewPage() {
             </p>
             <p className="mt-1.5 text-2xl font-medium tracking-tight text-foreground tabular-nums">
               {activeTools}
-              <span className="ml-1 text-sm font-medium text-muted-foreground">active</span>
+              <span className="ml-1 text-sm font-medium text-muted-foreground">on</span>
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {resources.length} total tool{resources.length === 1 ? "" : "s"} configured.
+              {resources.length} tool{resources.length === 1 ? "" : "s"} set up.
             </p>
           </div>
         </div>
@@ -235,9 +235,9 @@ export default function AgentOverviewPage() {
         >
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-foreground">Configured Tools</h3>
+              <h3 className="text-sm font-medium text-foreground">Tools</h3>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Tools available for agent actions and SOP-linked execution.
+                APIs the assistant can call while following a workflow.
               </p>
             </div>
             <motion.div {...buttonMotion}>

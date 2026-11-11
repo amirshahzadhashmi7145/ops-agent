@@ -78,7 +78,7 @@ export function SopReview({
           <Separator />
           <div className="space-y-4">
             <h3 className="font-medium text-foreground">
-              Processes ({document.processes?.length || 0})
+              Paths ({document.processes?.length || 0})
             </h3>
             {(document.processes || []).map((process) => (
               <div key={process.id} className="rounded-xl border border-border bg-muted/30 p-4">
@@ -122,7 +122,7 @@ export function SopReview({
             ))}
             {(document.processes || []).length === 0 && (
               <p className="text-muted-foreground">
-                No processes extracted yet. Wait for processing or reprocess.
+                No paths extracted yet. Wait for processing or try again.
               </p>
             )}
           </div>

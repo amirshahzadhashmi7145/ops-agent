@@ -59,7 +59,7 @@ export function ReferenceReview({
           </div>
           <DialogDescription>
             {isReady
-              ? "Compare your original input with the processed reference."
+              ? "Compare your original input with the processed article."
               : isFailed
                 ? reference.processing_error || "Processing failed."
                 : processingLabel}
@@ -89,7 +89,7 @@ export function ReferenceReview({
 
           {isReady && (
             <section>
-              <h3 className="mb-2 text-sm font-medium text-foreground">Processed reference</h3>
+              <h3 className="mb-2 text-sm font-medium text-foreground">Processed article</h3>
               <p className="mb-2 text-xs text-muted-foreground">
                 Structured output from the formatter (used for search). Not a copy of your editor formatting.
               </p>

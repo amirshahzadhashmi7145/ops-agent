@@ -75,7 +75,7 @@ export function useCreateSopDocument() {
     mutationFn: createSopDocument,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sop-documents"] });
-      toast.success("SOP created — processing started");
+      toast.success("Workflow created — processing started");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -88,7 +88,7 @@ export function useUpdateSopDocument(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sop-documents"] });
       queryClient.invalidateQueries({ queryKey: ["sop-documents", id] });
-      toast.success("SOP updated");
+      toast.success("Workflow updated");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -101,7 +101,7 @@ export function useSetSopEnabled() {
       setSopDocumentEnabled(id, enabled),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sop-documents"] });
-      toast.success("SOP updated");
+      toast.success("Workflow updated");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -113,7 +113,7 @@ export function useDeleteSopDocument() {
     mutationFn: deleteSopDocument,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sop-documents"] });
-      toast.success("SOP deleted");
+      toast.success("Workflow deleted");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -126,7 +126,7 @@ export function useReprocessSopDocument() {
     onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ["sop-documents"] });
       queryClient.invalidateQueries({ queryKey: ["sop-documents", id] });
-      toast.success("SOP reprocessing started");
+      toast.success("Workflow reprocessing started");
     },
     onError: (error: Error) => toast.error(error.message),
   });

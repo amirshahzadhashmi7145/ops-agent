@@ -236,7 +236,7 @@ export function RestQueryDialog({ open, onOpenChange, resource }: RestQueryDialo
         >
           <DialogHeader>
             <DialogTitle className="text-xl font-medium">
-              {isEdit ? "Edit REST Query" : "Create REST Query"}
+              {isEdit ? "Edit tool" : "Add tool"}
             </DialogTitle>
           </DialogHeader>
 
@@ -257,7 +257,7 @@ export function RestQueryDialog({ open, onOpenChange, resource }: RestQueryDialo
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                placeholder="When the agent should use this query..."
+                placeholder="When the assistant should use this tool..."
                 className="max-h-40 min-h-20 resize-none overflow-y-auto"
                 {...form.register("description")}
               />

@@ -51,7 +51,7 @@ export default function ResourceLogsPage() {
       <div className="w-full px-5 py-5">
         <Link href="/resources" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Tools & Resources
+          Tools
         </Link>
         <p className="mt-6 text-sm text-muted-foreground">This tool could not be found.</p>
       </div>
@@ -62,7 +62,7 @@ export default function ResourceLogsPage() {
     <div className="w-full px-5 py-5">
       <Link href="/resources" className={cn(buttonVariants({ variant: "ghost" }), "-ml-2 mb-4")}>
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Tools & Resources
+        Tools
       </Link>
 
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -114,7 +114,7 @@ export default function ResourceLogsPage() {
                 <Activity className="h-5 w-5" />
               </div>
               <p className="max-w-xs text-sm text-muted-foreground">
-                No calls yet. Run this tool from Chat or use Test on Tools & Resources.
+                No calls yet. Run this tool from Chat or use Test on Tools.
               </p>
             </div>
           ) : (

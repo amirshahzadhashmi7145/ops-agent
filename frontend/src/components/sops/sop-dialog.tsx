@@ -69,7 +69,7 @@ export function SopDialog({
 
   const handleSubmit = async () => {
     if (!title.trim() || !categoryId || !rawText.trim()) {
-      toast.error("Title, category, and SOP text are required");
+      toast.error("Title, category, and workflow text are required");
       return;
     }
     await onSubmit({
@@ -103,7 +103,7 @@ export function SopDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{document ? "Edit SOP" : "Add SOP"}</DialogTitle>
+            <DialogTitle>{document ? "Edit workflow" : "Add workflow"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
@@ -146,13 +146,13 @@ export function SopDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>SOP document</Label>
+              <Label>Workflow text</Label>
               <SopTextEditor
                 value={rawText}
                 onChange={setRawText}
                 tools={tools}
                 placeholder={
-                  "Describe each process as clear steps. Mention tools with @tool_name, e.g.\n\n## Cancel subscription\n1. Ask for the customer email\n2. Call @lookup_customer_by_email\n3. List subscriptions with @list_subscriptions\n4. Confirm and call @cancel_subscription"
+                  "Describe each path as clear steps. Mention tools with @tool_name, e.g.\n\n## Cancel subscription\n1. Ask for the customer email\n2. Call @lookup_customer_by_email\n3. List subscriptions with @list_subscriptions\n4. Confirm and call @cancel_subscription"
                 }
               />
             </div>
@@ -160,14 +160,14 @@ export function SopDialog({
               <p className="mb-1.5 font-medium text-foreground">Writing tips</p>
               <ul className="list-disc space-y-1 pl-4">
                 <li>
-                  Separate processes with a heading (e.g. <span className="font-mono">## Cancel subscription</span>).
+                  Separate paths with a heading (e.g. <span className="font-mono">## Cancel subscription</span>).
                 </li>
-                <li>Number the steps for each process in order.</li>
+                <li>Number the steps for each path in order.</li>
                 <li>
                   Mention tools with <span className="font-mono">@tool_name</span> — pick from the @ menu when possible.
                 </li>
                 <li>
-                  A perfect template helps, but free-form text is fine: the importer still tries to recover processes,
+                  A perfect template helps, but free-form text is fine: the importer still tries to recover paths,
                   steps, and tool names.
                 </li>
               </ul>

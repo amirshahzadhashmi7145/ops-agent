@@ -39,9 +39,9 @@ export default function MessagesPage() {
       <div className="w-full px-5 py-5">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="page-header">Messages</h2>
+            <h2 className="page-header">Outbox</h2>
             <p className="page-description">
-              Simulated outbound email outbox from SOP actions — nothing is sent externally.
+              Demo emails drafted by workflows — nothing is sent outside this app.
             </p>
           </div>
           <motion.div {...buttonMotion}>
@@ -67,7 +67,7 @@ export default function MessagesPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <Inbox className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-medium">No messages yet</h3>
+            <h3 className="text-sm font-medium">Outbox is empty</h3>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
               Run subscription cancel or device return flows in Chat to generate confirmation messages here.
             </p>

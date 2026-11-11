@@ -55,7 +55,7 @@ export function RuleDialog({
         <DialogHeader>
           <DialogTitle>{mode === "add" ? "Add rule" : "Edit rule"}</DialogTitle>
           <DialogDescription>
-            {categoryLabel} — this rule is added to the agent&apos;s system prompt on every message.
+            {categoryLabel} — this rule is included on every reply.
           </DialogDescription>
         </DialogHeader>
         <Textarea

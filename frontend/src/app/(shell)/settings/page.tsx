@@ -134,10 +134,10 @@ function OptionalNumberInput({
 }
 
 const QUICK_LINKS = [
-  { href: "/agent-rules", label: "Agent Rules", icon: ScrollText },
-  { href: "/sops", label: "SOPs", icon: Bot },
-  { href: "/kb", label: "Knowledge Base", icon: BookOpen },
-  { href: "/resources", label: "Tools & Resources", icon: Wrench },
+  { href: "/agent-rules", label: "Rules", icon: ScrollText },
+  { href: "/sops", label: "Workflows", icon: Bot },
+  { href: "/kb", label: "Articles", icon: BookOpen },
+  { href: "/resources", label: "Tools", icon: Wrench },
 ];
 
 export default function SettingsPage() {
@@ -191,7 +191,7 @@ export default function SettingsPage() {
     return (
       <div className="w-full px-5 py-10">
         <div className="surface-card space-y-4 p-6 text-center">
-          <h3 className="text-lg font-medium text-foreground">Couldn&apos;t load agent settings</h3>
+          <h3 className="text-lg font-medium text-foreground">Couldn&apos;t load settings</h3>
           <p className="text-sm text-muted-foreground">
             {error instanceof Error ? error.message : "Request failed while loading settings."}
           </p>
@@ -220,10 +220,10 @@ export default function SettingsPage() {
     >
       <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h2 className="page-header">Agent Settings</h2>
+          <h2 className="page-header">Settings</h2>
           <p className="page-description max-w-2xl">
-            Configure global agent identity, capabilities, and runtime behavior. Changes apply to
-            every new chat message.
+            Name, base instructions, and switches for what the assistant can use. Applies to new
+            chats.
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
             Last updated by {settings.updated_by} ·{" "}
@@ -247,13 +247,13 @@ export default function SettingsPage() {
       <div className="space-y-5">
         <SectionCard
           index={0}
-          title="Identity & prompt"
-          description="Core persona and base instructions sent with every request, before agent rules."
+          title="Name & prompt"
+          description="Who the assistant is, and the base instructions sent before Rules."
           icon={Sparkles}
         >
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="agent-name">Agent name</Label>
+              <Label htmlFor="agent-name">Assistant name</Label>
               <Input
                 id="agent-name"
                 value={form.agent_name}
@@ -295,36 +295,36 @@ export default function SettingsPage() {
 
         <SectionCard
           index={1}
-          title="Capabilities"
-          description="Master switches for what the agent can access during conversations."
+          title="What it can use"
+          description="Turn Articles, Workflows, and Tools on or off for chats."
           icon={Bot}
         >
           <div className="grid gap-3 md:grid-cols-2">
             <CapabilityRow
               id="enable-kb"
-              label="Knowledge Base search"
-              description="Allow search_knowledge_base for policy and documentation questions."
+              label="Articles"
+              description="Search help docs, FAQs, and policies."
               checked={form.enable_kb_search}
               onCheckedChange={(checked) => patch({ enable_kb_search: checked })}
             />
             <CapabilityRow
               id="enable-sop"
-              label="SOP matching"
-              description="Allow automatic and manual SOP process matching for operational workflows."
+              label="Workflows"
+              description="Match and follow step-by-step workflows."
               checked={form.enable_sop_matching}
               onCheckedChange={(checked) => patch({ enable_sop_matching: checked })}
             />
             <CapabilityRow
               id="enable-internal"
               label="Internal tools"
-              description="Expose internal REST tools registered in Tools & Resources."
+              description="Call company tools listed under Tools."
               checked={form.enable_internal_tools}
               onCheckedChange={(checked) => patch({ enable_internal_tools: checked })}
             />
             <CapabilityRow
               id="enable-external"
               label="External tools"
-              description="Expose external API tools registered in Tools & Resources."
+              description="Call third-party APIs listed under Tools."
               checked={form.enable_external_tools}
               onCheckedChange={(checked) => patch({ enable_external_tools: checked })}
             />
@@ -333,8 +333,8 @@ export default function SettingsPage() {
 
         <SectionCard
           index={2}
-          title="Behavior tuning"
-          description="Optional overrides. Leave blank to use deployment defaults from environment."
+          title="Fine tuning"
+          description="Optional. Leave blank to keep the defaults from your server setup."
           icon={SlidersHorizontal}
         >
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -348,7 +348,7 @@ export default function SettingsPage() {
               onChange={(value) => patch({ max_tool_rounds: value })}
             />
             <OptionalNumberInput
-              label="SOP auto-match threshold"
+              label="Workflow auto-match threshold"
               hint={`Default: ${runtime.env_sop_auto_match_threshold}`}
               value={form.sop_auto_match_threshold}
               placeholder={String(runtime.env_sop_auto_match_threshold)}
@@ -358,7 +358,7 @@ export default function SettingsPage() {
               onChange={(value) => patch({ sop_auto_match_threshold: value })}
             />
             <OptionalNumberInput
-              label="SOP search threshold"
+              label="Workflow search threshold"
               hint={`Default: ${runtime.env_sop_match_threshold}`}
               value={form.sop_match_threshold}
               placeholder={String(runtime.env_sop_match_threshold)}
@@ -368,7 +368,7 @@ export default function SettingsPage() {
               onChange={(value) => patch({ sop_match_threshold: value })}
             />
             <OptionalNumberInput
-              label="KB results count"
+              label="Article results count"
               hint={`Default: ${runtime.env_kb_search_top_k}`}
               value={form.kb_search_top_k}
               placeholder={String(runtime.env_kb_search_top_k)}
@@ -401,8 +401,8 @@ export default function SettingsPage() {
 
         <SectionCard
           index={3}
-          title="Model & infrastructure"
-          description="Read-only deployment configuration. API keys remain in environment secrets."
+          title="Model"
+          description="Current AI model (read-only). API keys stay in server secrets."
           icon={Cpu}
         >
           <div className="grid gap-3 sm:grid-cols-2">
@@ -427,8 +427,8 @@ export default function SettingsPage() {
 
         <SectionCard
           index={4}
-          title="Related configuration"
-          description="Manage detailed content and per-item enablement on dedicated pages."
+          title="Related setup"
+          description="Edit Rules, Workflows, Articles, and Tools on their own pages."
           icon={Shield}
         >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -454,8 +454,8 @@ export default function SettingsPage() {
             })}
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Badge variant="secondary">Agent rules are appended after the base prompt</Badge>
-            <Badge variant="outline">Per-tool active state lives in Tools & Resources</Badge>
+            <Badge variant="secondary">Rules are added after the base prompt</Badge>
+            <Badge variant="outline">Turn individual tools on or off under Tools</Badge>
           </div>
         </SectionCard>
       </div>

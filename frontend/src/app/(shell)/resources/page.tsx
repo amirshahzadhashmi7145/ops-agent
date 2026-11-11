@@ -91,7 +91,7 @@ export default function ResourcesPage() {
       setEditing(resource);
       setDialogOpen(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to load resource");
+      toast.error(error instanceof Error ? error.message : "Failed to load tool");
     }
   };
 
@@ -140,22 +140,22 @@ export default function ResourcesPage() {
       <div className="w-full px-5 py-5">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="page-header">Tools & Resources</h2>
+            <h2 className="page-header">Tools</h2>
             <p className="page-description">
-              Register REST queries the agent can call during SOP execution.
+              APIs the assistant can call while running a workflow (lookup, refund, reset, and more).
             </p>
           </div>
           <motion.div {...buttonMotion}>
             <Button onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />
-              Add REST Query
+              Add tool
             </Button>
           </motion.div>
         </div>
 
         {isLoading ? (
           <div className="surface-card p-10 text-center text-sm text-muted-foreground">
-            Loading resources...
+            Loading tools...
           </div>
         ) : resources.length === 0 ? (
           <motion.div
@@ -166,13 +166,13 @@ export default function ResourcesPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <Wrench className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-medium text-foreground">No REST queries yet</h3>
+            <h3 className="text-sm font-medium text-foreground">No tools yet</h3>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Add your first tool so the agent can call internal or external APIs.
+              Add your first tool so the assistant can call internal or external APIs.
             </p>
             <Button className="mt-6" onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" />
-              Add REST Query
+              Add tool
             </Button>
           </motion.div>
         ) : (
@@ -346,9 +346,9 @@ export default function ResourcesPage() {
       <Dialog open={Boolean(deleteTarget)} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete REST query?</DialogTitle>
+            <DialogTitle>Delete tool?</DialogTitle>
             <DialogDescription>
-              This will remove <strong>{deleteTarget?.name}</strong> from the agent toolset.
+              This will remove <strong>{deleteTarget?.name}</strong> from Tools.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Ops Agent",
-  description: "Internal AI copilot for customer support operations",
+  description: "Support assistant that follows workflows, articles, and tools",
   icons: {
     icon: "/icon.svg",
   },

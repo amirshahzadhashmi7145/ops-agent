@@ -29,9 +29,9 @@ export default function UsagePage() {
     <div className="w-full px-5 py-5">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="page-header">Pricing model</h2>
+          <h2 className="page-header">Costs</h2>
           <p className="page-description">
-            Metered LLM + configured VM hosting — pick subscription, usage, per-ticket, or hybrid.
+            Real AI spend plus hosting — choose subscription, pay-as-you-go, per ticket, or hybrid.
           </p>
         </div>
         <div className="flex gap-1">

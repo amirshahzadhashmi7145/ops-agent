@@ -80,7 +80,7 @@ export default function ChatPage() {
                 setStreamingStatus(event.message);
               }
               if (event.type === "sop_matched") {
-                setStreamingStatus(`Following SOP: ${event.title}`);
+                setStreamingStatus(`Following workflow: ${event.title}`);
               }
               if (event.type === "final_answer") {
                 setPendingAssistant(event.content);
@@ -125,7 +125,7 @@ export default function ChatPage() {
                   {conversation?.title || "New conversation"}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Follows SOPs. Calls tools only when the ticket needs them.
+                  Follows Workflows, searches Articles, and calls Tools only when needed.
                 </p>
               </div>
               <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-flex">

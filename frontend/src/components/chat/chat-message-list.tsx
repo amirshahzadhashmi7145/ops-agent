@@ -19,7 +19,7 @@ const MarkdownMessage = dynamic(
   },
 );
 
-/** Title of the SOP followed in this message, if any (for the "Followed SOP" chip). */
+/** Title of the workflow followed in this message, if any (for the "Followed workflow" chip). */
 function matchedSopTitle(trace: PipelineTraceEvent[]): string | null {
   const matched = trace.find((event) => event.type === "sop_matched");
   return matched?.type === "sop_matched" ? matched.title : null;
@@ -120,8 +120,8 @@ export function ChatMessageList({
                 Start a ticket
               </h3>
               <p className="mt-1.5 max-w-md text-xs leading-snug text-muted-foreground">
-                Ask in plain language. The agent matches an SOP, calls registered tools, and
-                cites the knowledge base — it will not invent device or order status.
+                Ask in plain language. The assistant matches a workflow, calls Tools, and
+                cites Articles — it will not invent device or order status.
               </p>
               {onSuggestionClick && (
                 <div className="mt-5 grid w-full max-w-xl gap-2 sm:grid-cols-3">
@@ -190,7 +190,7 @@ export function ChatMessageList({
                           return sopTitle ? (
                             <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
                               <ScrollText className="h-3 w-3" />
-                              Followed SOP: {sopTitle}
+                              Followed workflow: {sopTitle}
                             </div>
                           ) : null;
                         })()}

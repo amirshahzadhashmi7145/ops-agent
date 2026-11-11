@@ -127,7 +127,7 @@
   },
   {
     "name": "getDeviceSubscription",
-    "description": "Get subscription details for a camera serial number",
+    "description": "Get subscription details for a lock serial number",
     "http_method": "GET",
     "url": "/api/sim/billing/device-subscription/{serial_number}",
     "parameters": [
@@ -135,14 +135,14 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
   },
   {
     "name": "getDeviceHealth",
-    "description": "Get health/status details for a camera serial number",
+    "description": "Get health/status details for a lock serial number",
     "http_method": "GET",
     "url": "/api/sim/billing/device-health/{serial_number}",
     "parameters": [
@@ -150,14 +150,14 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
   },
   {
     "name": "getRecurlyInvoices",
-    "description": "Send past invoices for a camera to billing email on file",
+    "description": "Send past invoices for a lock to billing email on file",
     "http_method": "POST",
     "url": "/api/sim/billing/recurly/invoices",
     "parameters": [
@@ -165,7 +165,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       },
       {
@@ -187,7 +187,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       },
       {
@@ -216,7 +216,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
@@ -231,7 +231,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
@@ -516,7 +516,7 @@
   },
   {
     "name": "getSimTriage",
-    "description": "Run SIM triage for a Connect camera serial number",
+    "description": "Run SIM triage for a Connect lock serial number",
     "http_method": "GET",
     "url": "/api/sim/devices/{serial_number}/sim-triage",
     "parameters": [
@@ -524,14 +524,14 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
   },
   {
     "name": "getSimData",
-    "description": "Get SIM usage data for a Connect camera",
+    "description": "Get SIM usage data for a Connect lock",
     "http_method": "GET",
     "url": "/api/sim/devices/{serial_number}/sim-data",
     "parameters": [
@@ -539,14 +539,14 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
   },
   {
     "name": "getValidateSerial",
-    "description": "Validate that a camera serial is registered",
+    "description": "Validate that a lock serial is registered",
     "http_method": "POST",
     "url": "/api/sim/devices/{serial_number}/validate",
     "parameters": [
@@ -554,14 +554,14 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
   },
   {
     "name": "reactivateSim",
-    "description": "Reactivate a deactivated camera SIM",
+    "description": "Reactivate a deactivated lock SIM",
     "http_method": "POST",
     "url": "/api/sim/devices/{serial_number}/reactivate-sim",
     "parameters": [
@@ -569,7 +569,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
@@ -584,7 +584,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
@@ -599,7 +599,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial number",
+        "description": "Lock serial number",
         "default_value": ""
       }
     ]
@@ -687,7 +687,7 @@
         "name": "camera_model",
         "type": "string",
         "required": true,
-        "description": "Camera model",
+        "description": "Lock model",
         "default_value": ""
       },
       {
@@ -708,7 +708,7 @@
         "name": "serial_number",
         "type": "string",
         "required": true,
-        "description": "Camera serial",
+        "description": "Lock serial",
         "default_value": ""
       },
       {
