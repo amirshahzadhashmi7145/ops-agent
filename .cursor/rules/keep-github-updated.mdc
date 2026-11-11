@@ -1,0 +1,13 @@
+---
+description: Always commit and push completed work to GitHub
+alwaysApply: true
+---
+
+# Keep GitHub updated
+
+After finishing a meaningful change in this repo, commit and push to `origin/main` without waiting to be asked.
+
+- Never commit `.env` or secrets
+- Author must remain the human git identity (not Cursor)
+- If `.git/config` / `origin` is missing, restore `https://github.com/amirshahzadhashmi7145/ops-agent.git` then push
+- Skip empty commits; push only when there is something to ship
