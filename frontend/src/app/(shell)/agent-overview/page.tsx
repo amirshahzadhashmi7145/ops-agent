@@ -99,10 +99,10 @@ export default function AgentOverviewPage() {
         <div className="mb-5 overflow-hidden surface-card">
           <div className="flex flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between">
             <div className="max-w-2xl">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+              <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-primary">
                 Support copilot
               </p>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              <h2 className="mt-1 text-xl font-medium tracking-tight text-foreground">
                 Ready to take the next ticket.
               </h2>
               <p className="page-description max-w-xl">
@@ -135,7 +135,7 @@ export default function AgentOverviewPage() {
             <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
               Rule Groups Configured
             </p>
-            <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+            <p className="mt-1.5 text-2xl font-medium tracking-tight text-foreground tabular-nums">
               {populatedCount}
               <span className="ml-1 text-sm font-medium text-muted-foreground">/ {CATEGORIES.length}</span>
             </p>
@@ -145,7 +145,7 @@ export default function AgentOverviewPage() {
             <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
               SOPs / Processes
             </p>
-            <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+            <p className="mt-1.5 text-2xl font-medium tracking-tight text-foreground tabular-nums">
               {sopDocuments.length}
               <span className="mx-1 text-sm font-medium text-muted-foreground">/</span>
               <span>{totalProcesses}</span>
@@ -156,7 +156,7 @@ export default function AgentOverviewPage() {
             <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
               Tools
             </p>
-            <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+            <p className="mt-1.5 text-2xl font-medium tracking-tight text-foreground tabular-nums">
               {activeTools}
               <span className="ml-1 text-sm font-medium text-muted-foreground">active</span>
             </p>
@@ -198,7 +198,7 @@ export default function AgentOverviewPage() {
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-semibold text-foreground">{category.label}</h3>
+                        <h3 className="text-sm font-medium text-foreground">{category.label}</h3>
                         <p className="mt-0.5 text-xs text-muted-foreground">{category.description}</p>
                       </div>
                     </div>
@@ -235,7 +235,7 @@ export default function AgentOverviewPage() {
         >
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Configured Tools</h3>
+              <h3 className="text-sm font-medium text-foreground">Configured Tools</h3>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Tools available for agent actions and SOP-linked execution.
               </p>

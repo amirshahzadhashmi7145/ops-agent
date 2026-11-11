@@ -64,7 +64,7 @@ async def test_execute_resource_request_blocks_internal_target():
         connection=None,
         fixed_headers=[],
         payload={},
-        user_email="ops@getnexar.com",
+        user_email="ops@example.com",
     )
     assert result["success"] is False
     assert result["status_code"] is None
@@ -81,7 +81,7 @@ async def test_execute_resource_request_blocks_url_param_injection():
         connection=None,
         fixed_headers=[],
         payload={"host": "127.0.0.1"},
-        user_email="ops@getnexar.com",
+        user_email="ops@example.com",
     )
     assert result["success"] is False
     assert "Blocked request" in result["error"]
@@ -96,7 +96,7 @@ async def test_internal_tool_cannot_leave_internal_base():
         connection=None,
         fixed_headers=[],
         payload={},
-        user_email="ops@getnexar.com",
+        user_email="ops@example.com",
         tool_scope="internal",
     )
     # Reaches the network layer (connection error), i.e. it was not blocked by validation.
@@ -117,12 +117,12 @@ def test_secret_header_requires_allowed_prefix(monkeypatch):
                 "is_secret": True,
             },
         ],
-        "ops@getnexar.com",
+        "ops@example.com",
     )
 
     assert "X-Leak" not in headers
     assert headers["X-Partner"] == "sk-partner"
-    assert headers["X-Nexar-User"] == "ops@getnexar.com"
+    assert headers["X-Ops-User"] == "ops@example.com"
 
 
 def test_secret_header_omitted_when_env_missing():
@@ -135,7 +135,7 @@ def test_secret_header_omitted_when_env_missing():
                 "is_secret": True,
             }
         ],
-        "ops@getnexar.com",
+        "ops@example.com",
     )
     assert "X-Missing" not in headers
 

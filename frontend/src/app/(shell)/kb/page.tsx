@@ -210,7 +210,7 @@ export default function KbPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <BookOpen className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-semibold text-foreground">No references yet</h3>
+            <h3 className="text-sm font-medium text-foreground">No references yet</h3>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Add your first reference so the agent can answer policy and product questions.
             </p>

@@ -58,7 +58,7 @@ function SectionCard({
           <Icon className="h-4 w-4" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+          <h3 className="text-sm font-medium text-foreground">{title}</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         </div>
       </div>
@@ -191,7 +191,7 @@ export default function SettingsPage() {
     return (
       <div className="w-full px-5 py-10">
         <div className="surface-card space-y-4 p-6 text-center">
-          <h3 className="text-lg font-semibold text-foreground">Couldn&apos;t load agent settings</h3>
+          <h3 className="text-lg font-medium text-foreground">Couldn&apos;t load agent settings</h3>
           <p className="text-sm text-muted-foreground">
             {error instanceof Error ? error.message : "Request failed while loading settings."}
           </p>

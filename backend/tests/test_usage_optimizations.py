@@ -35,7 +35,7 @@ def test_prompt_cache_is_cheaper_than_full_input():
 def test_volatile_queries_skip_semantic_cache():
     assert query_is_cacheable("What's our return policy for accessories?")
     assert not query_is_cacheable("Look up alex.rivera@example.com")
-    assert not query_is_cacheable("Camera NX-BEAM-10088 has no LTE")
+    assert not query_is_cacheable("Lock MD-GUARD2-10088 has no LTE")
     assert not query_is_cacheable("hi")
 
 

@@ -9,7 +9,7 @@ function formatJson(value: unknown) {
 export function JsonPane({ title, value }: { title: string; value: unknown }) {
   return (
     <div className="min-w-0 flex-1">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
         {title}
       </p>
       <div className="max-h-[42vh] overflow-auto rounded-xl border border-border bg-muted/30 p-3">

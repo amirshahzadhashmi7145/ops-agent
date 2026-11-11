@@ -27,7 +27,7 @@ MAX_LOG_BODY = 10000
 
 
 def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Nexar-User", settings.dev_user_email)
+    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 def _headers_to_json(headers: list) -> list[dict]:

@@ -21,7 +21,7 @@ router = APIRouter(prefix="/kb", tags=["knowledge-base"])
 
 
 def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Nexar-User", settings.dev_user_email)
+    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 def _reference_or_404(db: Session, reference_id: uuid.UUID) -> KbReference:

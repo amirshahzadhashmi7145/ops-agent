@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Nexar-User", settings.dev_user_email)
+    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 @router.get("/agent-rules", response_model=list[AgentRuleResponse])

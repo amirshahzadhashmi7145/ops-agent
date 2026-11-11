@@ -15,8 +15,18 @@ from app.services.sop_retrieval import _process_result, search_sop_processes
 SERIAL_PATTERN = re.compile(r"\b([A-Z]{2,3}-[A-Z0-9]+-\d+)\b", re.IGNORECASE)
 EMAIL_PATTERN = re.compile(r"[\w.+-]+@[\w.-]+\.\w+")
 
-CONNECT_MODEL_MARKERS = ("beam2", "beam 2", "nexar one", "b2-mini", "b2 mini")
-CLASSIC_MODEL_MARKERS = ("nexar pro", "nexc1", "nexc2", "nexs1", "classic")
+CONNECT_MODEL_MARKERS = (
+    "guard 2",
+    "guard2",
+    "guard mini",
+    "guard",
+    "md-guard2",
+    "md-mini",
+    "md-guard",
+    "md-fleet",
+)
+CLASSIC_MODEL_MARKERS = ("latch", "md-latch", "classic")
+CLASSIC_KEY_PATTERN = re.compile(r"(?:\bkey\b|\bmd-key-)", re.IGNORECASE)
 CONNECTIVITY_MARKERS = (
     "won't connect",
     "wont connect",
@@ -33,6 +43,7 @@ CONNECTIVITY_MARKERS = (
     "onboarding",
     "turquoise",
     "blinking light",
+    "remote unlock",
 )
 HARDWARE_MARKERS = (
     "power",
@@ -49,6 +60,10 @@ HARDWARE_MARKERS = (
     "restart",
     "swollen",
     "bloated",
+    "won't lock",
+    "wont lock",
+    "won't unlock",
+    "wont unlock",
 )
 
 DOC_CLASSIC = "SOP - Classic App Connectivity & Pairing"
@@ -115,14 +130,19 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
     family = routing.get("camera_family")
     model = str(routing.get("model") or "").lower()
 
-    if _has_any(msg, CONNECT_MODEL_MARKERS) or any(
-        token in model for token in ("beam2", "nexar one", " one")
-    ) or model.strip() == "one":
+    connect_from_text = _has_any(msg, CONNECT_MODEL_MARKERS) or any(
+        token in model for token in ("guard 2", "guard2", "guard mini", "guard")
+    )
+    classic_from_text = _has_any(msg, CLASSIC_MODEL_MARKERS) or model.strip() == "latch"
+    # Bare "key" is Classic; Guard* already handled as Connect. Avoid matching "keypad".
+    if not connect_from_text and (CLASSIC_KEY_PATTERN.search(msg) or model.strip() == "key"):
+        classic_from_text = True
+    if connect_from_text:
         family = "connect"
-    if _has_any(msg, CLASSIC_MODEL_MARKERS) or "nexar pro" in model or model.strip() == "pro":
+    elif classic_from_text:
         family = "classic"
 
-    # Email-only lookups can return mixed Classic + Connect cameras. Do not pick
+    # Email-only lookups can return mixed Classic + Connect devices. Do not pick
     # a family (and lock a diagnostic SOP) from whichever device came back first.
     if email and not serial and len(matches) > 1:
         families = {
@@ -150,14 +170,14 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
             preferred_process = "Hardware Malfunction"
             mandatory_tools = ["getDeviceLookup", "getDeviceHealth"]
             instructions.append(
-                "Classic camera hardware issue. Do NOT use getClassicDiagnostic or the Connect connectivity SOP."
+                "Classic lock hardware issue. Do NOT use getClassicDiagnostic or the Connect connectivity SOP."
             )
         else:
             preferred_doc = DOC_CLASSIC
             preferred_process = "Classic App Connectivity"
             mandatory_tools = ["getClassicDiagnostic"]
             instructions.append(
-                "Classic camera app connectivity issue. Do NOT use getSimTriage or Connect-only tools."
+                "Classic lock app connectivity issue. Do NOT use getSimTriage or Connect-only tools."
             )
     elif should_lock_diagnostic_sop and family == "connect":
         if is_hardware:
@@ -165,7 +185,7 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
             preferred_process = "Hardware Malfunction"
             mandatory_tools = ["getDeviceLookup", "getDeviceHealth"]
             instructions.append(
-                "Connect camera hardware issue. Call getDeviceHealth before escalating. "
+                "Connect lock hardware issue. Call getDeviceHealth before escalating. "
                 "If has_power_issues is false, perform power troubleshooting steps — do not escalate immediately."
             )
         else:
@@ -173,7 +193,7 @@ def resolve_device_routing(db: Session, message: str) -> dict[str, Any]:
             preferred_process = "Sim Triage"
             mandatory_tools = ["getDeviceLookup", "getSimTriage"]
             instructions.append(
-                "Connect camera connectivity issue. Do NOT use getClassicDiagnostic. "
+                "Connect lock connectivity issue. Do NOT use getClassicDiagnostic. "
                 "Start with getDeviceLookup, then getSimTriage."
             )
             instructions.append(

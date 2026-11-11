@@ -166,7 +166,7 @@ export default function ResourcesPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <Wrench className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-semibold text-foreground">No REST queries yet</h3>
+            <h3 className="text-sm font-medium text-foreground">No REST queries yet</h3>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Add your first tool so the agent can call internal or external APIs.
             </p>

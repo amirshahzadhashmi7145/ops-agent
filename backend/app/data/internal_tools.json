@@ -69,7 +69,7 @@
         "type": "string",
         "required": true,
         "description": "Plan name",
-        "default_value": "Pro Monthly"
+        "default_value": "Guard Monthly"
       }
     ]
   },

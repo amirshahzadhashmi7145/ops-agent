@@ -13,7 +13,8 @@ from app.services.usage.meter import record_llm_usage
 # Live lookups (email, serial, order, phone) must never be served from cache.
 _VOLATILE = re.compile(
     r"(@[a-z0-9.-]+\.[a-z]{2,})"
-    r"|(\bNX-[A-Z0-9-]+\b)"
+    r"|(\bMD-[A-Z0-9-]+\b)"
+    r"|(\bAC-[A-Z0-9-]+\b)"
     r"|(\b[A-Z]{2,}\d{5,}\b)"
     r"|(\b\d{6,}\b)"
     r"|(\+?\d[\d\s().-]{8,}\d)",

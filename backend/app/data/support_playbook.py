@@ -50,7 +50,7 @@ KB_ARTICLES = [
         "source_url": "https://help.example.com/company",
         "markdown": """# Company
 
-We sell connected cameras and a cloud subscription for consumers and fleets. Support's job is to help with devices, the mobile app, LTE, subscriptions, orders, and warranty — never to guess about account or device state.
+**Meridian** sells connected smart locks and access devices and a cloud subscription for consumers and fleets. Support's job is to help with devices, the mobile app, LTE, subscriptions, orders, and warranty — never to guess about account or device state.
 
 # How we help
 
@@ -65,33 +65,34 @@ Be concise, calm, and practical. Use the customer's name when tools return it. D
     },
     {
         "title": "Product Line",
-        "summary": "Camera families, models, and which app or connectivity stack each one uses.",
+        "summary": "Lock families, models, and which app or connectivity stack each one uses.",
         "source_url": "https://help.example.com/products",
         "markdown": """# Product families
 
-Cameras fall into two families. Routing SOPs depend on this split.
+Meridian locks fall into two families. Routing SOPs depend on this split.
 
-# Classic cameras
+# Classic locks
 
-Classic cameras pair over Bluetooth/Wi-Fi to the **Classic app**. They do not have an onboard LTE SIM.
+Classic locks pair over Bluetooth/Wi-Fi to the **Classic app**. They do not have an onboard LTE SIM.
 
-- **Beam** — compact consumer Classic camera.
-- **Pro** — Classic camera with more storage and cabin options.
+- **Key** — compact consumer Classic deadbolt.
+- **Latch** — Classic lock with longer battery life and more install options.
 
-Diagnostics for Classic pairing use `getClassicDiagnostic`. Do not run SIM triage on Classic cameras.
+Diagnostics for Classic pairing use `getClassicDiagnostic`. Do not run SIM triage on Classic locks.
 
-# Connect cameras
+# Connect locks
 
-Connect cameras use an onboard LTE SIM and the Connect app.
+Connect locks use an onboard LTE SIM and the Connect app for remote unlock and event history.
 
-- **One** — flagship Connect camera; often paired with a rear camera.
-- **Beam2 mini** (serial prefix B2-MINI) — compact Connect camera.
+- **Guard** — flagship Connect lock; often paired with a keypad accessory.
+- **Guard Mini** (serial prefix MD-MINI) — compact Connect lock.
+- **Guard 2** (serial prefix MD-GUARD2) — Connect lock with LTE.
 
 Connectivity issues use `getDeviceLookup` then `getSimTriage`. Hardware issues use `getDeviceHealth`.
 
-# Rear camera
+# Keypad accessory
 
-A rear (or interior-facing) camera is an accessory paired to a Connect primary camera. It is not sold as a standalone LTE device. If lookup shows `rear_camera.paired = no`, walk the customer through pairing in the app before replacing hardware.
+A keypad accessory pairs to a Connect primary lock. It is not sold as a standalone LTE device. If lookup shows `rear_camera.paired = no` (keypad unpaired in this demo schema), walk the customer through pairing in the app before replacing hardware.
 """,
     },
     {
@@ -100,8 +101,8 @@ A rear (or interior-facing) camera is an accessory paired to a Connect primary c
         "source_url": "https://help.example.com/connect-vs-classic",
         "markdown": """# Quick identification
 
-- Serials like `NX-PRO-*` or older Beam units without LTE → **Classic**.
-- Serials like `NX-ONE-*`, `NX-FLEET-*`, `B2-MINI-*` → **Connect**.
+- Serials like `MD-LATCH-*` or `MD-KEY-*` → **Classic**.
+- Serials like `MD-GUARD-*`, `MD-FLEET-*`, `MD-MINI-*`, `MD-GUARD2-*` → **Connect**.
 - If the customer mentions a turquoise LED, SIM, or LTE data cap → **Connect**.
 - If they mention the Classic app, local Wi-Fi, or iOS Local Network permission → **Classic**.
 
@@ -125,14 +126,14 @@ A rear (or interior-facing) camera is an accessory paired to a Connect primary c
 
 Typical consumer plans in this environment:
 
-- **Basic Monthly** — cloud clips with a lower monthly price.
-- **Pro Monthly** — full cloud + extra AI features.
-- **Pro Annual** / **Annual Plan** — prepaid year; cheaper than 12 months of Pro Monthly.
+- **Basic Monthly** — basic cloud access logs with a lower monthly price.
+- **Guard Monthly** — full cloud access history + remote unlock alerts.
+- **Guard Annual** / **Annual Plan** — prepaid year; cheaper than 12 months of Guard Monthly.
 - **Monthly Plan** — generic monthly after a plan switch.
 
 # Billing system
 
-Subscriptions are billed in **Recurly**, keyed by camera serial for Connect and by customer email for Classic/sim tools.
+Subscriptions are billed in **Recurly**, keyed by lock serial for Connect and by customer email for Classic/sim tools.
 
 - Resend invoices: `getRecurlyInvoices` (optionally last N months).
 - Change the billing email then resend: `updateRecurlyEmailAndSendInvoices`.
@@ -154,24 +155,24 @@ Do not issue goodwill credits outside approved coupons (`createShopifyCoupon`, `
         "source_url": "https://help.example.com/warranty",
         "markdown": """# Coverage
 
-Consumer cameras purchased from the **Shopify shop** carry a limited hardware warranty from the delivery date on the order. Warranty status is returned by `getDeviceLookup` / `getWarrantyEligibility` — never guess from the customer's memory of the purchase date.
+Consumer locks purchased from the **Shopify shop** carry a limited hardware warranty from the delivery date on the order. Warranty status is returned by `getDeviceLookup` / `getWarrantyEligibility` — never guess from the customer's memory of the purchase date.
 
 # In warranty
 
 If eligibility is active and the issue is a confirmed hardware fault:
 
-1. Confirm the Shopify order number and camera model.
+1. Confirm the Shopify order number and lock model.
 2. Call `getShopifyOrderItems` so the replacement SKU matches.
 3. Create the replacement with `createShopifyReplacement`.
 4. Do not also create a return RMA unless the SOP says to collect the old unit.
 
 # Out of warranty
 
-Offer a discount coupon via `createShopifyCoupon` (typical 15–25% off a replacement) or an accessory coupon via `getAccessoriesCoupon` for mounts, cables, and rear cameras. Do not promise a free replacement.
+Offer a discount coupon via `createShopifyCoupon` (typical 15–25% off a replacement) or an accessory coupon via `getAccessoriesCoupon` for mount plates, batteries, and keypad accessories. Do not promise a free replacement.
 
 # Amazon purchases
 
-We cannot run Shopify warranty RMAs on Amazon orders. Direct the customer to Amazon returns/A-to-Z for the original purchase. We can still diagnose the camera and advise.
+We cannot run Shopify warranty RMAs on Amazon orders. Direct the customer to Amazon returns/A-to-Z for the original purchase. We can still diagnose the lock and advise.
 """,
     },
     {
@@ -204,7 +205,7 @@ Tell the customer to print the prepaid label, drop the package at USPS, and wait
         "source_url": "https://help.example.com/lte",
         "markdown": """# Who this applies to
 
-Only **Connect** cameras (One, Beam2 mini, fleet Connect). Classic cameras have no SIM.
+Only **Connect** locks (Guard, Guard 2, Guard Mini, fleet Connect). Classic locks have no SIM.
 
 # Triage
 
@@ -218,7 +219,7 @@ Optional: `getSimData` to explain usage to the customer.
 
 # What we tell customers
 
-LTE is for camera uploads and live features, not a phone hotspot. Repeated cap hits may mean a faulty unit (hardware SOP) or a fleet vehicle that needs a fleet data plan.
+LTE is for lock events and remote unlock features, not a phone hotspot. Repeated cap hits may mean a faulty unit (hardware SOP) or a multi-door site that needs a fleet data plan.
 
 # Fleet
 
@@ -226,23 +227,23 @@ Fleet Connect devices: do not apply consumer 25GB uplifts as a permanent fix. Es
 """,
     },
     {
-        "title": "Rear Camera Support",
-        "summary": "Pairing, interior-facing mode, and when a rear camera is out of scope for LTE tools.",
-        "source_url": "https://help.example.com/rear-camera",
+        "title": "Keypad Accessory Support",
+        "summary": "Pairing a keypad accessory and when it is out of scope for LTE tools.",
+        "source_url": "https://help.example.com/keypad",
         "markdown": """# Prerequisites
 
-A rear camera requires a working **Connect primary** camera, the Connect app, and Bluetooth/Wi-Fi during pairing. Lookup fields: `rear_camera.paired` and `rear_camera.interior_facing`.
+A keypad accessory requires a working **Connect primary** lock, the Connect app, and Bluetooth/Wi-Fi during pairing. Lookup fields: `rear_camera.paired` and `rear_camera.interior_facing` (demo schema fields for the accessory).
 
 # Pairing
 
 1. Confirm the primary serial with `getDeviceLookup`.
-2. If the primary is Classic, rear LTE accessories are not supported — sell or ship a Connect-compatible rear unit only with Connect primaries.
-3. If unpaired, ask the customer to start pairing from the app (Add rear camera). Keep the cameras 1–2 meters apart, engine on, and location permission set to Always.
-4. Interior-facing mode is a software toggle after pairing; it is not a separate SKU.
+2. If the primary is Classic, LTE keypad accessories are not supported — sell or ship a Connect-compatible keypad only with Connect primaries.
+3. If unpaired, ask the customer to start pairing from the app (Add keypad). Keep the lock and keypad within 1–2 meters, lock powered, and location permission set to Always.
+4. Interior-facing / privacy mode is a software toggle after pairing; it is not a separate SKU.
 
 # Hardware
 
-If the primary is healthy and pairing still fails after a power cycle, treat the rear unit under the Hardware Malfunction SOP and warranty path.
+If the primary is healthy and pairing still fails after a power cycle, treat the keypad under the Hardware Malfunction SOP and warranty path.
 """,
     },
     {
@@ -278,7 +279,7 @@ Diagnostic lookups, SIM reactivation, LTE uplift, invoice resend, eligible Shopi
 # Escalate (`ticketEscalate`)
 
 - Fleet accounts
-- Safety incidents / collisions (do not diagnose crash video here; route to the safety queue)
+- Forced-entry / safety incidents (route to the security queue; do not walk physical security advice beyond product policy)
 - Confirmed hardware fault with `has_power_issues` after troubleshooting
 - SIM triage `recommended_action = escalate`
 - Angry customers asking for a supervisor
@@ -300,15 +301,15 @@ Spam, duplicate outreach, or a customer who already confirmed they are done: `ti
 AGENT_RULES = [
     {
         "category": "business_context",
-        "content": "We sell connected cameras (Classic: Beam/Pro; Connect: One and Beam2 mini) plus cloud subscriptions billed in Recurly. Consumer orders come from Shopify or Amazon.",
+        "content": "Meridian sells smart locks (Classic: Key/Latch; Connect: Guard, Guard 2, Guard Mini) plus cloud subscriptions billed in Recurly. Consumer orders come from Shopify or Amazon.",
     },
     {
         "category": "business_context",
-        "content": "Classic cameras use the Classic app (Bluetooth/Wi-Fi). Connect cameras use LTE SIM + Connect app. Never mix Classic diagnostic tools with Connect SIM tools.",
+        "content": "Classic locks use the Classic app (Bluetooth/Wi-Fi). Connect locks use LTE SIM + Connect app. Never mix Classic diagnostic tools with Connect SIM tools.",
     },
     {
         "category": "escalations",
-        "content": "Escalate fleet customers, safety/collision cases, legal requests, and SIM triage recommended_action=escalate. Write an internal note with serial, order number, and tools already used before ticketEscalate.",
+        "content": "Escalate fleet customers, forced-entry / safety cases, legal requests, and SIM triage recommended_action=escalate. Write an internal note with serial, order number, and tools already used before ticketEscalate.",
     },
     {
         "category": "escalations",
@@ -363,7 +364,7 @@ When a customer wants to start a plan or check status:
 5. Summarize the result for the user.
 
 ## Look up customer devices
-When a customer or agent asks to look up an account or list cameras for an email:
+When a customer or agent asks to look up an account or list locks for an email:
 1. Call @lookup_customer_by_email with the email.
 2. Call @list_customer_devices with the same email.
 3. Present every serial, model, and status. Do not start a pairing or LTE SOP.
@@ -407,7 +408,7 @@ Triggers: look up, list their devices, list devices, customer account, find cust
             {
                 "process_key": "lookup_customer_devices",
                 "title": "Look up customer devices",
-                "description": "Look up a customer by email and list every camera they own.",
+                "description": "Look up a customer by email and list every lock they own.",
                 "trigger_phrases": [
                     "look up",
                     "list their devices",
@@ -424,7 +425,7 @@ Triggers: look up, list their devices, list devices, customer account, find cust
                 "steps": [
                     _step("lookup", "call_tool", "Verify the customer exists", "lookup_customer_by_email"),
                     _step("list", "call_tool", "List every device on the account", "list_customer_devices"),
-                    _step("inform", "inform", "Present serial, model, and status for each camera"),
+                    _step("inform", "inform", "Present serial, model, and status for each lock"),
                 ],
             },
         ],
@@ -432,11 +433,11 @@ Triggers: look up, list their devices, list devices, customer account, find cust
     {
         "category_slug": "returns",
         "title": "Return My Device",
-        "summary": "Identify a customer's cameras and start a device-level return.",
+        "summary": "Identify a customer's locks and start a device-level return.",
         "raw_text": """# Device Return Operations
 
 ## Return my device
-When a customer wants to return a camera:
+When a customer wants to return a lock:
 1. Ask for the customer email.
 2. Call @lookup_customer_by_email.
 3. Call @list_customer_devices and present the devices.
@@ -445,7 +446,7 @@ When a customer wants to return a camera:
 6. After confirmation, call @initiate_return.
 7. Tell the user a return confirmation was logged in Messages.
 
-Triggers: return my device, return my camera, start an RMA, send device back
+Triggers: return my device, return my lock, start an RMA, send device back
 """,
         "processes": [
             {
@@ -454,7 +455,7 @@ Triggers: return my device, return my camera, start an RMA, send device back
                 "description": "Identify customer devices, confirm, and initiate a return.",
                 "trigger_phrases": [
                     "return my device",
-                    "return my camera",
+                    "return my lock",
                     "start an RMA",
                     "send device back",
                 ],
@@ -478,10 +479,10 @@ Triggers: return my device, return my camera, start an RMA, send device back
     {
         "category_slug": "classic-connectivity",
         "title": "SOP - Classic App Connectivity & Pairing",
-        "summary": "Pairing and permission diagnostics for Classic cameras using getClassicDiagnostic.",
+        "summary": "Pairing and permission diagnostics for Classic locks using getClassicDiagnostic.",
         "raw_text": """# Classic App Connectivity
 
-When a Classic camera (Beam, Pro) will not pair or stay connected to the Classic app:
+When a Classic lock (Key, Latch) will not pair or stay connected to the Classic app:
 1. Collect email or phone.
 2. Call @getClassicDiagnostic.
 3. Fix the first failing permission (Location Always, Precise Location, Local Network, Bluetooth, storage).
@@ -495,26 +496,26 @@ When a Classic camera (Beam, Pro) will not pair or stay connected to the Classic
                 "trigger_phrases": [
                     "classic app",
                     "won't pair",
-                    "camera not pairing",
-                    "pro wifi",
+                    "lock not pairing",
+                    "latch wifi",
                     "local network permission",
                     "bluetooth pairing",
                 ],
                 "tools": ["getClassicDiagnostic", "getDeviceLookup"],
                 "steps": [
                     _step("identify", "ask_user", "Ask for customer email or phone if not already provided"),
-                    _step("lookup", "call_tool", "Confirm the camera is Classic if a serial or email is known", "getDeviceLookup"),
+                    _step("lookup", "call_tool", "Confirm the lock is Classic if a serial or email is known", "getDeviceLookup"),
                     _step("diag", "call_tool", "Run Classic app permission diagnostics", "getClassicDiagnostic"),
                     _step(
                         "coach",
                         "inform",
                         "Walk through the first failing flag: Location Always, Precise Location, Local Network (iOS), Bluetooth, storage, or notifications",
                     ),
-                    _step("retry", "ask_user", "Ask the customer to force-quit the Classic app, toggle Bluetooth, and retry pairing with the camera powered"),
+                    _step("retry", "ask_user", "Ask the customer to force-quit the Classic app, toggle Bluetooth, and retry pairing with the lock powered"),
                     _step(
                         "escalate",
                         "inform",
-                        "If camera_paired stays false after permissions are healthy, switch to the Hardware Malfunction SOP — do not run getSimTriage",
+                        "If camera_paired (paired flag) stays false after permissions are healthy, switch to the Hardware Malfunction SOP — do not run getSimTriage",
                     ),
                 ],
             }
@@ -523,10 +524,10 @@ When a Classic camera (Beam, Pro) will not pair or stay connected to the Classic
     {
         "category_slug": "connectivity",
         "title": "SOP - Connect LTE Connectivity",
-        "summary": "LTE/SIM triage for Connect cameras: lookup, sim triage, reactivate or 25GB uplift.",
+        "summary": "LTE/SIM triage for Connect locks: lookup, sim triage, reactivate or 25GB uplift.",
         "raw_text": """# Sim Triage
 
-Connect camera connectivity (One, Beam2 mini):
+Connect lock connectivity (Guard, Guard 2, Guard Mini):
 1. Call @getDeviceLookup with serial, email, or phone.
 2. Call @getSimTriage with the serial.
 3. Follow recommended_action: reactivate_sim → @reactivateSim; uplift_25gb → @createLTEQuota25GB; escalate → note + @ticketEscalate.
@@ -540,10 +541,10 @@ Connect camera connectivity (One, Beam2 mini):
                     "won't connect",
                     "lte",
                     "sim not working",
-                    "no live view",
+                    "no remote unlock",
                     "turquoise light",
                     "data cap",
-                    "one not connecting",
+                    "guard not connecting",
                 ],
                 "tools": [
                     "getDeviceLookup",
@@ -556,7 +557,7 @@ Connect camera connectivity (One, Beam2 mini):
                 ],
                 "steps": [
                     _step("collect", "ask_user", "Collect serial, email, or phone if missing"),
-                    _step("lookup", "call_tool", "Look up the Connect camera", "getDeviceLookup"),
+                    _step("lookup", "call_tool", "Look up the Connect lock", "getDeviceLookup"),
                     _step("triage", "call_tool", "Run SIM triage", "getSimTriage"),
                     _step("usage", "call_tool", "Optionally pull SIM usage to explain a cap", "getSimData"),
                     _step("reactivate", "call_tool", "If recommended_action is reactivate_sim", "reactivateSim"),
@@ -570,10 +571,10 @@ Connect camera connectivity (One, Beam2 mini):
     {
         "category_slug": "hardware",
         "title": "SOP - Hardware Malfunction",
-        "summary": "Power, recording, and hardware faults: health check, troubleshooting, then warranty or escalate.",
+        "summary": "Power, motor, and hardware faults: health check, troubleshooting, then warranty or escalate.",
         "raw_text": """# Hardware Malfunction
 
-When a camera has power, battery, red LED, SD, or recording failures:
+When a lock has power, battery, red LED, motor, or unlock failures:
 1. Call @getDeviceLookup and @getDeviceHealth.
 2. If has_power_issues is false, complete power troubleshooting (cable, fuse, 12V, reboot) before escalating.
 3. In-warranty Shopify hardware → warranty replacement SOP. Otherwise escalate with an internal note.
@@ -588,9 +589,9 @@ When a camera has power, battery, red LED, SD, or recording failures:
                     "red light",
                     "blinking red",
                     "battery swollen",
-                    "not recording",
-                    "sd card error",
-                    "defective camera",
+                    "won't unlock",
+                    "motor jammed",
+                    "defective lock",
                     "hardware issue",
                 ],
                 "tools": [
@@ -613,7 +614,7 @@ When a camera has power, battery, red LED, SD, or recording failures:
                     _step(
                         "irq",
                         "inform",
-                        "If irq or persistent recording/SD faults remain after reboot, treat as confirmed hardware fault",
+                        "If irq or persistent motor/unlock faults remain after reboot, treat as confirmed hardware fault",
                     ),
                     _step("note", "call_tool", "Document serial, health flags, and troubleshooting", "ticketInternalNote"),
                     _step(
@@ -722,7 +723,7 @@ Amazon orders must go through Amazon.
                     _step(
                         "inform",
                         "inform",
-                        "Give tracking, RMA URL, USPS drop-off, and remind them to cancel Connect billing in the customer portal if the camera was activated",
+                        "Give tracking, RMA URL, USPS drop-off, and remind them to cancel Connect billing in the customer portal if the lock was activated",
                     ),
                 ],
             }
@@ -743,9 +744,9 @@ Out of warranty: @createShopifyCoupon or @getAccessoriesCoupon.
                 "description": "Shopify warranty replacement after a confirmed hardware fault.",
                 "trigger_phrases": [
                     "warranty replacement",
-                    "replace my camera",
+                    "replace my lock",
                     "defective unit",
-                    "swap the camera",
+                    "swap the lock",
                 ],
                 "tools": [
                     "getDeviceLookup",
@@ -784,7 +785,7 @@ Out of warranty: @createShopifyCoupon or @getAccessoriesCoupon.
                 "trigger_phrases": ["send my invoices", "I need receipts", "billing email is wrong"],
                 "tools": ["getRecurlyInvoices", "updateRecurlyEmailAndSendInvoices"],
                 "steps": [
-                    _step("serial", "ask_user", "Ask for the camera serial if missing"),
+                    _step("serial", "ask_user", "Ask for the lock serial if missing"),
                     _step("send", "call_tool", "Resend invoices to the email on file", "getRecurlyInvoices"),
                     _step("update", "call_tool", "If the billing email is wrong, update it and resend", "updateRecurlyEmailAndSendInvoices"),
                 ],

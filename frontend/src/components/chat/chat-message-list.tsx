@@ -35,7 +35,7 @@ interface ChatMessageListProps {
 
 const SUGGESTIONS = [
   { label: "Look up an account", text: "Look up alex.rivera@example.com and list their devices." },
-  { label: "Triage LTE", text: "Camera NX-BEAM-10088 has no LTE. What’s going on?" },
+  { label: "Triage LTE", text: "Lock MD-GUARD2-10088 has no LTE. What’s going on?" },
   { label: "Return policy", text: "What's our return policy?" },
 ];
 
@@ -116,7 +116,7 @@ export function ChatMessageList({
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Bot className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-semibold tracking-tight text-foreground">
+              <h3 className="text-base font-medium tracking-tight text-foreground">
                 Start a ticket
               </h3>
               <p className="mt-1.5 max-w-md text-xs leading-snug text-muted-foreground">

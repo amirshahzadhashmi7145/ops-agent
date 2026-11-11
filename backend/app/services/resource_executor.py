@@ -57,7 +57,7 @@ def merge_headers(
     fixed_headers: list[dict[str, Any]],
     user_email: str,
 ) -> dict[str, str]:
-    headers: dict[str, str] = {"X-Nexar-User": user_email}
+    headers: dict[str, str] = {"X-Ops-User": user_email}
 
     if connection and connection.default_headers:
         for item in connection.default_headers:

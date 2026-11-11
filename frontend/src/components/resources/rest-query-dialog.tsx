@@ -235,7 +235,7 @@ export function RestQueryDialog({ open, onOpenChange, resource }: RestQueryDialo
           className="min-w-0"
         >
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
+            <DialogTitle className="text-xl font-medium">
               {isEdit ? "Edit REST Query" : "Create REST Query"}
             </DialogTitle>
           </DialogHeader>

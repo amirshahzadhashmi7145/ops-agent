@@ -1,9 +1,11 @@
-"""Seed generic KB articles, SOP documents, and agent rules, then embed with the local model."""
+"""Seed Meridian KB articles, SOP documents, and agent rules, then embed."""
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -12,7 +14,7 @@ from app.data.support_playbook import AGENT_RULES, CATEGORIES, KB_ARTICLES, SEED
 from app.models.agent_rule import AgentRule, AgentRuleCategory
 from app.models.agent_settings import SETTINGS_ROW_ID, AgentSettings
 from app.models.kb import KbChunk, KbProcessingStatus, KbReference
-from app.models.sim import SimDevice, SimDeviceProfile, SimSubscription
+from app.models.sim import SimDevice, SimDeviceProfile, SimOrder, SimSubscription
 from app.models.sop import (
     SopCategory,
     SopDocument,
@@ -27,23 +29,55 @@ from app.services.sop_ingestion import _build_chunk_content
 
 logger = logging.getLogger(__name__)
 
-LEGACY_SEED_USERS = ("system@nexar.ops", SEED_USER)
+PROFILES_PATH = Path(__file__).resolve().parent.parent / "data" / "device_profiles.json"
+
+LEGACY_SEED_USERS = ("system@nexar.ops", "system@ops.internal", SEED_USER)
+SERIAL_RENAMES = {
+    "NX-PRO-30001": "MD-LATCH-30001",
+    "NX-BEAM-10001": "MD-KEY-10001",
+    "NX-ONE-20022": "MD-GUARD-20022",
+    "NX-BEAM-10088": "MD-GUARD2-10088",
+    "B2-MINI-50001": "MD-MINI-50001",
+    "NX-FLEET-90001": "MD-FLEET-90001",
+    "AC-APEX-30001": "MD-LATCH-30001",
+    "AC-SCOUT-10001": "MD-KEY-10001",
+    "AC-HORIZON-20022": "MD-GUARD-20022",
+    "AC-SCOUT2-10088": "MD-GUARD2-10088",
+    "AC-MINI-50001": "MD-MINI-50001",
+    "AC-FLEET-90001": "MD-FLEET-90001",
+}
 DEVICE_MODEL_RENAMES = {
-    "Nexar Beam": "Beam",
-    "Nexar One": "One",
-    "Nexar Pro": "Pro",
+    "Nexar Beam": "Key",
+    "Nexar One": "Guard",
+    "Nexar Pro": "Latch",
+    "Beam": "Key",
+    "Beam2": "Guard 2",
+    "Beam2 mini": "Guard Mini",
+    "One": "Guard",
+    "Pro": "Latch",
+    "Scout": "Key",
+    "Scout 2": "Guard 2",
+    "Scout Mini": "Guard Mini",
+    "Horizon": "Guard",
+    "Apex": "Latch",
 }
 PLAN_RENAMES = {
-    "Nexar Pro Monthly": "Pro Monthly",
+    "Nexar Pro Monthly": "Guard Monthly",
     "Nexar Basic Monthly": "Basic Monthly",
-    "Nexar Pro Annual": "Pro Annual",
+    "Nexar Pro Annual": "Guard Annual",
     "Nexar Annual Plan": "Annual Plan",
     "Nexar Monthly Plan": "Monthly Plan",
+    "Pro Monthly": "Guard Monthly",
+    "Pro Annual": "Guard Annual",
+    "Apex Monthly": "Guard Monthly",
+    "Apex Annual": "Guard Annual",
 }
-
-
-def sync_nexar_content(db: Session | None = None) -> dict[str, int]:
-    return sync_playbook_content(db)
+TAG_RENAMES = {
+    "nexar-beam": "key",
+    "nexar-one": "guard",
+    "scout": "key",
+    "horizon": "guard",
+}
 
 
 def sync_playbook_content(db: Session | None = None) -> dict[str, int]:
@@ -57,6 +91,7 @@ def sync_playbook_content(db: Session | None = None) -> dict[str, int]:
             "agent_rules": _sync_agent_rules(session),
             "removed_legacy": _purge_removed_seed_content(session),
             "branding": _genericize_runtime_branding(session),
+            "profiles": _sync_device_profiles(session),
         }
         session.commit()
         logger.info("Support playbook seed complete: %s", counts)
@@ -88,6 +123,12 @@ def _purge_removed_seed_content(db: Session) -> int:
 
 def _genericize_runtime_branding(db: Session) -> int:
     updated = 0
+    for old, new in SERIAL_RENAMES.items():
+        updated += (
+            db.query(SimDevice)
+            .filter(SimDevice.serial_number == old)
+            .update({SimDevice.serial_number: new}, synchronize_session=False)
+        )
     for old, new in DEVICE_MODEL_RENAMES.items():
         updated += (
             db.query(SimDevice)
@@ -100,24 +141,55 @@ def _genericize_runtime_branding(db: Session) -> int:
             .filter(SimSubscription.plan_name == old)
             .update({SimSubscription.plan_name: new}, synchronize_session=False)
         )
-    for profile in db.query(SimDeviceProfile).all():
-        if profile.model in DEVICE_MODEL_RENAMES:
-            profile.model = DEVICE_MODEL_RENAMES[profile.model]
-            updated += 1
-        lookup = dict(profile.lookup_json or {})
-        if lookup.get("model") in DEVICE_MODEL_RENAMES:
-            lookup["model"] = DEVICE_MODEL_RENAMES[lookup["model"]]
-            profile.lookup_json = lookup
+    for order in db.query(SimOrder).all():
+        changed = False
+        tags = list(order.tags or [])
+        new_tags = [TAG_RENAMES.get(str(tag), tag) for tag in tags]
+        if new_tags != tags:
+            order.tags = new_tags
+            changed = True
+        rma = order.rma_url or ""
+        if "getnexar.com" in rma:
+            order.rma_url = rma.replace("returns.getnexar.com", "returns.example.com")
+            changed = True
+        if changed:
             updated += 1
     settings_row = db.get(AgentSettings, SETTINGS_ROW_ID)
     if settings_row:
-        if "Nexar" in (settings_row.agent_name or ""):
+        name = settings_row.agent_name or ""
+        if any(token in name for token in ("Nexar", "AetherCam", "Aether")):
             settings_row.agent_name = "Ops Agent"
             updated += 1
         prompt = settings_row.system_prompt or ""
-        if prompt.startswith("You are Nexar Ops Agent"):
+        if any(token in prompt for token in ("Nexar", "AetherCam", "connected cameras")):
             settings_row.system_prompt = DEFAULT_SYSTEM_PROMPT
             updated += 1
+    db.flush()
+    return updated
+
+
+def _sync_device_profiles(db: Session) -> int:
+    profiles = json.loads(PROFILES_PATH.read_text(encoding="utf-8"))
+    updated = 0
+    for serial, payload in profiles.items():
+        device = db.query(SimDevice).filter(SimDevice.serial_number == serial).first()
+        if not device:
+            continue
+        if payload.get("model") and device.model != payload["model"]:
+            device.model = payload["model"]
+        row = db.query(SimDeviceProfile).filter(SimDeviceProfile.device_id == device.id).first()
+        if row is None:
+            row = SimDeviceProfile(device_id=device.id)
+            db.add(row)
+        row.segment = payload.get("segment") or "consumer"
+        row.camera_family = payload.get("camera_family") or "connect"
+        row.model = payload.get("model") or device.model
+        row.lookup_json = payload.get("lookup")
+        row.classic_diagnostic_json = payload.get("classic_diagnostic")
+        row.health_json = payload.get("health")
+        row.sim_triage_json = payload.get("sim_triage")
+        row.sim_data_json = payload.get("sim_data")
+        updated += 1
     db.flush()
     return updated
 

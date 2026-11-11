@@ -99,7 +99,7 @@ export default function ResourceLogsPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(280px,0.95fr)_minmax(0,1.15fr)]">
         <section className="surface-card overflow-hidden">
           <div className="border-b border-border px-4 py-3">
-            <p className="text-sm font-semibold">Every call</p>
+            <p className="text-sm font-medium">Every call</p>
             <p className="text-xs text-muted-foreground">Newest first · click a row for payloads</p>
           </div>
           {callsLoading ? (
@@ -165,7 +165,7 @@ export default function ResourceLogsPage() {
 
         <section className="surface-card overflow-hidden">
           <div className="border-b border-border px-4 py-3">
-            <p className="text-sm font-semibold">Request & response</p>
+            <p className="text-sm font-medium">Request & response</p>
             {selectedLog ? (
               <p className="text-xs text-muted-foreground">
                 <LocalTime value={selectedLog.created_at} /> ·{" "}
@@ -211,11 +211,11 @@ function StatCard({
     <div className="surface-card px-4 py-3">
       <p className="text-xs text-muted-foreground">{label}</p>
       {timestamp ? (
-        <p className="mt-1 text-sm font-semibold">
+        <p className="mt-1 text-sm font-medium">
           <LocalTime value={timestamp} />
         </p>
       ) : (
-        <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
+        <p className="mt-1 text-lg font-medium tabular-nums">{value}</p>
       )}
     </div>
   );

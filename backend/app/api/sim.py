@@ -388,7 +388,7 @@ def to_monthly(serial_number: str, db: Session = Depends(get_db)) -> dict:
 
 @router.post("/ops/jira/issues")
 def jira_create_issue(payload: JiraIssueRequest, db: Session = Depends(get_db)) -> dict:
-    issue_key = f"NX-{int(datetime.now(timezone.utc).timestamp())}"
+    issue_key = f"MD-{int(datetime.now(timezone.utc).timestamp())}"
     _queue_message(
         db,
         to_address="backoffice@internal",

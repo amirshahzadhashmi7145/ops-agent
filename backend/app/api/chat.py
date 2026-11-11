@@ -21,7 +21,7 @@ router = APIRouter()
 
 
 def get_user_email(request: Request) -> str:
-    return request.headers.get("X-Nexar-User", settings.dev_user_email)
+    return request.headers.get("X-Ops-User", settings.dev_user_email)
 
 
 def _conversation_or_404(db: Session, conversation_id: uuid.UUID, user_email: str) -> Conversation:

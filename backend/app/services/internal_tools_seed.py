@@ -18,7 +18,7 @@ from app.models.resource import ConnectionMode, HttpMethod, Resource, ToolScope
 
 logger = logging.getLogger(__name__)
 
-SEED_USER = "system@nexar.ops"
+SEED_USER = "system@ops.internal"
 INTERNAL_TOOLS_PATH = Path(__file__).resolve().parent.parent / "data" / "internal_tools.json"
 
 

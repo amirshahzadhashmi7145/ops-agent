@@ -67,8 +67,8 @@ export default function UsagePage() {
 function EmptyUsage() {
   return (
     <div className="surface-card p-6">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Live sample</p>
-      <h3 className="mt-1 text-xl font-semibold tracking-tight">Need live tickets</h3>
+      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-primary">Live sample</p>
+      <h3 className="mt-1 text-xl font-medium tracking-tight">Need live tickets</h3>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
         Hosting above is your configured VM plan. LLM percentiles and the model pick only appear after Chat
         records real spend.
@@ -82,10 +82,10 @@ function HostingPanel({ hosting }: { hosting: HostingStats }) {
     <div className="mb-5 surface-card overflow-hidden p-0">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border px-5 py-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-primary">
             Hosting / VM
           </p>
-          <h3 className="mt-1 text-lg font-semibold tracking-tight">
+          <h3 className="mt-1 text-lg font-medium tracking-tight">
             {usd(hosting.monthly_usd, 0)}
             <span className="ml-1 text-sm font-medium text-muted-foreground">/ month</span>
           </h3>
@@ -113,14 +113,14 @@ function HostingPanel({ hosting }: { hosting: HostingStats }) {
             <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
               {item.label}
             </p>
-            <p className="mt-1.5 text-xl font-semibold tabular-nums">{usd(item.monthly_usd, 0)}</p>
+            <p className="mt-1.5 text-xl font-medium tabular-nums">{usd(item.monthly_usd, 0)}</p>
             <p className="mt-0.5 text-[11px] font-medium text-foreground">{item.specs}</p>
             <p className="mt-1 text-[11px] text-muted-foreground">{item.note}</p>
           </div>
         ))}
       </div>
       <div className="border-t border-border px-5 py-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
           Hosting share by ticket volume
         </p>
         <div className="flex flex-wrap gap-4 text-xs">
@@ -149,10 +149,10 @@ function DecisionBoard({ data }: { data: UsageStats }) {
       <div className="mb-5 surface-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-primary">
               Recommended model
             </p>
-            <h3 className="mt-1 text-xl font-semibold tracking-tight">{pick.label}</h3>
+            <h3 className="mt-1 text-xl font-medium tracking-tight">{pick.label}</h3>
             <p className="mt-1 text-xs text-muted-foreground">
               {pick.sample === "observed"
                 ? `From ${compact(pick.signals.ticket_count)} metered tickets in this window.`
@@ -204,7 +204,7 @@ function DecisionBoard({ data }: { data: UsageStats }) {
         <div className="mb-5 surface-card overflow-x-auto p-4">
           <div className="mb-3 flex items-end justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold">Compare models at {compact(volume)} tickets / month</h3>
+              <h3 className="text-sm font-medium">Compare models at {compact(volume)} tickets / month</h3>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 COGS = metered LLM ({usd(data.pricing.cost_per_ticket_usd, 4)}/ticket) + fixed hosting (
                 {usd(data.hosting.monthly_usd, 0)}/mo). Seat {usd(data.pricing.seat_usd, 0)} recovers hosting
@@ -230,7 +230,7 @@ function DecisionBoard({ data }: { data: UsageStats }) {
                 return (
                   <tr key={model.key} className={cn("border-b border-border/60", selected && "bg-primary/5")}>
                     <td className="py-2.5 pr-3">
-                      <p className="font-semibold text-foreground">
+                      <p className="font-medium text-foreground">
                         {model.label}
                         {selected ? <span className="ml-2 text-[10px] font-medium text-primary">Pick</span> : null}
                       </p>
@@ -252,7 +252,7 @@ function DecisionBoard({ data }: { data: UsageStats }) {
 
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="surface-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             Unit economics
           </p>
           <ul className="mt-3 space-y-2 text-xs">
@@ -274,7 +274,7 @@ function DecisionBoard({ data }: { data: UsageStats }) {
           </ul>
         </div>
         <div className="surface-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             What the mix is telling you
           </p>
           <ul className="mt-3 space-y-2 text-xs">
@@ -304,7 +304,7 @@ function VolumeStrip({
   const volumes = models[0]?.scenarios.map((item) => item.tickets_per_month) ?? [];
   return (
     <div className="mt-4 overflow-x-auto">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+      <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
         Customer bill by volume (usage includes hosting platform fee)
       </p>
       <table className="w-full text-left text-[11px]">
@@ -360,7 +360,7 @@ function StatCard({
       <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "mt-1.5 text-2xl font-semibold tracking-tight tabular-nums",
+          "mt-1.5 text-2xl font-medium tracking-tight tabular-nums",
           tone === "good" ? "text-emerald-600 dark:text-emerald-400" : "text-foreground",
         )}
       >

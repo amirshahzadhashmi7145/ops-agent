@@ -1,12 +1,21 @@
 {
-  "NX-PRO-30001": {
+  "MD-LATCH-30001": {
     "segment": "consumer",
     "camera_family": "classic",
-    "model": "Pro",
+    "model": "Latch",
     "lookup": {
-      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-08-15"},
-      "subscription": {"status": "Active"},
-      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "warranty": {
+        "status": "active",
+        "purchase_channel": "shopify",
+        "delivery_date": "2025-08-15"
+      },
+      "subscription": {
+        "status": "Active"
+      },
+      "rear_camera": {
+        "paired": "no",
+        "interior_facing": "no"
+      },
       "order_number": "346741"
     },
     "classic_diagnostic": {
@@ -32,14 +41,23 @@
     "sim_triage": null,
     "sim_data": null
   },
-  "NX-BEAM-10001": {
+  "MD-KEY-10001": {
     "segment": "consumer",
     "camera_family": "classic",
-    "model": "Beam",
+    "model": "Key",
     "lookup": {
-      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-03-12"},
-      "subscription": {"status": "Active"},
-      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "warranty": {
+        "status": "active",
+        "purchase_channel": "shopify",
+        "delivery_date": "2025-03-12"
+      },
+      "subscription": {
+        "status": "Active"
+      },
+      "rear_camera": {
+        "paired": "no",
+        "interior_facing": "no"
+      },
       "order_number": "346741"
     },
     "classic_diagnostic": {
@@ -55,60 +73,111 @@
     "sim_triage": null,
     "sim_data": null
   },
-  "NX-ONE-20022": {
+  "MD-GUARD-20022": {
     "segment": "consumer",
     "camera_family": "connect",
-    "model": "One",
+    "model": "Guard",
     "lookup": {
-      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2024-11-02"},
-      "subscription": {"status": "Active"},
-      "rear_camera": {"paired": "yes", "interior_facing": "yes"},
+      "warranty": {
+        "status": "active",
+        "purchase_channel": "shopify",
+        "delivery_date": "2024-11-02"
+      },
+      "subscription": {
+        "status": "Active"
+      },
+      "rear_camera": {
+        "paired": "yes",
+        "interior_facing": "yes"
+      },
       "order_number": "353893"
     },
     "classic_diagnostic": null,
     "health": {
-      "serial_number": "NX-ONE-20022",
-      "model": "One",
+      "serial_number": "MD-GUARD-20022",
+      "model": "Guard",
       "irq": false,
       "has_power_issues": false,
       "has_reset_issues": false,
       "activation_date": "2024-11-05",
-      "summary": {"health_score": "good"},
-      "power": {"avg_battery_level": 88, "status": "normal"},
-      "lte": {"signal_quality": "good", "avg_daily_heartbeats": 120, "avg_daily_signals": 18},
-      "sd_card": {"status": "healthy", "size_gb": "116.8 GB"},
+      "summary": {
+        "health_score": "good"
+      },
+      "power": {
+        "avg_battery_level": 88,
+        "status": "normal"
+      },
+      "lte": {
+        "signal_quality": "good",
+        "avg_daily_heartbeats": 120,
+        "avg_daily_signals": 18
+      },
+      "sd_card": {
+        "status": "healthy",
+        "size_gb": "116.8 GB"
+      },
       "issues": [],
       "firmware_version": "7.8.2",
       "interior_facing": "Yes"
     },
-    "sim_triage": {"conclusion": "no_lte_issue", "activity_level": "normal"},
+    "sim_triage": {
+      "conclusion": "no_lte_issue",
+      "activity_level": "normal"
+    },
     "sim_data": {
-      "sim": {"status": "active", "last_30d_mb": 4200, "iccid": "8901260123456789012"},
-      "modem": {"connected": true}
+      "sim": {
+        "status": "active",
+        "last_30d_mb": 4200,
+        "iccid": "8901260123456789012"
+      },
+      "modem": {
+        "connected": true
+      }
     }
   },
-  "NX-BEAM-10088": {
+  "MD-GUARD2-10088": {
     "segment": "consumer",
     "camera_family": "connect",
-    "model": "Beam2",
+    "model": "Guard 2",
     "lookup": {
-      "warranty": {"status": "active", "purchase_channel": "shopify", "delivery_date": "2025-01-20"},
-      "subscription": {"status": "Active"},
-      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "warranty": {
+        "status": "active",
+        "purchase_channel": "shopify",
+        "delivery_date": "2025-01-20"
+      },
+      "subscription": {
+        "status": "Active"
+      },
+      "rear_camera": {
+        "paired": "no",
+        "interior_facing": "no"
+      },
       "order_number": "320100"
     },
     "classic_diagnostic": null,
     "health": {
-      "serial_number": "NX-BEAM-10088",
-      "model": "Beam2",
+      "serial_number": "MD-GUARD2-10088",
+      "model": "Guard 2",
       "irq": false,
       "has_power_issues": false,
       "has_reset_issues": false,
       "activation_date": "2025-01-22",
-      "summary": {"health_score": "fair"},
-      "power": {"avg_battery_level": 72, "status": "normal"},
-      "lte": {"signal_quality": "moderate", "avg_daily_heartbeats": 95, "avg_daily_signals": 12},
-      "sd_card": {"status": "healthy", "size_gb": "58.1 GB"},
+      "summary": {
+        "health_score": "fair"
+      },
+      "power": {
+        "avg_battery_level": 72,
+        "status": "normal"
+      },
+      "lte": {
+        "signal_quality": "moderate",
+        "avg_daily_heartbeats": 95,
+        "avg_daily_signals": 12
+      },
+      "sd_card": {
+        "status": "healthy",
+        "size_gb": "58.1 GB"
+      },
       "issues": [],
       "firmware_version": "7.6.1",
       "interior_facing": "No"
@@ -116,61 +185,120 @@
     "sim_triage": {
       "conclusion": "monthly_cap_exceeded",
       "activity_level": "high",
-      "context": {"last_30d_mb": 18500}
+      "context": {
+        "last_30d_mb": 18500
+      }
     },
     "sim_data": {
-        "sim": {"status": "active", "last_30d_mb": 18500, "iccid": "8901260987654321098", "monthly_cap_mb": 12000},
-      "modem": {"connected": true}
+      "sim": {
+        "status": "active",
+        "last_30d_mb": 18500,
+        "iccid": "8901260987654321098",
+        "monthly_cap_mb": 12000
+      },
+      "modem": {
+        "connected": true
+      }
     }
   },
-  "B2-MINI-50001": {
+  "MD-MINI-50001": {
     "segment": "consumer",
     "camera_family": "connect",
-    "model": "Beam2 mini",
+    "model": "Guard Mini",
     "lookup": {
-      "warranty": {"status": "active", "purchase_channel": "amazon", "delivery_date": "2025-05-01"},
-      "subscription": {"status": "Deactivated"},
-      "rear_camera": {"paired": "no", "interior_facing": "no"},
+      "warranty": {
+        "status": "active",
+        "purchase_channel": "amazon",
+        "delivery_date": "2025-05-01"
+      },
+      "subscription": {
+        "status": "Deactivated"
+      },
+      "rear_camera": {
+        "paired": "no",
+        "interior_facing": "no"
+      },
       "order_number": "114-1536531-8448242"
     },
     "classic_diagnostic": null,
     "health": {
-      "serial_number": "B2-MINI-50001",
-      "model": "Beam2 mini",
+      "serial_number": "MD-MINI-50001",
+      "model": "Guard Mini",
       "irq": false,
       "has_power_issues": false,
       "has_reset_issues": false,
       "activation_date": "2025-05-03",
-      "summary": {"health_score": "poor"},
-      "power": {"avg_battery_level": 45, "status": "low"},
-      "lte": {"signal_quality": "poor", "avg_daily_heartbeats": 0, "avg_daily_signals": 0},
-      "sd_card": {"status": "healthy", "size_gb": "58.1 GB"},
-      "issues": ["no_recent_heartbeat"],
+      "summary": {
+        "health_score": "poor"
+      },
+      "power": {
+        "avg_battery_level": 45,
+        "status": "low"
+      },
+      "lte": {
+        "signal_quality": "poor",
+        "avg_daily_heartbeats": 0,
+        "avg_daily_signals": 0
+      },
+      "sd_card": {
+        "status": "healthy",
+        "size_gb": "58.1 GB"
+      },
+      "issues": [
+        "no_recent_heartbeat"
+      ],
       "firmware_version": "7.5.8",
       "interior_facing": "No"
     },
-    "sim_triage": {"conclusion": "sim_inactive", "sim_status": "Deactivated"},
+    "sim_triage": {
+      "conclusion": "sim_inactive",
+      "sim_status": "Deactivated"
+    },
     "sim_data": {
-      "sim": {"status": "deactivated", "last_30d_mb": 0, "iccid": "8901260111222333444"},
-      "modem": {"connected": false}
+      "sim": {
+        "status": "deactivated",
+        "last_30d_mb": 0,
+        "iccid": "8901260111222333444"
+      },
+      "modem": {
+        "connected": false
+      }
     }
   },
-  "NX-FLEET-90001": {
+  "MD-FLEET-90001": {
     "segment": "fleets",
     "camera_family": "connect",
-    "model": "One",
+    "model": "Guard",
     "lookup": {
-      "warranty": {"status": "active", "purchase_channel": "portal", "delivery_date": "2025-02-01"},
-      "subscription": {"status": "Active"},
-      "rear_camera": {"paired": "no", "interior_facing": "no"}
+      "warranty": {
+        "status": "active",
+        "purchase_channel": "portal",
+        "delivery_date": "2025-02-01"
+      },
+      "subscription": {
+        "status": "Active"
+      },
+      "rear_camera": {
+        "paired": "no",
+        "interior_facing": "no"
+      }
     },
     "classic_diagnostic": null,
     "health": {
-      "serial_number": "NX-FLEET-90001",
-      "model": "One",
-      "summary": {"health_score": "good"}
+      "serial_number": "MD-FLEET-90001",
+      "model": "Guard",
+      "summary": {
+        "health_score": "good"
+      }
     },
-    "sim_triage": {"conclusion": "no_lte_issue"},
-    "sim_data": {"sim": {"status": "active", "last_30d_mb": 2100}}
+    "sim_triage": {
+      "conclusion": "no_lte_issue"
+    },
+    "sim_data": {
+      "sim": {
+        "status": "active",
+        "last_30d_mb": 2100
+      }
+    }
   }
 }

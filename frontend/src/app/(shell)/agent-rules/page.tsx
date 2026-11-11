@@ -155,7 +155,7 @@ export default function AgentRulesPage() {
                       <Icon className="h-4 w-4" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-foreground">
+                      <h3 className="text-sm font-medium text-foreground">
                         {category.label}
                         <span className="ml-2 text-xs font-normal text-muted-foreground">
                           {categoryRules.length}

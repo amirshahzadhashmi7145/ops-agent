@@ -67,7 +67,7 @@ export default function MessagesPage() {
             <div className="mb-4 rounded-2xl bg-primary/10 p-4 text-primary">
               <Inbox className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-semibold">No messages yet</h3>
+            <h3 className="text-sm font-medium">No messages yet</h3>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
               Run subscription cancel or device return flows in Chat to generate confirmation messages here.
             </p>

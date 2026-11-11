@@ -368,7 +368,7 @@ def create_shopify_replacement(payload: CreateShopifyReplacementRequest, db: Ses
 
 @router.post("/shopify/coupon")
 def create_shopify_coupon(payload: CreateShopifyCouponRequest, db: Session = Depends(get_db)) -> dict:
-    code = f"NEXAR{payload.discount}-{uuid.uuid4().hex[:8].upper()}"
+    code = f"MERIDIAN{payload.discount}-{uuid.uuid4().hex[:8].upper()}"
     _queue_message(
         db,
         to_address=payload.email,

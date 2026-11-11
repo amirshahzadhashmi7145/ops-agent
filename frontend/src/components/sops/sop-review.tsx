@@ -77,7 +77,7 @@ export function SopReview({
           )}
           <Separator />
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">
+            <h3 className="font-medium text-foreground">
               Processes ({document.processes?.length || 0})
             </h3>
             {(document.processes || []).map((process) => (

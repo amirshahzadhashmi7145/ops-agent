@@ -21,14 +21,14 @@ class _Customer:
 
 
 CLASSIC = (
-    _Device("NX-BEAM-10001", "Beam"),
+    _Device("MD-KEY-10001", "Key"),
     _Customer(),
-    {"camera_family": "classic", "model": "Beam", "segment": "consumer", "lookup": {}},
+    {"camera_family": "classic", "model": "Key", "segment": "consumer", "lookup": {}},
 )
 CONNECT = (
-    _Device("NX-ONE-20022", "One"),
+    _Device("MD-GUARD-20022", "Guard"),
     _Customer(),
-    {"camera_family": "connect", "model": "One", "segment": "consumer", "lookup": {}},
+    {"camera_family": "connect", "model": "Guard", "segment": "consumer", "lookup": {}},
 )
 
 
@@ -48,13 +48,13 @@ def test_lte_issue_locks_connect_sop(monkeypatch):
         "app.services.sop_device_routing.find_devices_by_query",
         lambda db, q: [
             (
-                _Device("NX-BEAM-10088", "Beam2"),
+                _Device("MD-GUARD2-10088", "Guard 2"),
                 _Customer(),
-                {"camera_family": "connect", "model": "Beam2", "segment": "consumer", "lookup": {}},
+                {"camera_family": "connect", "model": "Guard 2", "segment": "consumer", "lookup": {}},
             )
         ],
     )
-    routing = resolve_device_routing(SimpleNamespace(), "Camera NX-BEAM-10088 has no LTE. What’s going on?")
+    routing = resolve_device_routing(SimpleNamespace(), "Lock MD-GUARD2-10088 has no LTE. What’s going on?")
     assert routing["preferred_process_hint"] == "Sim Triage"
     assert routing["is_connectivity"] is True
 
@@ -99,4 +99,4 @@ def test_devices_lookup_route_not_captured_as_serial():
     app.include_router(sim, prefix="/api")
     client = TestClient(app)
     assert client.get("/api/sim/devices/lookup").json() == {"lookup": True}
-    assert client.get("/api/sim/devices/NX-ONE-20022").json() == {"serial": "NX-ONE-20022"}
+    assert client.get("/api/sim/devices/MD-GUARD-20022").json() == {"serial": "MD-GUARD-20022"}

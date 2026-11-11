@@ -151,7 +151,8 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "calt";
-    letter-spacing: -0.011em;
+    letter-spacing: -0.006em;
+    font-weight: 400;
   }
 }
 
@@ -161,11 +162,11 @@
   }
 
   .page-header {
-    @apply text-lg font-semibold tracking-tight text-foreground;
+    @apply text-lg font-medium tracking-tight text-foreground;
   }
 
   .page-description {
-    @apply mt-1 text-xs leading-snug text-muted-foreground;
+    @apply mt-1 text-xs font-normal leading-snug text-muted-foreground;
   }
 
   .scrollbar-none {

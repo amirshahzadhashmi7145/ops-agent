@@ -50,7 +50,7 @@ export function ChatTracePanel({ trace }: ChatTracePanelProps) {
           <span
             className={cn(
               "ml-1 rounded px-1.5 py-0.5",
-              isSop ? "bg-primary/15 font-semibold text-primary" : "bg-muted",
+              isSop ? "bg-primary/15 font-medium text-primary" : "bg-muted",
             )}
           >
             {MODE_LABELS[mode] ?? mode}

@@ -54,7 +54,7 @@ function NavGroup({
   return (
     <div className="space-y-1">
       {!collapsed && (
-        <p className="px-2.5 pb-1 pt-2.5 text-[11px] font-semibold tracking-[-0.01em] text-muted-foreground">
+        <p className="px-2.5 pb-1.5 pt-3 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
           {label}
         </p>
       )}
@@ -72,22 +72,22 @@ function NavGroup({
             {active && (
               <motion.span
                 layoutId="nav-active"
-                className="absolute inset-0 rounded-xl bg-sidebar-accent shadow-sm"
+                className="absolute inset-0 rounded-lg bg-sidebar-accent"
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
             <span
               className={cn(
-                "relative flex items-center rounded-lg py-[7px] text-[13px] leading-none tracking-[-0.01em] transition-colors",
+                "relative flex items-center rounded-lg py-[7px] text-[13px] leading-none transition-colors",
                 collapsed ? "justify-center px-0" : "gap-2.5 px-2.5",
                 active
-                  ? "font-semibold text-sidebar-accent-foreground"
-                  : "font-medium text-sidebar-foreground/85 hover:text-foreground",
+                  ? "font-medium text-sidebar-accent-foreground"
+                  : "font-normal text-sidebar-foreground/80 hover:text-foreground",
               )}
             >
               <Icon
                 className={cn(
-                  "h-3.5 w-3.5 shrink-0",
+                  "h-3.5 w-3.5 shrink-0 stroke-[1.75]",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               />
@@ -129,10 +129,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <OpsLogo className="h-7 w-7 shrink-0" />
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <h1 className="text-[13px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
+                <h1 className="text-[13px] font-medium leading-tight text-foreground">
                   Ops Agent
                 </h1>
-                <p className="text-[11px] font-medium leading-tight tracking-[-0.01em] text-muted-foreground">
+                <p className="text-[11px] font-normal leading-tight text-muted-foreground">
                   Support copilot
                 </p>
               </div>
@@ -158,14 +158,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {!collapsed ? (
             <div className="flex items-center justify-between rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-2.5 py-1.5">
               <div>
-                <p className="text-[12px] font-semibold leading-tight tracking-[-0.01em] text-foreground">
+                <p className="text-[12px] font-medium leading-tight text-foreground">
                   Workspace
                 </p>
-                <p className="text-[11px] font-medium leading-tight tracking-[-0.01em] text-muted-foreground">
+                <p className="text-[11px] font-normal leading-tight text-muted-foreground">
                   Simulated tools
                 </p>
               </div>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-medium tracking-[-0.01em] text-emerald-700 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-normal text-emerald-700 dark:text-emerald-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 Ready
               </span>

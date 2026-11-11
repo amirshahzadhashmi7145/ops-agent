@@ -50,7 +50,7 @@ export function ToolUsageCharts({ calls }: { calls: ToolCallLogListItem[] }) {
       <section className="surface-card p-5">
         <div className="mb-4 flex items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold">Calls over time</p>
+            <p className="text-sm font-medium">Calls over time</p>
             <p className="text-xs text-muted-foreground">Last {DAY_COUNT} days</p>
           </div>
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
@@ -100,7 +100,7 @@ export function ToolUsageCharts({ calls }: { calls: ToolCallLogListItem[] }) {
 
       <section className="surface-card flex flex-col justify-between p-5">
         <div>
-          <p className="text-sm font-semibold">Outcomes</p>
+          <p className="text-sm font-medium">Outcomes</p>
           <p className="text-xs text-muted-foreground">Across loaded calls</p>
         </div>
         <div className="mt-4 space-y-3">
@@ -117,21 +117,21 @@ export function ToolUsageCharts({ calls }: { calls: ToolCallLogListItem[] }) {
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <dt className="text-xs text-muted-foreground">Succeeded</dt>
-              <dd className="font-semibold text-emerald-600 dark:text-emerald-400">{successCount}</dd>
+              <dd className="font-medium text-emerald-600 dark:text-emerald-400">{successCount}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Failed</dt>
-              <dd className="font-semibold text-red-500">{failedCount}</dd>
+              <dd className="font-medium text-red-500">{failedCount}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Success rate</dt>
-              <dd className="font-semibold">
+              <dd className="font-medium">
                 {calls.length ? `${Math.round((successCount / calls.length) * 100)}%` : "—"}
               </dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Avg latency</dt>
-              <dd className="font-semibold">{calls.length ? `${avgLatency}ms` : "—"}</dd>
+              <dd className="font-medium">{calls.length ? `${avgLatency}ms` : "—"}</dd>
             </div>
           </dl>
         </div>

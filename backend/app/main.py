@@ -18,7 +18,7 @@ from app.api.sops import router as sops_router
 from app.api.usage import router as usage_router
 from app.core.config import settings
 from app.services.internal_tools_seed import sync_internal_tools
-from app.services.nexar_content_seed import sync_nexar_content
+from app.services.playbook_content_seed import sync_playbook_content
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def _seed_playbook() -> None:
     uv_log = logging.getLogger("uvicorn.error")
     try:
         uv_log.info("Indexing knowledge base and SOPs...")
-        counts = sync_nexar_content()
+        counts = sync_playbook_content()
         uv_log.info("Support playbook ready: %s", counts)
     except Exception:  # noqa: BLE001
         logger.exception("Support playbook seed skipped (DB or embeddings may not be ready yet)")
@@ -54,10 +54,10 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "X-Nexar-User"],
+    allow_headers=["Content-Type", "Authorization", "X-Ops-User"],
 )
 
-audit_logger = logging.getLogger("nexar.audit")
+audit_logger = logging.getLogger("ops.audit")
 AUDITED_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 
@@ -69,7 +69,7 @@ async def audit_state_changes(request: Request, call_next):
     if request.method in AUDITED_METHODS:
         audit_logger.info(
             "actor=%s method=%s path=%s status=%s",
-            request.headers.get("X-Nexar-User", "anonymous"),
+            request.headers.get("X-Ops-User", "anonymous"),
             request.method,
             request.url.path,
             response.status_code,

@@ -78,7 +78,7 @@ export function ReferenceReview({
           )}
 
           <section>
-            <h3 className="mb-2 text-sm font-semibold text-foreground">What you entered</h3>
+            <h3 className="mb-2 text-sm font-medium text-foreground">What you entered</h3>
             <p className="mb-2 text-xs text-muted-foreground">
               Your original content and formatting. This is what was sent to processing.
             </p>
@@ -89,7 +89,7 @@ export function ReferenceReview({
 
           {isReady && (
             <section>
-              <h3 className="mb-2 text-sm font-semibold text-foreground">Processed reference</h3>
+              <h3 className="mb-2 text-sm font-medium text-foreground">Processed reference</h3>
               <p className="mb-2 text-xs text-muted-foreground">
                 Structured output from the formatter (used for search). Not a copy of your editor formatting.
               </p>
