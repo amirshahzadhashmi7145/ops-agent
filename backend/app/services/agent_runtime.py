@@ -41,6 +41,11 @@ from app.services.sop_device_routing import (
     routing_prompt_block,
 )
 from app.services.sop_retrieval import process_to_prompt_block, search_sop_processes
+from app.services.grounding import (
+    corpus_cache_version,
+    looks_like_operational_action,
+    needs_document_grounding,
+)
 from app.services.tool_definitions import (
     build_tool_definitions,
     is_greeting_message,
@@ -178,35 +183,6 @@ def _looks_like_unfulfilled_search(content: str | None) -> bool:
     not emit a tool call. Used to force a tool call on a corrective retry so the
     user gets a real answer instead of an empty 'let me check…' non-answer."""
     return bool(content and _UNFULFILLED_INTENT_PATTERN.search(content))
-
-
-# Informational / policy asks should hit Articles, not auto-lock a Workflow.
-_POLICY_QUESTION_PATTERN = re.compile(
-    r"\b("
-    r"policy|policies|warranty|warranties|faq|coverage|according to"
-    r"|out of warranty|do we offer|does meridian|what is meridian"
-    r"|tell me more about|how long (is|does)|return policy"
-    r"|battery replacement|lifetime battery"
-    r")\b",
-    re.IGNORECASE,
-)
-_POLICY_ACTION_PATTERN = re.compile(
-    r"\b("
-    r"cancel|refund|escalate|look ?up|reset (the )?|replace my|ship|return my"
-    r"|create (a )?ticket|health status|serial"
-    r")\b",
-    re.IGNORECASE,
-)
-
-
-def _looks_like_policy_question(text: str | None) -> bool:
-    """True for FAQ/policy wording without an operational action verb."""
-    cleaned = (text or "").strip()
-    if not cleaned:
-        return False
-    if _POLICY_ACTION_PATTERN.search(cleaned):
-        return False
-    return bool(_POLICY_QUESTION_PATTERN.search(cleaned))
 
 
 def _history_to_messages(history: list[dict[str, str]]) -> list[ChatMessage]:
@@ -377,9 +353,13 @@ async def run_agent_turn(
     # True when Articles (KB) or Workflows (SOP search) grounded this turn — safe to cache.
     used_retrieval = False
 
+    corpus_version = corpus_cache_version(db)
+
     if is_greeting_message(user_message):
         pipeline_trace.append({"type": "mode", "mode": "general_chat", "reason": "greeting_short_circuit"})
-        fingerprint = cache_fingerprint(sop_process_id=None, greeting=True)
+        fingerprint = cache_fingerprint(
+            sop_process_id=None, greeting=True, corpus_version=corpus_version
+        )
         cached = lookup_semantic_cache(db, query=user_message, fingerprint=fingerprint)
         if cached:
             record_semantic_hit(db, cached, conversation_id=conversation_id, user_email=user_email)
@@ -423,8 +403,13 @@ async def run_agent_turn(
             db, user_message, routing=device_routing, threshold=sop_auto_threshold
         )
         auto_best = selection["best"]
-        # Policy/FAQ turns must stay on Articles — do not auto-lock a Workflow.
-        if auto_best and selection["confident"] and not _looks_like_policy_question(user_message):
+        # Production-safe: only auto-lock a Workflow on clear operational intent.
+        # FAQ/how-to/policy ("can we create an RMA for Amazon?") must stay on Articles.
+        if (
+            auto_best
+            and selection["confident"]
+            and looks_like_operational_action(user_message)
+        ):
             active_sop = auto_best
             allowed = set(auto_best.get("tools") or [])
             tools = _build_tools(filtered_resources, agent_cfg, allowed_tool_names=allowed)
@@ -456,6 +441,7 @@ async def run_agent_turn(
     fingerprint = cache_fingerprint(
         sop_process_id=str(active_sop["process_id"]) if active_sop else None,
         greeting=False,
+        corpus_version=corpus_version,
     )
     cached = lookup_semantic_cache(db, query=user_message, fingerprint=fingerprint)
     if cached:
@@ -492,22 +478,17 @@ async def run_agent_turn(
         )
 
         # Safety net: force a tool call when the model narrates a search without
-        # calling one, or when a policy/FAQ question skips Articles entirely.
+        # calling one, or when a docs/FAQ question skips Articles entirely.
+        docs_turn = bool(agent_cfg.enable_kb_search and needs_document_grounding(user_message))
         needs_forced_tool = bool(
             tools
             and round_idx == 0
             and not response.tool_calls
-            and (
-                _looks_like_unfulfilled_search(response.content)
-                or (
-                    agent_cfg.enable_kb_search
-                    and _looks_like_policy_question(user_message)
-                )
-            )
+            and (_looks_like_unfulfilled_search(response.content) or docs_turn)
         )
         if needs_forced_tool:
             force_tools = tools
-            if agent_cfg.enable_kb_search and _looks_like_policy_question(user_message):
+            if docs_turn:
                 kb_only = [
                     t
                     for t in tools
@@ -534,6 +515,13 @@ async def run_agent_turn(
             final_content = response.content or (
                 "I'm not sure I follow — could you rephrase that or add a bit more detail so I can help?"
             )
+            # Hard stop: never ship an ungrounded docs/FAQ answer in production.
+            if docs_turn and not used_retrieval:
+                final_content = (
+                    "I need to check our Articles before answering that, but I couldn't complete "
+                    "a knowledge-base search. Please try again or rephrase the question."
+                )
+                pipeline_trace.append({"type": "ungrounded_docs_blocked", "reason": "no_kb_retrieval"})
             # Only cache answers that were grounded via Articles/Workflows search.
             # Never cache after live resource/API calls, and never cache bare LLM
             # replies that skipped retrieval (those poisoned later "policy" hits).
@@ -637,7 +625,9 @@ async def run_agent_turn(
                     tools = _build_tools(filtered_resources, agent_cfg, allowed_tool_names=allowed)
                     _set_dynamic_system(messages, process_to_prompt_block(matched))
                     fingerprint = cache_fingerprint(
-                        sop_process_id=str(matched["process_id"]), greeting=False
+                        sop_process_id=str(matched["process_id"]),
+                        greeting=False,
+                        corpus_version=corpus_version,
                     )
                     pipeline_trace.append(
                         {

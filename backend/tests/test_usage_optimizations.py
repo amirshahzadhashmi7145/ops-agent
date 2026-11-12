@@ -43,6 +43,10 @@ def test_cache_fingerprint_namespaces_sops():
     assert cache_fingerprint(sop_process_id=None, greeting=True) == "mode:greeting"
     assert cache_fingerprint(sop_process_id="abc", greeting=False) == "sop:abc"
     assert cache_fingerprint(sop_process_id=None, greeting=False) == "mode:kb"
+    assert (
+        cache_fingerprint(sop_process_id=None, greeting=False, corpus_version="deadbeef")
+        == "mode:kb:c=deadbeef"
+    )
 
 
 def test_recommend_none_when_no_tickets():

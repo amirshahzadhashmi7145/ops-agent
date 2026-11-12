@@ -171,8 +171,14 @@ def _genericize_runtime_branding(db: Session) -> int:
             updated += 1
         prompt = settings_row.system_prompt or ""
         needs_prompt_refresh = any(
-            token in prompt for token in ("Nexar", "AetherCam", "connected cameras")
-        ) or "Ground every policy claim" not in prompt
+            token in prompt
+            for token in (
+                "Nexar",
+                "AetherCam",
+                "connected cameras",
+                "Meridian customer support",
+            )
+        ) or "Ground every policy claim" not in prompt or "company docs" not in prompt
         if needs_prompt_refresh:
             settings_row.system_prompt = DEFAULT_SYSTEM_PROMPT
             updated += 1

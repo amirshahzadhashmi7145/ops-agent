@@ -1,22 +1,48 @@
 """Static checks that the agent is configured to stay grounded."""
 
 from app.services.agent_settings_defaults import DEFAULT_SYSTEM_PROMPT
-from app.services.agent_runtime import PROMPT_INJECTION_GUARD, _looks_like_policy_question
+from app.services.agent_runtime import PROMPT_INJECTION_GUARD
+from app.services.grounding import looks_like_operational_action, needs_document_grounding
+from app.services.usage.semantic_cache import cache_fingerprint
 
 
-def test_policy_question_detector():
-    assert _looks_like_policy_question(
-        "What is Meridian's warranty policy for Shopify purchases?"
+def test_docs_vs_ops_detectors_are_company_agnostic():
+    # Docs / FAQ — force Articles, never auto-lock Workflow.
+    assert needs_document_grounding(
+        "What's the difference between Classic and Connect locks?"
     )
-    assert _looks_like_policy_question("Tell me more about the out of warranty options.")
-    assert _looks_like_policy_question(
-        "According to Meridian policy, do we offer BatteryForever?"
+    assert needs_document_grounding("Can we create a Shopify RMA for an Amazon purchase?")
+    assert needs_document_grounding("When should we escalate to a human queue?")
+    assert needs_document_grounding("How do we handle LTE data issues on Connect locks?")
+    assert needs_document_grounding("Tell me more about the out of warranty options.")
+    assert needs_document_grounding(
+        "According to policy, do we offer a MeridianVIP lifetime program?"
     )
-    assert not _looks_like_policy_question(
+    assert not looks_like_operational_action(
+        "Can we create a Shopify RMA for an Amazon purchase?"
+    )
+    assert not looks_like_operational_action("How do we handle LTE data issues?")
+
+    # Live ops — Workflow/tools OK.
+    assert looks_like_operational_action(
         "Please cancel the subscription for customer alex.rivera@example.com"
     )
-    assert not _looks_like_policy_question(
+    assert looks_like_operational_action(
         "What is the health status of lock serial MD-GUARD-20022?"
+    )
+    assert looks_like_operational_action("Check SIM / LTE triage for MD-GUARD2-10088")
+    assert looks_like_operational_action("Look up devices for alex.rivera@example.com")
+    assert not needs_document_grounding(
+        "Please cancel the subscription for customer alex.rivera@example.com"
+    )
+
+
+def test_cache_fingerprint_includes_corpus_version():
+    assert cache_fingerprint(sop_process_id=None, greeting=False, corpus_version="abc") == (
+        "mode:kb:c=abc"
+    )
+    assert cache_fingerprint(sop_process_id="p1", greeting=False, corpus_version="abc") == (
+        "sop:p1:c=abc"
     )
 
 
@@ -25,6 +51,8 @@ def test_default_prompt_requires_kb_search_for_policy():
     assert "search_knowledge_base" in prompt
     assert "never fabricate" in prompt
     assert "knowledge base" in prompt or "articles" in prompt
+    assert "meridian customer support" not in prompt
+    assert "company docs" in prompt
 
 
 def test_default_prompt_requires_sop_before_ops_actions():

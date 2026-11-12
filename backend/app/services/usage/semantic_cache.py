@@ -29,12 +29,19 @@ def query_is_cacheable(text: str) -> bool:
     return _VOLATILE.search(cleaned) is None
 
 
-def cache_fingerprint(*, sop_process_id: str | None, greeting: bool) -> str:
+def cache_fingerprint(
+    *,
+    sop_process_id: str | None,
+    greeting: bool,
+    corpus_version: str = "",
+) -> str:
+    # corpus_version invalidates cache when Articles/Workflows/Rules change.
+    suffix = f":c={corpus_version}" if corpus_version else ""
     if greeting:
-        return "mode:greeting"
+        return f"mode:greeting{suffix}"
     if sop_process_id:
-        return f"sop:{sop_process_id}"
-    return "mode:kb"
+        return f"sop:{sop_process_id}{suffix}"
+    return f"mode:kb{suffix}"
 
 
 def lookup_semantic_cache(
