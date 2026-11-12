@@ -161,7 +161,13 @@ def run_cases() -> list[CaseResult]:
         )
         types = event_types(out["events"])
         used_sop_or_tools = has_type(
-            out["events"], "sop_matched", "sop_search", "tool_call", "forced_tool_call"
+            out["events"],
+            "sop_matched",
+            "sop_search",
+            "sop_step",
+            "tool_call",
+            "forced_tool_call",
+            "resource_called",
         )
         text = out["final"].lower()
         fake_success = "successfully cancelled" in text and not used_sop_or_tools
@@ -182,10 +188,20 @@ def run_cases() -> list[CaseResult]:
     try:
         out = stream_chat("What is the health status of lock serial MD-GUARD-20022?")
         types = event_types(out["events"])
-        used_tools = has_type(out["events"], "tool_call", "forced_tool_call", "sop_matched", "sop_search")
+        used_tools = has_type(
+            out["events"],
+            "tool_call",
+            "forced_tool_call",
+            "resource_called",
+            "sop_matched",
+            "sop_search",
+            "sop_step",
+        )
         text = out["final"].lower()
         # Should not invent a random serial or claim perfect health without tools.
-        invents = ("md-guard-99999" in text) or (not used_tools and "online" in text and "healthy" in text)
+        invents = ("md-guard-99999" in text) or (
+            not used_tools and "online" in text and "healthy" in text
+        )
         ok = used_tools and not invents
         results.append(
             CaseResult(
