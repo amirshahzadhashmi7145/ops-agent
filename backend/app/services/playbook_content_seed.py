@@ -84,14 +84,23 @@ def sync_playbook_content(db: Session | None = None) -> dict[str, int]:
     owns_session = db is None
     session = db or SessionLocal()
     try:
+        categories = _sync_categories(session)
+        kb_updated = _sync_kb_articles(session)
+        sop_updated = _sync_sop_documents(session)
+        rules = _sync_agent_rules(session)
+        removed = _purge_removed_seed_content(session)
+        branding = _genericize_runtime_branding(session)
+        profiles = _sync_device_profiles(session)
         counts = {
-            "categories": _sync_categories(session),
-            "kb_articles": _sync_kb_articles(session),
-            "sop_documents": _sync_sop_documents(session),
-            "agent_rules": _sync_agent_rules(session),
-            "removed_legacy": _purge_removed_seed_content(session),
-            "branding": _genericize_runtime_branding(session),
-            "profiles": _sync_device_profiles(session),
+            "categories": categories,
+            "kb_articles_updated": kb_updated,
+            "kb_articles_total": session.query(KbReference).count(),
+            "sop_documents_updated": sop_updated,
+            "sop_documents_total": session.query(SopDocument).count(),
+            "agent_rules": rules,
+            "removed_legacy": removed,
+            "branding": branding,
+            "profiles": profiles,
         }
         session.commit()
         logger.info("Support playbook seed complete: %s", counts)
@@ -161,7 +170,10 @@ def _genericize_runtime_branding(db: Session) -> int:
             settings_row.agent_name = "Ops Agent"
             updated += 1
         prompt = settings_row.system_prompt or ""
-        if any(token in prompt for token in ("Nexar", "AetherCam", "connected cameras")):
+        needs_prompt_refresh = any(
+            token in prompt for token in ("Nexar", "AetherCam", "connected cameras")
+        ) or "Ground every policy claim" not in prompt
+        if needs_prompt_refresh:
             settings_row.system_prompt = DEFAULT_SYSTEM_PROMPT
             updated += 1
     db.flush()
