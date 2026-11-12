@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -124,6 +124,13 @@ def record_semantic_hit(
         avoided_prompt_tokens=entry.prompt_tokens,
         avoided_completion_tokens=entry.completion_tokens,
     )
+
+
+def clear_semantic_cache(db: Session) -> int:
+    """Delete all semantic-cache rows. Returns the number of rows removed."""
+    result = db.execute(delete(SemanticCacheEntry))
+    db.commit()
+    return int(result.rowcount or 0)
 
 
 def last_chat_usage(db: Session, conversation_id: UUID | None) -> LlmUsageEvent | None:

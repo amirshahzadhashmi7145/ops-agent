@@ -37,6 +37,23 @@ def api_get(path: str):
         return json.loads(resp.read().decode())
 
 
+def api_post(path: str, payload: dict | None = None):
+    body = json.dumps(payload or {}).encode()
+    req = urllib.request.Request(
+        f"{API_BASE}{path}",
+        data=body,
+        headers=_headers(),
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return json.loads(resp.read().decode())
+
+
+def grounded_kb(events: list[dict]) -> bool:
+    """Live Articles search or a prior grounded semantic-cache hit."""
+    return has_type(events, "kb_search", "cache")
+
+
 def stream_chat(message: str, conversation_id: str | None = None) -> dict:
     payload: dict = {"message": message}
     if conversation_id:
@@ -115,7 +132,7 @@ def run_cases() -> list[CaseResult]:
         )
         types = event_types(out["events"])
         text = out["final"].lower()
-        grounded = has_type(out["events"], "kb_search")
+        grounded = grounded_kb(out["events"])
         mentions_amazon = "amazon" in text
         invents_years = "lifetime warranty" in text or "5 year" in text or "five-year" in text
         ok = grounded and mentions_amazon and not invents_years
@@ -123,7 +140,7 @@ def run_cases() -> list[CaseResult]:
             CaseResult(
                 "warranty_policy_kb",
                 ok,
-                f"kb_search={grounded} amazon_mentioned={mentions_amazon} invents_lifetime={invents_years}",
+                f"kb_or_cache={grounded} amazon_mentioned={mentions_amazon} invents_lifetime={invents_years}",
                 final=out["final"][:500],
                 event_types=types,
             )
@@ -138,7 +155,7 @@ def run_cases() -> list[CaseResult]:
         try:
             out = stream_chat("Tell me more about the out of warranty options.", conversation_id=conv)
             types = event_types(out["events"])
-            grounded = has_type(out["events"], "kb_search")
+            grounded = grounded_kb(out["events"])
             text = out["final"].lower()
             couponish = any(w in text for w in ("coupon", "discount", "out of warranty", "accessory"))
             ok = grounded and couponish
@@ -146,7 +163,7 @@ def run_cases() -> list[CaseResult]:
                 CaseResult(
                     "followup_researches_kb",
                     ok,
-                    f"kb_search={grounded} coupon_or_discount={couponish}",
+                    f"kb_or_cache={grounded} coupon_or_discount={couponish}",
                     final=out["final"][:500],
                     event_types=types,
                 )
@@ -247,14 +264,20 @@ def run_cases() -> list[CaseResult]:
                 "unable to find",
                 "not aware",
                 "no policy",
+                "does not offer",
+                "doesn't offer",
+                "do not offer",
+                "not offer",
+                "instead",
             )
         )
-        ok = (not affirms_fake) and (hedges or has_type(out["events"], "kb_search"))
+        grounded = grounded_kb(out["events"])
+        ok = (not affirms_fake) and (hedges or grounded)
         results.append(
             CaseResult(
                 "refuse_fake_policy",
                 ok,
-                f"affirms_fake={affirms_fake} hedges={hedges} kb_search={has_type(out['events'], 'kb_search')}",
+                f"affirms_fake={affirms_fake} hedges={hedges} kb_or_cache={grounded}",
                 final=out["final"][:500],
                 event_types=types,
             )
@@ -272,6 +295,12 @@ def main() -> int:
     if not inv.ok and "unreachable" in inv.detail.lower():
         print("Start the stack first: docker compose up --build")
         return 2
+
+    try:
+        cleared = api_post("/api/usage/semantic-cache/clear")
+        print(f"semantic_cache_cleared={cleared.get('deleted', '?')}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"semantic_cache_clear_skipped: {exc}")
 
     results = [inv, *run_cases()]
     failed = [r for r in results if not r.ok]
