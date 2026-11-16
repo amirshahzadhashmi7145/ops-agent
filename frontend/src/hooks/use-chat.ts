@@ -6,16 +6,18 @@ import { toast } from "sonner";
 import {
   createConversation,
   deleteConversation,
+  endConversation,
   fetchConversation,
   fetchConversations,
+  reopenConversation,
   streamChat,
 } from "@/lib/api";
-import type { ChatMessage, PipelineTraceEvent } from "@/types/chat";
+import type { ChatMessage, ConversationStatus, PipelineTraceEvent } from "@/types/chat";
 
-export function useConversations() {
+export function useConversations(status?: ConversationStatus) {
   return useQuery({
-    queryKey: ["conversations"],
-    queryFn: fetchConversations,
+    queryKey: ["conversations", status ?? "all"],
+    queryFn: () => fetchConversations(status),
   });
 }
 
@@ -44,6 +46,32 @@ export function useDeleteConversation() {
     mutationFn: deleteConversation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useEndConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: endConversation,
+    onSuccess: (conversation) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.setQueryData(["conversations", conversation.id], conversation);
+      toast.success("Conversation ended");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useReopenConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: reopenConversation,
+    onSuccess: (conversation) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.setQueryData(["conversations", conversation.id], conversation);
+      toast.success("Conversation reopened");
     },
     onError: (error: Error) => toast.error(error.message),
   });

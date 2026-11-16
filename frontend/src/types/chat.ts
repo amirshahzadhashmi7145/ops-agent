@@ -1,6 +1,12 @@
+export type ConversationStatus = "live" | "ended";
+
 export interface ConversationListItem {
   id: string;
   title: string;
+  status: ConversationStatus;
+  ended_at: string | null;
+  message_count: number;
+  preview: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -16,6 +22,9 @@ export interface ChatMessage {
 export interface ConversationDetail {
   id: string;
   title: string;
+  status: ConversationStatus;
+  ended_at: string | null;
+  message_count: number;
   created_at: string;
   updated_at: string;
   messages: ChatMessage[];

@@ -1,6 +1,6 @@
 from app.models.agent_rule import AgentRule, AgentRuleCategory
 from app.models.agent_settings import AgentSettings
-from app.models.conversation import Conversation, Message, MessageRole
+from app.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from app.models.kb import KbChunk, KbProcessingStatus, KbReference
 from app.models.resource import ApiConnection, Resource, ResourceTestLog, ToolScope
 from app.models.tool_log import ToolCallLog
@@ -33,6 +33,7 @@ __all__ = [
     "AgentSettings",
     "ApiConnection",
     "Conversation",
+    "ConversationStatus",
     "KbChunk",
     "LlmUsageEvent",
     "KbProcessingStatus",

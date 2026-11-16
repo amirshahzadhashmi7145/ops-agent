@@ -8,7 +8,7 @@ import {
   BookOpen,
   Bot,
   Compass,
-  Inbox,
+  History,
   MessageSquare,
   PanelLeft,
   PanelLeftClose,
@@ -27,7 +27,7 @@ const SIDEBAR_KEY = "ops-agent.sidebar-collapsed";
 const workspaceNav = [
   { href: "/agent-overview", label: "Home", icon: Compass },
   { href: "/chat", label: "Chat", icon: MessageSquare },
-  { href: "/messages", label: "Outbox", icon: Inbox },
+  { href: "/history", label: "History", icon: History },
 ];
 
 const configureNav = [

@@ -1,17 +1,17 @@
 import json
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth import get_user_email
 from app.core.config import settings
 from app.core.database import SessionLocal, get_db
-from app.models.conversation import Conversation, Message, MessageRole
+from app.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from app.models.resource import Resource
 from app.schemas.chat import ChatStreamRequest, ConversationCreate, ConversationDetail, ConversationListItem
 from app.services.agent_runtime import run_agent_turn
@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-
+# Live chats with no activity for this long are treated as ended on read.
+LIVE_IDLE = timedelta(hours=2)
 
 
 def _conversation_or_404(db: Session, conversation_id: uuid.UUID, user_email: str) -> Conversation:
@@ -37,11 +38,74 @@ def _title_from_message(message: str) -> str:
     return cleaned[:60] + ("..." if len(cleaned) > 60 else "")
 
 
+def _preview_text(content: str | None, limit: int = 140) -> str | None:
+    if not content:
+        return None
+    cleaned = " ".join(content.strip().split())
+    if not cleaned:
+        return None
+    return cleaned[:limit] + ("…" if len(cleaned) > limit else "")
+
+
+def _mark_live(conversation: Conversation) -> None:
+    conversation.status = ConversationStatus.live
+    conversation.ended_at = None
+
+
+def _mark_ended(conversation: Conversation, when: datetime | None = None) -> None:
+    conversation.status = ConversationStatus.ended
+    conversation.ended_at = when or datetime.now(timezone.utc)
+
+
+def _apply_idle_end(conversation: Conversation, now: datetime) -> bool:
+    """End stale live conversations. Returns True if status changed."""
+    if conversation.status != ConversationStatus.live:
+        return False
+    updated = conversation.updated_at
+    if updated is not None and updated.tzinfo is None:
+        updated = updated.replace(tzinfo=timezone.utc)
+    if updated is None or updated >= now - LIVE_IDLE:
+        return False
+    _mark_ended(conversation, when=updated + LIVE_IDLE)
+    return True
+
+
+def _to_list_item(
+    conversation: Conversation,
+    message_count: int,
+    preview: str | None,
+) -> ConversationListItem:
+    return ConversationListItem(
+        id=conversation.id,
+        title=conversation.title,
+        status=conversation.status.value,
+        ended_at=conversation.ended_at,
+        message_count=message_count,
+        preview=preview,
+        created_at=conversation.created_at,
+        updated_at=conversation.updated_at,
+    )
+
+
+def _to_detail(conversation: Conversation, messages: list[Message]) -> ConversationDetail:
+    return ConversationDetail(
+        id=conversation.id,
+        title=conversation.title,
+        status=conversation.status.value,
+        ended_at=conversation.ended_at,
+        message_count=len(messages),
+        created_at=conversation.created_at,
+        updated_at=conversation.updated_at,
+        messages=messages,
+    )
+
+
 @router.get("/conversations", response_model=list[ConversationListItem])
 def list_conversations(
     request: Request,
     db: Session = Depends(get_db),
     limit: int = 50,
+    status: str | None = None,
 ) -> list[ConversationListItem]:
     user_email = get_user_email(request)
     capped = max(1, min(limit, 100))
@@ -52,7 +116,53 @@ def list_conversations(
         .limit(capped)
         .all()
     )
-    return conversations
+
+    now = datetime.now(timezone.utc)
+    dirty = False
+    for conversation in conversations:
+        if _apply_idle_end(conversation, now):
+            dirty = True
+    if dirty:
+        db.commit()
+
+    if status in {"live", "ended"}:
+        conversations = [c for c in conversations if c.status.value == status]
+
+    ids = [c.id for c in conversations]
+    counts: dict[uuid.UUID, int] = {}
+    previews: dict[uuid.UUID, str | None] = {}
+    if ids:
+        count_rows = (
+            db.query(Message.conversation_id, func.count(Message.id))
+            .filter(Message.conversation_id.in_(ids))
+            .group_by(Message.conversation_id)
+            .all()
+        )
+        counts = {row[0]: int(row[1]) for row in count_rows}
+
+        # Latest message preview per conversation (by created_at).
+        latest_ids = (
+            db.query(Message.conversation_id, func.max(Message.created_at).label("latest"))
+            .filter(Message.conversation_id.in_(ids))
+            .group_by(Message.conversation_id)
+            .subquery()
+        )
+        latest_messages = (
+            db.query(Message)
+            .join(
+                latest_ids,
+                (Message.conversation_id == latest_ids.c.conversation_id)
+                & (Message.created_at == latest_ids.c.latest),
+            )
+            .all()
+        )
+        for message in latest_messages:
+            previews[message.conversation_id] = _preview_text(message.content)
+
+    return [
+        _to_list_item(conversation, counts.get(conversation.id, 0), previews.get(conversation.id))
+        for conversation in conversations
+    ]
 
 
 @router.post("/conversations", response_model=ConversationDetail)
@@ -62,17 +172,15 @@ def create_conversation(
     db: Session = Depends(get_db),
 ) -> ConversationDetail:
     user_email = get_user_email(request)
-    conversation = Conversation(user_email=user_email, title=payload.title)
+    conversation = Conversation(
+        user_email=user_email,
+        title=payload.title,
+        status=ConversationStatus.live,
+    )
     db.add(conversation)
     db.commit()
     db.refresh(conversation)
-    return ConversationDetail(
-        id=conversation.id,
-        title=conversation.title,
-        created_at=conversation.created_at,
-        updated_at=conversation.updated_at,
-        messages=[],
-    )
+    return _to_detail(conversation, [])
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
@@ -83,19 +191,58 @@ def get_conversation(
 ) -> ConversationDetail:
     user_email = get_user_email(request)
     conversation = _conversation_or_404(db, conversation_id, user_email)
+    if _apply_idle_end(conversation, datetime.now(timezone.utc)):
+        db.commit()
+        db.refresh(conversation)
     messages = (
         db.query(Message)
         .filter(Message.conversation_id == conversation.id)
         .order_by(Message.created_at.asc())
         .all()
     )
-    return ConversationDetail(
-        id=conversation.id,
-        title=conversation.title,
-        created_at=conversation.created_at,
-        updated_at=conversation.updated_at,
-        messages=messages,
+    return _to_detail(conversation, messages)
+
+
+@router.post("/conversations/{conversation_id}/end", response_model=ConversationDetail)
+def end_conversation(
+    conversation_id: uuid.UUID,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> ConversationDetail:
+    user_email = get_user_email(request)
+    conversation = _conversation_or_404(db, conversation_id, user_email)
+    _mark_ended(conversation)
+    conversation.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(conversation)
+    messages = (
+        db.query(Message)
+        .filter(Message.conversation_id == conversation.id)
+        .order_by(Message.created_at.asc())
+        .all()
     )
+    return _to_detail(conversation, messages)
+
+
+@router.post("/conversations/{conversation_id}/reopen", response_model=ConversationDetail)
+def reopen_conversation(
+    conversation_id: uuid.UUID,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> ConversationDetail:
+    user_email = get_user_email(request)
+    conversation = _conversation_or_404(db, conversation_id, user_email)
+    _mark_live(conversation)
+    conversation.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(conversation)
+    messages = (
+        db.query(Message)
+        .filter(Message.conversation_id == conversation.id)
+        .order_by(Message.created_at.asc())
+        .all()
+    )
+    return _to_detail(conversation, messages)
 
 
 @router.delete("/conversations/{conversation_id}", status_code=204)
@@ -127,6 +274,7 @@ async def chat_stream(
         conversation = Conversation(
             user_email=user_email,
             title=_title_from_message(message_text),
+            status=ConversationStatus.live,
         )
         db.add(conversation)
         db.commit()
@@ -165,6 +313,7 @@ async def chat_stream(
     )
     db.add(user_message)
     conversation.updated_at = datetime.now(timezone.utc)
+    _mark_live(conversation)
     if conversation.title == "New chat":
         conversation.title = _title_from_message(message_text)
     db.commit()
@@ -210,6 +359,7 @@ async def chat_stream(
             conv = stream_db.get(Conversation, conversation_id)
             if conv is not None:
                 conv.updated_at = datetime.now(timezone.utc)
+                _mark_live(conv)
             stream_db.commit()
             stream_db.refresh(assistant_message)
 

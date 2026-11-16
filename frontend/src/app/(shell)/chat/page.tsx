@@ -1,25 +1,42 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { ChatHistoryBar } from "@/components/chat/chat-history-bar";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessageList } from "@/components/chat/chat-message-list";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   useConversation,
   useConversations,
   useCreateConversation,
   useDeleteConversation,
+  useEndConversation,
+  useReopenConversation,
   sendMessageWithStream,
 } from "@/hooks/use-chat";
 import type { ChatMessage, ChatStreamEvent } from "@/types/chat";
 
 export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="p-5 text-sm text-muted-foreground">Loading chat…</div>}>
+      <ChatPageInner />
+    </Suspense>
+  );
+}
+
+function ChatPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeConversationId = searchParams.get("c");
   const { data: conversations = [] } = useConversations();
   const createConversation = useCreateConversation();
   const deleteConversation = useDeleteConversation();
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const endConversation = useEndConversation();
+  const reopenConversation = useReopenConversation();
   const { data: conversation, refetch: refetchConversation } = useConversation(activeConversationId);
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [streamingStatus, setStreamingStatus] = useState<string | null>(null);
@@ -39,17 +56,32 @@ export default function ChatPage() {
     }
   }, [conversation, activeConversationId]);
 
+  const syncUrl = useCallback(
+    (id: string | null) => {
+      if (id) {
+        router.replace(`/chat?c=${id}`);
+      } else {
+        router.replace("/chat");
+      }
+    },
+    [router],
+  );
+
+  const handleSelect = (id: string) => {
+    syncUrl(id);
+  };
+
   const handleNewChat = async () => {
     const created = await createConversation.mutateAsync();
-    setActiveConversationId(created.id);
     setLocalMessages([]);
+    syncUrl(created.id);
   };
 
   const handleDelete = async (id: string) => {
     await deleteConversation.mutateAsync(id);
     if (activeConversationId === id) {
-      setActiveConversationId(null);
       setLocalMessages([]);
+      syncUrl(null);
     }
   };
 
@@ -91,13 +123,12 @@ export default function ChatPage() {
         );
 
         if (!activeConversationId) {
-          setActiveConversationId(result.conversationId);
+          syncUrl(result.conversationId);
         }
 
         setLocalMessages((current) => [...current, result.assistantMessage]);
         await refetchConversation();
       } catch (error) {
-        // A user-initiated stop is expected; anything else is a real failure.
         if ((error as Error)?.name !== "AbortError") {
           toast.error((error as Error)?.message || "Something went wrong. Please try again.");
         }
@@ -108,12 +139,14 @@ export default function ChatPage() {
         setPendingAssistant(null);
       }
     },
-    [activeConversationId, refetchConversation],
+    [activeConversationId, refetchConversation, syncUrl],
   );
 
   const handleStop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
+
+  const status = conversation?.status ?? "live";
 
   return (
       <div className="flex h-[calc(100vh)] min-h-0 flex-col overflow-hidden">
@@ -128,10 +161,40 @@ export default function ChatPage() {
                   Follows Workflows, searches Articles, and calls Tools only when needed.
                 </p>
               </div>
-              <span className="hidden shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-flex">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Live
-              </span>
+              <div className="flex shrink-0 items-center gap-2">
+                {status === "live" ? (
+                  <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                    Live
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                    Ended
+                  </Badge>
+                )}
+                {activeConversationId ? (
+                  status === "live" ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={endConversation.isPending || isSending}
+                      onClick={() => endConversation.mutate(activeConversationId)}
+                    >
+                      End
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={reopenConversation.isPending || isSending}
+                      onClick={() => reopenConversation.mutate(activeConversationId)}
+                    >
+                      Reopen
+                    </Button>
+                  )
+                ) : null}
+              </div>
             </div>
           </div>
 
@@ -144,7 +207,7 @@ export default function ChatPage() {
           />
 
           <ChatInput
-            disabled={isSending}
+            disabled={isSending || status === "ended"}
             isSending={isSending}
             onSend={handleSend}
             onStop={handleStop}
@@ -154,7 +217,7 @@ export default function ChatPage() {
         <ChatHistoryBar
           conversations={conversations}
           activeId={activeConversationId}
-          onSelect={setActiveConversationId}
+          onSelect={handleSelect}
           onNewChat={handleNewChat}
           onDelete={handleDelete}
         />

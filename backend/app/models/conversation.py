@@ -14,12 +14,25 @@ class MessageRole(str, enum.Enum):
     assistant = "assistant"
 
 
+class ConversationStatus(str, enum.Enum):
+    live = "live"
+    ended = "ended"
+
+
 class Conversation(Base):
     __tablename__ = "conversations"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False, default="New chat")
+    status: Mapped[ConversationStatus] = mapped_column(
+        Enum(ConversationStatus, name="conversationstatus", create_type=False),
+        nullable=False,
+        default=ConversationStatus.live,
+        server_default="live",
+        index=True,
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), index=True

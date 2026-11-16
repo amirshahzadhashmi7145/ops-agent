@@ -107,6 +107,13 @@ export function ChatHistoryBar({
                       />
                       <span
                         className={cn(
+                          "h-1.5 w-1.5 shrink-0 rounded-full",
+                          conversation.status === "live" ? "bg-emerald-500" : "bg-muted-foreground/40",
+                        )}
+                        title={conversation.status === "live" ? "Live" : "Ended"}
+                      />
+                      <span
+                        className={cn(
                           "truncate text-xs font-medium",
                           isActive ? "text-foreground" : "text-foreground/80",
                         )}

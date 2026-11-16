@@ -118,8 +118,9 @@ export function testResourceSaved(
   });
 }
 
-export function fetchConversations(): Promise<ConversationListItem[]> {
-  return apiFetch<ConversationListItem[]>("/api/conversations");
+export function fetchConversations(status?: "live" | "ended"): Promise<ConversationListItem[]> {
+  const query = status ? `?status=${status}` : "";
+  return apiFetch<ConversationListItem[]>(`/api/conversations${query}`);
 }
 
 export function fetchConversation(id: string): Promise<ConversationDetail> {
@@ -131,6 +132,14 @@ export function createConversation(title = "New chat"): Promise<ConversationDeta
     method: "POST",
     body: JSON.stringify({ title }),
   });
+}
+
+export function endConversation(id: string): Promise<ConversationDetail> {
+  return apiFetch<ConversationDetail>(`/api/conversations/${id}/end`, { method: "POST" });
+}
+
+export function reopenConversation(id: string): Promise<ConversationDetail> {
+  return apiFetch<ConversationDetail>(`/api/conversations/${id}/reopen`, { method: "POST" });
 }
 
 export function deleteConversation(id: string): Promise<void> {

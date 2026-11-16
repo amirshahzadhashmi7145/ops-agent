@@ -205,7 +205,7 @@ export default function AgentOverviewPage() {
               { href: "/resources", label: "Tools" },
               { href: "/agent-rules", label: "Rules" },
               { href: "/settings", label: "Settings" },
-              { href: "/messages", label: "Outbox" },
+              { href: "/history", label: "History" },
             ].map((link) => (
               <Link
                 key={link.href}
