@@ -14,3 +14,4 @@ backend/.venv-local/
 scripts/load_usability_report.json
 scripts/multi_company_report.json
 scripts/usage_snapshot_30d.json
+docs/
