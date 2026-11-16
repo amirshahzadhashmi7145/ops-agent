@@ -16,7 +16,7 @@ def test_docs_vs_ops_detectors_are_company_agnostic():
     assert needs_document_grounding("How do we handle LTE data issues on Connect locks?")
     assert needs_document_grounding("Tell me more about the out of warranty options.")
     assert needs_document_grounding(
-        "According to policy, do we offer a MeridianVIP lifetime program?"
+        "According to policy, do we offer a CobaltCare lifetime program?"
     )
     assert not looks_like_operational_action(
         "Can we create a Shopify RMA for an Amazon purchase?"

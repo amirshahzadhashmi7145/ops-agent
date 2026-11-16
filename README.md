@@ -2,6 +2,8 @@
 
 Support assistant that follows **Workflows**, searches **Articles**, and calls **Tools**.
 
+Demo corpus: **Cobalt Home** (generic connected-access company). Replace Articles/Workflows/Rules with a real customer's content for production.
+
 Stack: FastAPI + Postgres/pgvector + Next.js.
 
 ## Quick start (local dev)

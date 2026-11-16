@@ -1,7 +1,7 @@
 """Company-agnostic grounding heuristics.
 
 Production installs bring their own Articles/Workflows. These helpers must not
-depend on Meridian (or any brand) keywords — only on intent shape:
+depend on Cobalt Home (or any brand) keywords — only on intent shape:
 informational/docs vs live operational action.
 """
 

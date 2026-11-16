@@ -1,5 +1,6 @@
 """Canonical support playbook: KB articles, SOP documents, and agent rules.
 
+Demo company: Cobalt Home (generic connected-access brand).
 Seeded on API startup. Edit this file and restart the backend to reindex.
 """
 
@@ -46,17 +47,17 @@ CATEGORIES = [
 KB_ARTICLES = [
     {
         "title": "Company Overview",
-        "summary": "What we sell and how internal support should represent the company.",
+        "summary": "What Cobalt Home sells and how support should represent the brand.",
         "source_url": "https://help.example.com/company",
         "markdown": """# Company
 
-**Meridian** sells connected smart locks and access devices and a cloud subscription for consumers and fleets. Support's job is to help with devices, the mobile app, LTE, subscriptions, orders, and warranty — never to guess about account or device state.
+**Cobalt Home** sells connected entry devices (smart locks and access accessories) plus a cloud subscription for households and small fleets. Support helps with devices, mobile apps, LTE, subscriptions, orders, and warranty — and never guesses about account or device state.
 
 # How we help
 
 - Consumer customers buy on **Shopify** (our web shop) or **Amazon**.
-- Fleet customers are a separate segment. Escalate fleet billing, installs, and multi-device issues to the fleet queue.
-- Internal tools in this agent talk to a simulation of our systems (devices, Recurly, Shopify, Intercom). Treat tool results as source of truth.
+- Fleet / multi-door sites are a separate segment. Escalate fleet billing, installs, and multi-device issues to the fleet queue.
+- Internal tools in this agent talk to a simulation of our systems (devices, Recurly, Shopify, messaging). Treat tool results as source of truth.
 
 # Tone
 
@@ -69,7 +70,7 @@ Be concise, calm, and practical. Use the customer's name when tools return it. D
         "source_url": "https://help.example.com/products",
         "markdown": """# Product families
 
-Meridian locks fall into two families. Routing workflows depend on this split.
+Cobalt Home locks fall into two families. Routing workflows depend on this split.
 
 # Classic locks
 
@@ -82,7 +83,7 @@ Diagnostics for Classic pairing use `getClassicDiagnostic`. Do not run SIM triag
 
 # Connect locks
 
-Connect locks use an onboard LTE SIM and the Connect app for remote unlock and event history.
+Connect locks use an onboard LTE SIM and the **Connect app** for remote unlock and event history.
 
 - **Guard** — flagship Connect lock; often paired with a keypad accessory.
 - **Guard Mini** (serial prefix MD-MINI) — compact Connect lock.
@@ -177,7 +178,7 @@ We cannot run Shopify warranty RMAs on Amazon orders. Direct the customer to Ama
     },
     {
         "title": "Returns and RMA Policy",
-        "summary": "30-day returns, Shopify-only RMAs, and what happens after a device is sent back.",
+        "summary": "Return windows, Shopify-only RMAs, and what happens after a device is sent back.",
         "source_url": "https://help.example.com/returns",
         "markdown": """# Eligibility
 
@@ -270,7 +271,7 @@ Unfulfilled Shopify only, via `cancelShopifyOrder`. If the order is already fulf
     },
     {
         "title": "Support Hours and Escalation",
-        "summary": "When to stay in self-serve tools vs escalate to a human queue or Jira.",
+        "summary": "When to stay in self-serve tools vs escalate to a human queue.",
         "source_url": "https://help.example.com/escalation",
         "markdown": """# Stay in the agent
 
@@ -301,7 +302,7 @@ Spam, duplicate outreach, or a customer who already confirmed they are done: `ti
 AGENT_RULES = [
     {
         "category": "business_context",
-        "content": "Meridian sells smart locks (Classic: Key/Latch; Connect: Guard, Guard 2, Guard Mini) plus cloud subscriptions billed in Recurly. Consumer orders come from Shopify or Amazon.",
+        "content": "Cobalt Home sells smart locks (Classic: Key/Latch; Connect: Guard, Guard 2, Guard Mini) plus cloud subscriptions billed in Recurly. Consumer orders come from Shopify or Amazon.",
     },
     {
         "category": "business_context",
@@ -482,7 +483,7 @@ Triggers: return my device, return my lock, start an RMA, send device back
         "summary": "Pairing and permission diagnostics for Classic locks using getClassicDiagnostic.",
         "raw_text": """# Classic App Connectivity
 
-When a Classic lock (Key, Latch) will not pair or stay connected to the Classic app:
+When a Cobalt Home Classic lock (Key, Latch) will not pair or stay connected to the Classic app:
 1. Collect email or phone.
 2. Call @getClassicDiagnostic.
 3. Fix the first failing permission (Location Always, Precise Location, Local Network, Bluetooth, storage).
@@ -527,7 +528,7 @@ When a Classic lock (Key, Latch) will not pair or stay connected to the Classic 
         "summary": "LTE/SIM triage for Connect locks: lookup, sim triage, reactivate or 25GB uplift.",
         "raw_text": """# Sim Triage
 
-Connect lock connectivity (Guard, Guard 2, Guard Mini):
+Cobalt Home Connect lock connectivity (Guard, Guard 2, Guard Mini):
 1. Call @getDeviceLookup with serial, email, or phone.
 2. Call @getSimTriage with the serial.
 3. Follow recommended_action: reactivate_sim → @reactivateSim; uplift_25gb → @createLTEQuota25GB; escalate → note + @ticketEscalate.
@@ -574,7 +575,7 @@ Connect lock connectivity (Guard, Guard 2, Guard Mini):
         "summary": "Power, motor, and hardware faults: health check, troubleshooting, then warranty or escalate.",
         "raw_text": """# Hardware Malfunction
 
-When a lock has power, battery, red LED, motor, or unlock failures:
+When a Cobalt Home lock has power, battery, red LED, motor, or unlock failures:
 1. Call @getDeviceLookup and @getDeviceHealth.
 2. If has_power_issues is false, complete power troubleshooting (cable, fuse, 12V, reboot) before escalating.
 3. In-warranty Shopify hardware → warranty replacement workflow. Otherwise escalate with an internal note.

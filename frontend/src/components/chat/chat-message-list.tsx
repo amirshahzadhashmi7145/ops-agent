@@ -35,7 +35,8 @@ interface ChatMessageListProps {
 
 const SUGGESTIONS = [
   { label: "Look up an account", text: "Look up alex.rivera@example.com and list their devices." },
-  { label: "Triage LTE", text: "Lock MD-GUARD2-10088 has no LTE. What’s going on?" },
+  { label: "Triage LTE", text: "Lock MD-GUARD2-10088 has no LTE. What's going on?" },
+  { label: "Warranty policy", text: "What is Cobalt Home's warranty policy for Shopify vs Amazon?" },
   { label: "Return policy", text: "What's our return policy?" },
 ];
 

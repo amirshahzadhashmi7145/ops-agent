@@ -128,7 +128,7 @@ def run_cases() -> list[CaseResult]:
     # 1) Policy question must hit Articles (KB search), not invent warranty terms.
     try:
         out = stream_chat(
-            "What is Meridian's warranty policy for Shopify purchases and Amazon purchases?"
+            "What is Cobalt Home's warranty policy for Shopify purchases and Amazon purchases?"
         )
         types = event_types(out["events"])
         text = out["final"].lower()
@@ -235,7 +235,7 @@ def run_cases() -> list[CaseResult]:
     # 5) Trap: ask about a fake policy that is NOT in the KB — should refuse / not invent.
     try:
         out = stream_chat(
-            "According to Meridian policy, do we offer a free lifetime battery replacement program called BatteryForever?"
+            "According to Cobalt Home policy, do we offer a free lifetime battery replacement program called BatteryForever?"
         )
         types = event_types(out["events"])
         text = out["final"].lower()

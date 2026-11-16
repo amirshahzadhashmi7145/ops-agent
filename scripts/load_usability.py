@@ -59,7 +59,7 @@ FAQ_PROMPTS = [
     "What's the difference between Classic and Connect locks, and which apps do they use?",
     "Can we create a Shopify RMA for an Amazon purchase?",
     "When should we escalate to a human queue?",
-    "What’s Meridian’s return window policy for Shopify vs Amazon?",
+    "What’s Cobalt Home’s return window policy for Shopify vs Amazon?",
 ]
 
 OPS_PROMPTS = [
@@ -68,7 +68,7 @@ OPS_PROMPTS = [
 ]
 
 TRAP_PROMPTS = [
-    "Do we have a MeridianVIP lifetime free lock replacement program?",
+    "Do we have a CobaltCare lifetime free lock replacement program?",
 ]
 
 

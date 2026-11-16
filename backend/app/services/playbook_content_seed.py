@@ -1,4 +1,4 @@
-"""Seed Meridian KB articles, SOP documents, and agent rules, then embed."""
+"""Seed Cobalt Home KB articles, SOP documents, and agent rules, then embed."""
 
 from __future__ import annotations
 
@@ -117,8 +117,19 @@ def sync_playbook_content(db: Session | None = None) -> dict[str, int]:
 def _purge_removed_seed_content(db: Session) -> int:
     keep_kb = {article["title"] for article in KB_ARTICLES}
     keep_sop = {document["title"] for document in SOP_DOCUMENTS}
+    # Old demo titles that should never linger after a brand refresh.
+    legacy_kb_titles = {
+        "Return Policy",
+        "Warranty & Returns",
+        "Nexar Overview",
+        "AetherCam Overview",
+    }
     removed = 0
     for row in db.query(KbReference).filter(KbReference.created_by.in_(LEGACY_SEED_USERS)).all():
+        if row.title not in keep_kb:
+            db.delete(row)
+            removed += 1
+    for row in db.query(KbReference).filter(KbReference.title.in_(legacy_kb_titles)).all():
         if row.title not in keep_kb:
             db.delete(row)
             removed += 1
@@ -177,6 +188,7 @@ def _genericize_runtime_branding(db: Session) -> int:
                 "AetherCam",
                 "connected cameras",
                 "Meridian customer support",
+                "Meridian sells",
             )
         ) or "Ground every policy claim" not in prompt or "company docs" not in prompt
         if needs_prompt_refresh:

@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # resources can target localhost during development. Must stay OFF in production;
     # docker-compose enables it explicitly for local dev.
     allow_local_test: bool = False
-    # Seed Meridian demo content on API startup (disable on scaled replicas).
+    # Seed Cobalt Home demo content on API startup (disable on scaled replicas).
     seed_playbook_on_startup: bool = True
     # Soft per-IP request budget for mutating/expensive traffic (0 disables).
     rate_limit_per_minute: int = 120
