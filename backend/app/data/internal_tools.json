@@ -1,7 +1,7 @@
 [
   {
     "name": "lookup_customer_by_email",
-    "description": "Look up a simulated customer by email",
+    "description": "Look up a customer account by email",
     "http_method": "GET",
     "url": "/api/sim/customers/{email}",
     "parameters": [
@@ -16,7 +16,7 @@
   },
   {
     "name": "list_subscriptions",
-    "description": "List subscriptions for a customer email",
+    "description": "List active subscriptions/plans for a customer email",
     "http_method": "GET",
     "url": "/api/sim/subscriptions",
     "parameters": [
@@ -31,7 +31,7 @@
   },
   {
     "name": "cancel_subscription",
-    "description": "Cancel an active subscription and send confirmation message",
+    "description": "Cancel an active subscription/plan and log confirmation",
     "http_method": "POST",
     "url": "/api/sim/subscriptions/{subscription_id}/cancel",
     "parameters": [
@@ -53,7 +53,7 @@
   },
   {
     "name": "create_subscription",
-    "description": "Create a new subscription for a customer",
+    "description": "Create a new subscription/plan for a customer",
     "http_method": "POST",
     "url": "/api/sim/subscriptions",
     "parameters": [
@@ -68,14 +68,14 @@
         "name": "plan_name",
         "type": "string",
         "required": true,
-        "description": "Plan name",
-        "default_value": "Guard Monthly"
+        "description": "Plan name (company-specific)",
+        "default_value": "Standard Monthly"
       }
     ]
   },
   {
     "name": "list_customer_devices",
-    "description": "List devices owned by a customer email",
+    "description": "List assets/devices owned by a customer email",
     "http_method": "GET",
     "url": "/api/sim/devices",
     "parameters": [
@@ -90,7 +90,7 @@
   },
   {
     "name": "lookup_device",
-    "description": "Look up a device by serial number",
+    "description": "Look up an asset/device by serial or asset id",
     "http_method": "GET",
     "url": "/api/sim/devices/{serial_number}",
     "parameters": [
@@ -105,7 +105,7 @@
   },
   {
     "name": "initiate_return",
-    "description": "Start a device return and queue confirmation message",
+    "description": "Start a return/RMA for an asset/device serial",
     "http_method": "POST",
     "url": "/api/sim/devices/{serial_number}/return",
     "parameters": [
@@ -127,7 +127,7 @@
   },
   {
     "name": "getDeviceSubscription",
-    "description": "Get subscription details for a lock serial number",
+    "description": "Get billing subscription details for an asset serial",
     "http_method": "GET",
     "url": "/api/sim/billing/device-subscription/{serial_number}",
     "parameters": [
@@ -142,7 +142,7 @@
   },
   {
     "name": "getDeviceHealth",
-    "description": "Get health/status details for a lock serial number",
+    "description": "Get health/diagnostics status for an asset serial",
     "http_method": "GET",
     "url": "/api/sim/billing/device-health/{serial_number}",
     "parameters": [
@@ -157,7 +157,7 @@
   },
   {
     "name": "getRecurlyInvoices",
-    "description": "Send past invoices for a lock to billing email on file",
+    "description": "Resend billing invoices for an asset serial",
     "http_method": "POST",
     "url": "/api/sim/billing/recurly/invoices",
     "parameters": [
@@ -179,7 +179,7 @@
   },
   {
     "name": "updateRecurlyEmailAndSendInvoices",
-    "description": "Update billing email and send invoices",
+    "description": "Update billing email and resend invoices",
     "http_method": "POST",
     "url": "/api/sim/billing/recurly/email-and-send",
     "parameters": [
@@ -208,7 +208,7 @@
   },
   {
     "name": "updateRecurlySubscriptionToAnnual",
-    "description": "Switch subscription plan from monthly to annual",
+    "description": "Switch a subscription to annual billing",
     "http_method": "POST",
     "url": "/api/sim/billing/subscriptions/{serial_number}/to-annual",
     "parameters": [
@@ -223,7 +223,7 @@
   },
   {
     "name": "updateRecurlySubscriptionToMonthly",
-    "description": "Switch subscription plan from annual to monthly",
+    "description": "Switch a subscription to monthly billing",
     "http_method": "POST",
     "url": "/api/sim/billing/subscriptions/{serial_number}/to-monthly",
     "parameters": [
@@ -238,7 +238,7 @@
   },
   {
     "name": "jiraCreateIssue",
-    "description": "Create Jira back-office task",
+    "description": "Create a back-office engineering ticket",
     "http_method": "POST",
     "url": "/api/sim/ops/jira/issues",
     "parameters": [
@@ -288,7 +288,7 @@
   },
   {
     "name": "ticketEscalate",
-    "description": "Escalate ticket to a human queue",
+    "description": "Escalate the support ticket to a human queue",
     "http_method": "POST",
     "url": "/api/sim/ops/tickets/escalate",
     "parameters": [
@@ -310,7 +310,7 @@
   },
   {
     "name": "ticketInternalNote",
-    "description": "Create an internal ticket note",
+    "description": "Write an internal note on the support ticket",
     "http_method": "POST",
     "url": "/api/sim/ops/tickets/internal-note",
     "parameters": [
@@ -325,7 +325,7 @@
   },
   {
     "name": "ticketResolve",
-    "description": "Resolve a ticket directly (spam or unwanted outreach)",
+    "description": "Resolve/close the support ticket",
     "http_method": "POST",
     "url": "/api/sim/ops/tickets/resolve",
     "parameters": [
@@ -340,7 +340,7 @@
   },
   {
     "name": "ticketMessageResponse",
-    "description": "Identify purchase channel from customer message or order number",
+    "description": "Classify an inbound customer message / order channel",
     "http_method": "POST",
     "url": "/api/sim/ops/tickets/message-response",
     "parameters": [
@@ -362,7 +362,7 @@
   },
   {
     "name": "verifyReturnEligibility",
-    "description": "Check whether a Shopify order is eligible for return",
+    "description": "Verify whether an order is eligible for return",
     "http_method": "POST",
     "url": "/api/sim/returns/verify-eligibility",
     "parameters": [
@@ -384,7 +384,7 @@
   },
   {
     "name": "getOrderShippingAddressAndPhoneNumber",
-    "description": "Get shipping address and phone on file for an order",
+    "description": "Get shipping address and phone for an order",
     "http_method": "GET",
     "url": "/api/sim/returns/orders/{order_number}/shipping",
     "parameters": [
@@ -399,7 +399,7 @@
   },
   {
     "name": "createReturnForOrder",
-    "description": "Create an RMA and prepaid return label for a Shopify order",
+    "description": "Create a prepaid return/RMA for an eligible order",
     "http_method": "POST",
     "url": "/api/sim/returns/create",
     "parameters": [
@@ -435,7 +435,7 @@
   },
   {
     "name": "getOrderStatusShopify",
-    "description": "Get Shopify order status including fulfillment, delivery, tracking, and return/refund info",
+    "description": "Get commerce order fulfillment and tracking status",
     "http_method": "GET",
     "url": "/api/sim/returns/orders/{order_number}/status",
     "parameters": [
@@ -450,7 +450,7 @@
   },
   {
     "name": "cancelShopifyOrder",
-    "description": "Cancel an unfulfilled Shopify order",
+    "description": "Cancel an unfulfilled commerce order",
     "http_method": "POST",
     "url": "/api/sim/shipping/orders/cancel",
     "parameters": [
@@ -479,7 +479,7 @@
   },
   {
     "name": "getClassicDiagnostic",
-    "description": "Get Classic app permission and pairing diagnostic flags for a customer",
+    "description": "Run local-app pairing/permission diagnostics for Classic-family assets",
     "http_method": "POST",
     "url": "/api/sim/devices/classic/diagnostic",
     "parameters": [
@@ -501,7 +501,7 @@
   },
   {
     "name": "getDeviceLookup",
-    "description": "Look up devices by email, phone, or serial number",
+    "description": "Look up asset warranty, model, and account linkage",
     "http_method": "GET",
     "url": "/api/sim/devices/lookup",
     "parameters": [
@@ -516,7 +516,7 @@
   },
   {
     "name": "getSimTriage",
-    "description": "Run SIM triage for a Connect lock serial number",
+    "description": "Run connectivity/SIM triage for Connect-family assets",
     "http_method": "GET",
     "url": "/api/sim/devices/{serial_number}/sim-triage",
     "parameters": [
@@ -531,7 +531,7 @@
   },
   {
     "name": "getSimData",
-    "description": "Get SIM usage data for a Connect lock",
+    "description": "Fetch connectivity usage stats for an asset",
     "http_method": "GET",
     "url": "/api/sim/devices/{serial_number}/sim-data",
     "parameters": [
@@ -546,7 +546,7 @@
   },
   {
     "name": "getValidateSerial",
-    "description": "Validate that a lock serial is registered",
+    "description": "Validate that an asset serial exists",
     "http_method": "POST",
     "url": "/api/sim/devices/{serial_number}/validate",
     "parameters": [
@@ -561,7 +561,7 @@
   },
   {
     "name": "reactivateSim",
-    "description": "Reactivate a deactivated lock SIM",
+    "description": "Reactivate connectivity/SIM for an asset",
     "http_method": "POST",
     "url": "/api/sim/devices/{serial_number}/reactivate-sim",
     "parameters": [
@@ -576,7 +576,7 @@
   },
   {
     "name": "createLTEQuota25GB",
-    "description": "Uplift monthly LTE data cap to 25GB for a device",
+    "description": "Apply a data-plan uplift pack for an asset",
     "http_method": "POST",
     "url": "/api/sim/devices/{serial_number}/lte-quota-25gb",
     "parameters": [
@@ -606,7 +606,7 @@
   },
   {
     "name": "getWarrantyEligibility",
-    "description": "Check warranty eligibility for a Shopify order",
+    "description": "Check warranty eligibility for an asset",
     "http_method": "POST",
     "url": "/api/sim/warranty/eligibility",
     "parameters": [
@@ -628,7 +628,7 @@
   },
   {
     "name": "getShopifyOrderItems",
-    "description": "Get Shopify order line items for hardware replacement matching",
+    "description": "List line items for a commerce order",
     "http_method": "POST",
     "url": "/api/sim/shopify/order-items",
     "parameters": [
@@ -650,7 +650,7 @@
   },
   {
     "name": "changeAddressShopify",
-    "description": "Update shipping address on a Shopify order",
+    "description": "Change shipping address on an unfulfilled order",
     "http_method": "POST",
     "url": "/api/sim/shopify/change-address",
     "parameters": [
@@ -679,7 +679,7 @@
   },
   {
     "name": "createShopifyReplacement",
-    "description": "Create faulty hardware replacement RMA for Shopify order",
+    "description": "Create an in-warranty replacement shipment",
     "http_method": "POST",
     "url": "/api/sim/shopify/replacement",
     "parameters": [
@@ -743,7 +743,7 @@
   },
   {
     "name": "createShopifyCoupon",
-    "description": "Generate a Shopify discount coupon for out-of-warranty customers",
+    "description": "Create a replacement discount coupon",
     "http_method": "POST",
     "url": "/api/sim/shopify/coupon",
     "parameters": [
@@ -765,7 +765,7 @@
   },
   {
     "name": "getAccessoriesCoupon",
-    "description": "Generate accessory replacement coupon",
+    "description": "Create an accessories discount coupon",
     "http_method": "POST",
     "url": "/api/sim/shopify/accessories-coupon",
     "parameters": [
@@ -796,6 +796,81 @@
         "type": "string",
         "required": true,
         "description": "Message body",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "list_customer_assets",
+    "description": "List customer assets (generic alias of list_customer_devices)",
+    "http_method": "GET",
+    "url": "/api/sim/devices",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "lookup_asset",
+    "description": "Look up an asset by serial (generic alias of lookup_device)",
+    "http_method": "GET",
+    "url": "/api/sim/devices/{serial_number}",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Asset serial",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "get_asset_health",
+    "description": "Get health/diagnostics for an asset (generic alias of getDeviceHealth)",
+    "http_method": "GET",
+    "url": "/api/sim/billing/device-health/{serial_number}",
+    "parameters": [
+      {
+        "name": "serial_number",
+        "type": "string",
+        "required": true,
+        "description": "Asset serial",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "lookup_account",
+    "description": "Look up a customer account by email (alias of lookup_customer_by_email)",
+    "http_method": "GET",
+    "url": "/api/sim/customers/{email}",
+    "parameters": [
+      {
+        "name": "email",
+        "type": "string",
+        "required": true,
+        "description": "Customer email",
+        "default_value": ""
+      }
+    ]
+  },
+  {
+    "name": "get_order_status",
+    "description": "Get order fulfillment/tracking status (alias of getOrderStatusShopify)",
+    "http_method": "GET",
+    "url": "/api/sim/returns/orders/{order_number}/status",
+    "parameters": [
+      {
+        "name": "order_number",
+        "type": "string",
+        "required": true,
+        "description": "Order number",
         "default_value": ""
       }
     ]

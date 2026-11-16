@@ -12,3 +12,4 @@ frontend/next-env.d.ts
 .DS_Store
 backend/.venv-local/
 scripts/load_usability_report.json
+scripts/multi_company_report.json

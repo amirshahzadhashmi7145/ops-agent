@@ -1,0 +1,57 @@
+{
+  "id": "atlas_fleet",
+  "brand": "Atlas Fleet",
+  "industry": "Commercial telematics",
+  "articles": [
+    {
+      "title": "Company Overview",
+      "summary": "Who Atlas Fleet is.",
+      "markdown": "# Company\n\n**Atlas Fleet** provides GPS telematics and driver coaching for commercial fleets. Support covers device install, data plans, and portal permissions.\n"
+    },
+    {
+      "title": "Data Plan Policy",
+      "summary": "SIM / data plan rules.",
+      "markdown": "# Data plans\n\nTrackers include a pooled data plan. Overage triggers a soft cap notice then a 2GB uplift pack. Devices offline >14 days should run connectivity triage before hardware replacement.\n"
+    },
+    {
+      "title": "Hardware Replacement",
+      "summary": "Tracker RMA.",
+      "markdown": "# Hardware\n\nIn-warranty trackers with confirmed GPS failure are replaced after remote diagnostics. Out-of-warranty units get a 20% refurbished replacement coupon.\n"
+    }
+  ],
+  "cases": [
+    {
+      "name": "data",
+      "ask": "What is Atlas Fleet's data plan policy for tracker overages?",
+      "must_contain_any": [
+        "overage",
+        "uplift",
+        "2gb",
+        "2 GB",
+        "pooled"
+      ],
+      "must_not_contain": [
+        "unlimited free forever"
+      ],
+      "expect_kb": true
+    },
+    {
+      "name": "trap",
+      "ask": "Do we have AtlasInfinity free lifetime tracker replacement with no diagnostics?",
+      "must_contain_any": [
+        "do not",
+        "don't",
+        "does not",
+        "no ",
+        "not",
+        "couldn't find",
+        "could not find",
+        "diagnostics"
+      ],
+      "must_not_contain": [
+        "yes, atlasinfinity"
+      ],
+      "expect_kb": true
+    }
+  ]
+}

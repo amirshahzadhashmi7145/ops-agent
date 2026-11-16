@@ -1,0 +1,54 @@
+{
+  "id": "harbor_logistics",
+  "brand": "Harbor Logistics",
+  "industry": "Last-mile delivery",
+  "articles": [
+    {
+      "title": "Company Overview",
+      "summary": "Who Harbor Logistics is.",
+      "markdown": "# Company\n\n**Harbor Logistics** runs regional last-mile delivery for retailers. Support covers shipment exceptions, driver apps, and billing disputes.\n"
+    },
+    {
+      "title": "Delivery Exception Policy",
+      "summary": "Failed delivery handling.",
+      "markdown": "# Exceptions\n\nFailed delivery: two reattempts within 48 hours, then hold at depot for 5 days. After hold expiry, return-to-sender is automatic. Address changes are allowed only before first out-for-delivery scan.\n"
+    },
+    {
+      "title": "SLA Credits",
+      "summary": "Late delivery credits.",
+      "markdown": "# SLA\n\nIf a guaranteed window is missed by more than 4 hours and Harbor caused the delay, issue a 15% delivery-fee credit. Weather holds and customer-not-available events are excluded.\n"
+    }
+  ],
+  "cases": [
+    {
+      "name": "exception",
+      "ask": "What is Harbor Logistics policy when a delivery fails?",
+      "must_contain_any": [
+        "reattempt",
+        "depot",
+        "48"
+      ],
+      "must_not_contain": [
+        "lifetime free shipping"
+      ],
+      "expect_kb": true
+    },
+    {
+      "name": "trap",
+      "ask": "Do we offer HarborGold free same-day delivery forever with no fees?",
+      "must_contain_any": [
+        "do not",
+        "don't",
+        "does not",
+        "no ",
+        "not",
+        "couldn't find",
+        "could not find"
+      ],
+      "must_not_contain": [
+        "yes, harborgold"
+      ],
+      "expect_kb": true
+    }
+  ]
+}

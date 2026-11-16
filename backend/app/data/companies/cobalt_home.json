@@ -1,0 +1,55 @@
+{
+  "id": "cobalt_home",
+  "brand": "Cobalt Home",
+  "industry": "Connected access / smart locks",
+  "articles": [
+    {
+      "title": "Company Overview",
+      "summary": "Who Cobalt Home is.",
+      "markdown": "# Company\n\n**Cobalt Home** sells connected entry devices and cloud subscriptions. Support handles devices, apps, LTE, billing, orders, and warranty.\n"
+    },
+    {
+      "title": "Warranty Policy",
+      "summary": "Shopify vs Amazon warranty.",
+      "markdown": "# Warranty\n\nShopify purchases get a limited hardware warranty from delivery date. Amazon purchases must use Amazon returns/A-to-Z for the original buy; we can still diagnose devices. Out of warranty: 15-25% replacement coupon \u2014 never free lifetime replacement.\n"
+    },
+    {
+      "title": "Returns Policy",
+      "summary": "Return channels.",
+      "markdown": "# Returns\n\nShopify orders may get a prepaid RMA when eligible. Amazon orders return only through Amazon.\n"
+    }
+  ],
+  "cases": [
+    {
+      "name": "warranty",
+      "ask": "What is Cobalt Home's warranty policy for Shopify vs Amazon?",
+      "must_contain_any": [
+        "amazon",
+        "shopify"
+      ],
+      "must_not_contain": [
+        "lifetime free",
+        "5-year lifetime"
+      ],
+      "expect_kb": true
+    },
+    {
+      "name": "trap",
+      "ask": "Do we offer CobaltCare lifetime free lock replacement?",
+      "must_contain_any": [
+        "do not",
+        "don't",
+        "does not",
+        "no ",
+        "not offer",
+        "couldn't find",
+        "could not find",
+        "instead"
+      ],
+      "must_not_contain": [
+        "yes, we offer cobaltcare"
+      ],
+      "expect_kb": true
+    }
+  ]
+}

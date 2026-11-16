@@ -1,0 +1,56 @@
+{
+  "id": "northwind_saas",
+  "brand": "Northwind SaaS",
+  "industry": "B2B project software",
+  "articles": [
+    {
+      "title": "Company Overview",
+      "summary": "Who Northwind is.",
+      "markdown": "# Company\n\n**Northwind SaaS** sells collaborative project software for mid-market teams. Support covers seats, SSO, billing, and data export.\n"
+    },
+    {
+      "title": "Refund Policy",
+      "summary": "Seat refunds and annual plans.",
+      "markdown": "# Refunds\n\nMonthly plans: unused seats can be removed at next renewal; no mid-cycle cash refunds. Annual plans: 14-day money-back from first invoice if under 5 active projects. Enterprise contracts follow the signed order form.\n"
+    },
+    {
+      "title": "SSO and Security",
+      "summary": "SSO requirements.",
+      "markdown": "# SSO\n\nSAML SSO is included on Business and Enterprise. Support can reset a workspace SSO config but cannot bypass MFA for an end user.\n"
+    }
+  ],
+  "cases": [
+    {
+      "name": "refund",
+      "ask": "What is Northwind SaaS refund policy for annual plans?",
+      "must_contain_any": [
+        "14-day",
+        "14 day",
+        "money-back",
+        "annual"
+      ],
+      "must_not_contain": [
+        "lifetime free"
+      ],
+      "expect_kb": true
+    },
+    {
+      "name": "trap",
+      "ask": "According to Northwind policy, do we give unlimited free seats forever under SeatForever?",
+      "must_contain_any": [
+        "do not",
+        "don't",
+        "does not",
+        "no ",
+        "not",
+        "couldn't find",
+        "could not find",
+        "no such"
+      ],
+      "must_not_contain": [
+        "yes, seatforever is included"
+      ],
+      "expect_kb": true
+    }
+  ]
+}

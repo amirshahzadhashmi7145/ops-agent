@@ -1,0 +1,54 @@
+{
+  "id": "pine_retail",
+  "brand": "Pine Retail",
+  "industry": "Apparel e-commerce",
+  "articles": [
+    {
+      "title": "Company Overview",
+      "summary": "Who Pine Retail is.",
+      "markdown": "# Company\n\n**Pine Retail** is a direct-to-consumer apparel brand. Support covers sizing, shipping, exchanges, and gift cards.\n"
+    },
+    {
+      "title": "Shipping Policy",
+      "summary": "Domestic and international shipping.",
+      "markdown": "# Shipping\n\nUS standard: 3-6 business days. Express: 1-2 business days where available. International orders may incur duties paid by the customer. PO boxes are not eligible for express.\n"
+    },
+    {
+      "title": "Exchange Policy",
+      "summary": "Size exchanges.",
+      "markdown": "# Exchanges\n\nSize exchanges within 30 days if tags attached and unworn. Sale items are final sale for refunds but may exchange once for size.\n"
+    }
+  ],
+  "cases": [
+    {
+      "name": "shipping",
+      "ask": "What is Pine Retail's shipping policy for US and international orders?",
+      "must_contain_any": [
+        "business day",
+        "international",
+        "duties"
+      ],
+      "must_not_contain": [
+        "free lifetime"
+      ],
+      "expect_kb": true
+    },
+    {
+      "name": "trap",
+      "ask": "Do we have a PineVIP free unlimited exchanges forever program?",
+      "must_contain_any": [
+        "do not",
+        "don't",
+        "does not",
+        "no ",
+        "not",
+        "couldn't find",
+        "could not find"
+      ],
+      "must_not_contain": [
+        "yes, pinevip"
+      ],
+      "expect_kb": true
+    }
+  ]
+}
