@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import {
   BookOpen,
   Bot,
-  CircleDollarSign,
   Compass,
   Inbox,
   MessageSquare,
@@ -29,7 +28,6 @@ const workspaceNav = [
   { href: "/agent-overview", label: "Home", icon: Compass },
   { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/messages", label: "Outbox", icon: Inbox },
-  { href: "/usage", label: "Costs", icon: CircleDollarSign },
 ];
 
 const configureNav = [

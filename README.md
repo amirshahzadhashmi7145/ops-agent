@@ -59,7 +59,6 @@ localStorage.setItem("ops-agent.user-email", "agent@company.com");
 | APIs | Tools |
 | Standing instructions | Rules |
 | Outbound demo mail | Outbox |
-| Spend board | Costs |
 
 ## Backup
 
