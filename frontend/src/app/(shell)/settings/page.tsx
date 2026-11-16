@@ -14,7 +14,7 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -144,12 +144,16 @@ export default function SettingsPage() {
   const { data: settings, isLoading, isError, error, refetch } = useAgentSettings();
   const updateMutation = useUpdateAgentSettings();
   const [form, setForm] = useState<AgentSettingsFormValues | null>(null);
+  const settingsKey = settings
+    ? `${settings.updated_at ?? ""}:${settings.agent_name}:${settings.system_prompt.length}`
+    : "";
+  const [loadedKey, setLoadedKey] = useState("");
 
-  useEffect(() => {
-    if (settings) {
-      setForm(settingsToFormValues(settings));
-    }
-  }, [settings]);
+  // Adjust draft when server settings arrive/change (React-recommended render-time sync).
+  if (settings && settingsKey !== loadedKey) {
+    setLoadedKey(settingsKey);
+    setForm(settingsToFormValues(settings));
+  }
 
   const patch = (partial: Partial<AgentSettingsFormValues>) => {
     setForm((current) => (current ? { ...current, ...partial } : current));

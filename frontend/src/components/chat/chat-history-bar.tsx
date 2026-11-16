@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MessageSquare, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -29,15 +29,9 @@ function formatRelativeTime(value: string) {
 }
 
 function RelativeTime({ value }: { value: string }) {
-  const [label, setLabel] = useState("");
-
-  useEffect(() => {
-    setLabel(formatRelativeTime(value));
-  }, [value]);
-
   return (
     <span className="shrink-0 text-[10px] text-muted-foreground" suppressHydrationWarning>
-      {label}
+      {formatRelativeTime(value)}
     </span>
   );
 }

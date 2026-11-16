@@ -51,16 +51,22 @@ export function SopDialog({
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
+  const [wasOpen, setWasOpen] = useState(false);
+  if (open && !wasOpen) {
+    setWasOpen(true);
     setTitle(document?.title ?? "");
     setCategoryId(document?.category_id ?? categories[0]?.id ?? "");
     setRawText(document?.raw_text ?? "");
+  } else if (!open && wasOpen) {
+    setWasOpen(false);
+  }
+
+  useEffect(() => {
+    if (!open) return;
     void fetchResources()
       .then(setTools)
       .catch(() => toast.error("Failed to load tools for @mentions"));
-  }, [open, document, categories]);
+  }, [open]);
 
   const selectedCategoryName = useMemo(
     () => categories.find((category) => category.id === categoryId)?.name,

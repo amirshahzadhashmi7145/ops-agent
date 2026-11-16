@@ -66,9 +66,9 @@ HARDWARE_MARKERS = (
     "wont unlock",
 )
 
-DOC_CLASSIC = "SOP - Classic App Connectivity & Pairing"
-DOC_CONNECT = "SOP - Connect LTE Connectivity"
-DOC_HARDWARE = "SOP - Hardware Malfunction"
+DOC_CLASSIC = "Workflow - Classic App Connectivity & Pairing"
+DOC_CONNECT = "Workflow - Connect LTE Connectivity"
+DOC_HARDWARE = "Workflow - Hardware Malfunction"
 
 
 def _extract_serial(message: str) -> str | None:

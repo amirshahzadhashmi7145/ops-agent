@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { motion } from "framer-motion";
@@ -13,13 +13,11 @@ const options = [
   { value: "system", label: "System", icon: Monitor },
 ] as const;
 
+const emptySubscribe = () => () => {};
+
 export function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   const current = options.find((option) => option.value === theme) ?? options[2];
 

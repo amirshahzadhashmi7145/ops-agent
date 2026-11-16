@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -100,20 +100,27 @@ function NavGroup({
   );
 }
 
+function subscribeSidebar(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener("ops-sidebar-collapse", onStoreChange);
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener("ops-sidebar-collapse", onStoreChange);
+  };
+}
+
+function getSidebarCollapsed() {
+  return localStorage.getItem(SIDEBAR_KEY) === "1";
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    setCollapsed(localStorage.getItem(SIDEBAR_KEY) === "1");
-  }, []);
+  const collapsed = useSyncExternalStore(subscribeSidebar, getSidebarCollapsed, () => false);
 
   const toggleCollapsed = () => {
-    setCollapsed((current) => {
-      const next = !current;
-      localStorage.setItem(SIDEBAR_KEY, next ? "1" : "0");
-      return next;
-    });
+    const next = !getSidebarCollapsed();
+    localStorage.setItem(SIDEBAR_KEY, next ? "1" : "0");
+    window.dispatchEvent(new Event("ops-sidebar-collapse"));
   };
 
   return (

@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 export function LocalTime({
   value,
   empty = "Never",
@@ -11,11 +9,7 @@ export function LocalTime({
   empty?: string;
   className?: string;
 }) {
-  const [label, setLabel] = useState(value ?? empty);
-
-  useEffect(() => {
-    setLabel(value ? new Date(value).toLocaleString() : empty);
-  }, [empty, value]);
+  const label = value ? new Date(value).toLocaleString() : empty;
 
   return (
     <span className={className} suppressHydrationWarning>

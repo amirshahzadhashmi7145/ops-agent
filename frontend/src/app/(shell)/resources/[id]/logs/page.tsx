@@ -3,7 +3,7 @@
 import { ArrowLeft, Activity } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { LocalTime } from "@/components/local-time";
 import { JsonPane } from "@/components/resources/json-pane";
@@ -24,16 +24,13 @@ export default function ResourceLogsPage() {
     enabled: Boolean(resourceId && resource?.name),
   });
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
-  const { data: selectedLog, isLoading: detailLoading } = useToolLog(selectedLogId);
-
-  useEffect(() => {
-    if (callsLoading) return;
-    setSelectedLogId((current) => {
-      if (!calls.length) return null;
-      if (current && calls.some((call) => call.id === current)) return current;
-      return calls[0].id;
-    });
-  }, [calls, callsLoading]);
+  const effectiveLogId =
+    !callsLoading && calls.length
+      ? selectedLogId && calls.some((call) => call.id === selectedLogId)
+        ? selectedLogId
+        : calls[0].id
+      : null;
+  const { data: selectedLog, isLoading: detailLoading } = useToolLog(effectiveLogId);
 
   const successCount = calls.filter((call) => call.success).length;
 
@@ -120,7 +117,7 @@ export default function ResourceLogsPage() {
           ) : (
             <div className="divide-y divide-border">
               {calls.map((call) => {
-                const active = call.id === selectedLogId;
+                const active = call.id === effectiveLogId;
                 return (
                   <button
                     key={call.id}
@@ -176,7 +173,7 @@ export default function ResourceLogsPage() {
             )}
           </div>
           <div className="space-y-4 p-4">
-            {!selectedLogId ? (
+            {!effectiveLogId ? (
               <p className="py-10 text-center text-sm text-muted-foreground">
                 Select a call to see request and response bodies.
               </p>

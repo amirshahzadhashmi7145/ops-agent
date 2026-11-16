@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,16 +86,16 @@ export function SopTextEditor({ value, onChange, tools, placeholder }: SopTextEd
       .slice(0, 8);
   }, [mentionQuery, tools]);
 
-  useEffect(() => {
-    setHighlightIndex(0);
-  }, [mentionQuery, suggestions.length]);
-
   const updateMentionState = (next: string, cursor: number) => {
     onChange(next);
     const before = next.slice(0, cursor);
     const match = before.match(/@([a-zA-Z0-9_-]*)$/);
     if (match) {
-      setMentionQuery(match[1]);
+      const nextQuery = match[1];
+      if (nextQuery !== mentionQuery) {
+        setHighlightIndex(0);
+      }
+      setMentionQuery(nextQuery);
       setMentionStart(cursor - match[0].length);
       requestAnimationFrame(() => {
         if (!textareaRef.current) return;
@@ -104,6 +104,7 @@ export function SopTextEditor({ value, onChange, tools, placeholder }: SopTextEd
     } else {
       setMentionQuery(null);
       setMentionStart(null);
+      setHighlightIndex(0);
     }
   };
 
