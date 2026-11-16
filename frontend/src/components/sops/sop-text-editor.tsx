@@ -4,8 +4,9 @@ import { useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import type { ResourceListItem } from "@/types/resource";
+import { isAliasTool } from "@/lib/tool-aliases";
 import { cn } from "@/lib/utils";
+import type { ResourceListItem } from "@/types/resource";
 
 interface SopTextEditorProps {
   value: string;
@@ -83,6 +84,13 @@ export function SopTextEditor({ value, onChange, tools, placeholder }: SopTextEd
     const q = mentionQuery.toLowerCase();
     return tools
       .filter((tool) => tool.name.toLowerCase().includes(q))
+      .slice()
+      .sort((a, b) => {
+        const aAlias = isAliasTool(a.name, a.is_alias);
+        const bAlias = isAliasTool(b.name, b.is_alias);
+        if (aAlias !== bAlias) return aAlias ? 1 : -1;
+        return a.name.localeCompare(b.name);
+      })
       .slice(0, 8);
   }, [mentionQuery, tools]);
 

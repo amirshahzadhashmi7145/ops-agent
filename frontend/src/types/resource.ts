@@ -26,6 +26,7 @@ export interface ResourceListItem {
   last_test_success: boolean | null;
   active: boolean;
   resolved_url_preview?: string | null;
+  is_alias?: boolean;
 }
 
 export interface Resource extends ResourceListItem {

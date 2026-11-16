@@ -5,10 +5,11 @@ import { Activity, MoreHorizontal, Pencil, Play, Plus, Power, PowerOff, Trash2, 
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { LocalTime } from "@/components/local-time";
 import { TestResultPanel } from "@/components/resources/test-result-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ import { useToolLogSummary } from "@/hooks/use-tool-logs";
 import { fetchResource } from "@/lib/api";
 import { buttonMotion, listItemVariants } from "@/lib/motion";
 import { buildTestPayload } from "@/lib/test-query";
+import { isAliasTool } from "@/lib/tool-aliases";
 import type { Resource, ResourceFormValues, ResourceListItem, ResourceTestResult } from "@/types/resource";
 
 const RestQueryDialog = dynamic(
@@ -76,6 +78,20 @@ export default function ResourcesPage() {
   const [deleteTarget, setDeleteTarget] = useState<ResourceListItem | null>(null);
   const [quickTestTarget, setQuickTestTarget] = useState<ResourceListItem | null>(null);
   const [quickTestResult, setQuickTestResult] = useState<ResourceTestResult | null>(null);
+  const [hideAliases, setHideAliases] = useState(true);
+
+  const sortedResources = useMemo(() => {
+    return [...resources].sort((a, b) => a.name.localeCompare(b.name));
+  }, [resources]);
+
+  const visibleResources = useMemo(() => {
+    if (!hideAliases) return sortedResources;
+    return sortedResources.filter((resource) => !isAliasTool(resource.name, resource.is_alias));
+  }, [hideAliases, sortedResources]);
+
+  const aliasCount = sortedResources.filter((resource) =>
+    isAliasTool(resource.name, resource.is_alias),
+  ).length;
 
   const openCreate = () => {
     setEditing(null);
@@ -138,19 +154,36 @@ export default function ResourcesPage() {
   return (
     <>
       <div className="w-full px-5 py-5">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="page-header">Tools</h2>
             <p className="page-description">
               APIs the assistant can call while running a workflow (lookup, refund, reset, and more).
             </p>
+            {!isLoading && resources.length > 0 ? (
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Showing {visibleResources.length} of {resources.length}
+                {aliasCount > 0 ? ` · ${aliasCount} alias${aliasCount === 1 ? "" : "es"}` : ""}
+              </p>
+            ) : null}
           </div>
-          <motion.div {...buttonMotion}>
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add tool
-            </Button>
-          </motion.div>
+          <div className="flex flex-wrap items-center gap-2">
+            {aliasCount > 0 ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setHideAliases((value) => !value)}
+              >
+                {hideAliases ? "Show aliases" : "Hide aliases"}
+              </Button>
+            ) : null}
+            <motion.div {...buttonMotion}>
+              <Button onClick={openCreate}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add tool
+              </Button>
+            </motion.div>
+          </div>
         </div>
 
         {isLoading ? (
@@ -180,127 +213,142 @@ export default function ResourcesPage() {
             <Table>
               <TableHeader>
                 <TableRow className="border-border/60 hover:bg-transparent">
-                  <TableHead className="pl-6">Name</TableHead>
+                  <TableHead className="w-14 pl-5 text-muted-foreground">#</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="w-20 text-right">Calls</TableHead>
                   <TableHead>Method</TableHead>
                   <TableHead>URL</TableHead>
-                  <TableHead>Agent Access</TableHead>
+                  <TableHead>Agent</TableHead>
                   <TableHead>Last test</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {resources.map((resource, index) => (
-                  <TableRow
-                    key={resource.id}
-                    className="transition-colors hover:bg-muted/50"
-                  >
-                    <TableCell className="pl-6 font-medium text-foreground">
-                      <motion.span
-                        custom={index}
-                        variants={listItemVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex items-center gap-2"
-                      >
-                        <Link
-                          href={`/resources/${resource.id}/logs`}
-                          className="inline-flex items-center gap-2 hover:text-primary"
+                {visibleResources.map((resource, index) => {
+                  const alias = isAliasTool(resource.name, resource.is_alias);
+                  const calls = usageByName[resource.name] ?? 0;
+                  return (
+                    <TableRow
+                      key={resource.id}
+                      className="transition-colors hover:bg-muted/50"
+                    >
+                      <TableCell className="pl-5 tabular-nums text-muted-foreground">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell className="font-medium text-foreground">
+                        <motion.span
+                          custom={index}
+                          variants={listItemVariants}
+                          initial="hidden"
+                          animate="visible"
+                          className="flex flex-wrap items-center gap-2"
                         >
-                          <Badge variant={usageByName[resource.name] ? "secondary" : "outline"} className="font-mono">
-                            {usageByName[resource.name] ?? 0}
+                          <Link
+                            href={`/resources/${resource.id}/logs`}
+                            className="hover:text-primary"
+                          >
+                            {resource.name}
+                          </Link>
+                          <Badge
+                            variant={resource.tool_scope === "internal" ? "default" : "secondary"}
+                            className="text-[10px]"
+                          >
+                            {resource.tool_scope === "internal" ? "Internal" : "External"}
                           </Badge>
-                          <span>{resource.name}</span>
-                        </Link>
-                        <Badge
-                          variant={resource.tool_scope === "internal" ? "default" : "secondary"}
-                          className="text-[10px]"
-                        >
-                          {resource.tool_scope === "internal" ? "Internal" : "External"}
+                          {alias ? (
+                            <Badge variant="outline" className="text-[10px]">
+                              Alias
+                            </Badge>
+                          ) : null}
+                        </motion.span>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
+                        {calls}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="font-mono text-xs">
+                          {resource.http_method}
                         </Badge>
-                      </motion.span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="font-mono text-xs">
-                        {resource.http_method}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate text-muted-foreground">{resource.url}</TableCell>
-                    <TableCell>
-                      <motion.div {...buttonMotion} className="w-fit">
-                        <Button
-                          variant={resource.active ? "secondary" : "outline"}
-                          size="sm"
-                          disabled={setActiveMutation.isPending}
-                          onClick={() =>
-                            setActiveMutation.mutate({
-                              id: resource.id,
-                              active: !resource.active,
-                            })
-                          }
-                        >
-                          {resource.active ? (
-                            <>
-                              <Power className="mr-1.5 h-3.5 w-3.5" />
-                              On
-                            </>
-                          ) : (
-                            <>
-                              <PowerOff className="mr-1.5 h-3.5 w-3.5" />
-                              Off
-                            </>
-                          )}
-                        </Button>
-                      </motion.div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <StatusDot success={resource.last_test_success} />
-                        <span className="text-xs text-muted-foreground">
-                          {resource.last_tested_at
-                            ? new Date(resource.last_tested_at).toLocaleString()
-                            : "Never"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-muted"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEdit(resource)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/resources/${resource.id}/logs`)}>
-                            <Activity className="mr-2 h-4 w-4" />
-                            Usage logs
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              void handleQuickTest(resource);
-                            }}
-                            disabled={testMutation.isPending && quickTestTarget?.id === resource.id}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate text-muted-foreground">
+                        {resource.url}
+                      </TableCell>
+                      <TableCell>
+                        <motion.div {...buttonMotion} className="w-fit">
+                          <Button
+                            variant={resource.active ? "secondary" : "outline"}
+                            size="sm"
+                            disabled={setActiveMutation.isPending}
+                            onClick={() =>
+                              setActiveMutation.mutate({
+                                id: resource.id,
+                                active: !resource.active,
+                              })
+                            }
                           >
-                            <Play className="mr-2 h-4 w-4" />
-                            {testMutation.isPending && quickTestTarget?.id === resource.id
-                              ? "Testing..."
-                              : "Test"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => setDeleteTarget(resource)}
+                            {resource.active ? (
+                              <>
+                                <Power className="mr-1.5 h-3.5 w-3.5" />
+                                On
+                              </>
+                            ) : (
+                              <>
+                                <PowerOff className="mr-1.5 h-3.5 w-3.5" />
+                                Off
+                              </>
+                            )}
+                          </Button>
+                        </motion.div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <StatusDot success={resource.last_test_success} />
+                          <LocalTime
+                            value={resource.last_tested_at}
+                            className="text-xs text-muted-foreground"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-muted"
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                            <MoreHorizontal className="h-4 w-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEdit(resource)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push(`/resources/${resource.id}/logs`)}>
+                              <Activity className="mr-2 h-4 w-4" />
+                              Usage logs
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                void handleQuickTest(resource);
+                              }}
+                              disabled={testMutation.isPending && quickTestTarget?.id === resource.id}
+                            >
+                              <Play className="mr-2 h-4 w-4" />
+                              {testMutation.isPending && quickTestTarget?.id === resource.id
+                                ? "Testing..."
+                                : "Test"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => setDeleteTarget(resource)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

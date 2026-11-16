@@ -51,7 +51,7 @@ _HOWTO_PROCESS = re.compile(
 _DOCS_SIGNAL = re.compile(
     r"(?i)\b("
     r"policy|policies|procedure|procedures|faq|guideline|guidelines"
-    r"|coverage|warranty|warranties|sla|entitlement|program"
+    r"|coverage|warranty|warranties|sla|entitlement|entitlements|program|programs"
     r"|documentation|article|knowledge base|playbook"
     r")\b"
 )

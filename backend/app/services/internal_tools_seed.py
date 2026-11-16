@@ -21,6 +21,21 @@ logger = logging.getLogger(__name__)
 SEED_USER = "system@ops.internal"
 INTERNAL_TOOLS_PATH = Path(__file__).resolve().parent.parent / "data" / "internal_tools.json"
 
+# Generic aliases kept for agent/SOP resolution; UI may hide these.
+ALIAS_NAMES: frozenset[str] = frozenset(
+    {
+        "lookup_account",
+        "list_customer_assets",
+        "lookup_asset",
+        "get_asset_health",
+        "get_order_status",
+    }
+)
+
+
+def is_alias_tool(name: str) -> bool:
+    return name in ALIAS_NAMES
+
 
 def load_internal_tool_defs() -> list[dict]:
     if not INTERNAL_TOOLS_PATH.exists():

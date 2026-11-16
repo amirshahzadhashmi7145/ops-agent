@@ -19,6 +19,7 @@ from app.schemas.resource import (
     ResourceTestResponse,
     ResourceUpdate,
 )
+from app.services.internal_tools_seed import is_alias_tool
 from app.services.resource_executor import execute_resource_request, resolve_resource_url, resolve_test_headers
 from app.services.tool_log import record_tool_call, redact_headers
 
@@ -27,6 +28,14 @@ router = APIRouter()
 MAX_LOG_BODY = 10000
 
 
+def resource_name_sort_key(name: str) -> str:
+    """Sort key for Tools UI list ordering (matches order_by(Resource.name.asc()))."""
+    return name or ""
+
+
+def sorted_resource_names(names: list[str]) -> list[str]:
+    """Pure helper documenting expected resource list order for ASCII names."""
+    return sorted(names, key=resource_name_sort_key)
 
 
 def _headers_to_json(headers: list) -> list[dict]:
@@ -49,6 +58,7 @@ def _to_list_item(resource: Resource) -> ResourceListItem:
         last_test_success=resource.last_test_success,
         active=resource.active,
         resolved_url_preview=_preview_for(resource),
+        is_alias=is_alias_tool(resource.name),
     )
 
 
@@ -188,7 +198,7 @@ def create_connection(
 
 @router.get("/resources", response_model=list[ResourceListItem])
 def list_resources(db: Session = Depends(get_db)) -> list[ResourceListItem]:
-    rows = db.query(Resource).order_by(Resource.updated_at.desc()).all()
+    rows = db.query(Resource).order_by(Resource.name.asc()).all()
     return [_to_list_item(row) for row in rows]
 
 

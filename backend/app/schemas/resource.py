@@ -130,6 +130,7 @@ class ResourceListItem(BaseModel):
     last_test_success: bool | None
     active: bool
     resolved_url_preview: str | None = None
+    is_alias: bool = False
 
     model_config = {"from_attributes": True}
 

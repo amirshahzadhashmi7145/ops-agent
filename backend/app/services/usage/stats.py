@@ -40,9 +40,17 @@ def _dec(values: Iterable[Decimal]) -> Decimal:
     return sum(values, Decimal("0"))
 
 
-def usage_stats(db: Session, *, days: int = 30) -> dict:
-    since = _period_start(days)
-    rows = db.execute(select(LlmUsageEvent).where(LlmUsageEvent.created_at >= since)).scalars().all()
+def build_usage_stats_from_rows(
+    rows: Iterable,
+    *,
+    days: int = 30,
+    hosting: dict | None = None,
+    cache_entries: tuple[int, int] = (0, 0),
+    user_turns_by_conversation: dict | None = None,
+) -> dict:
+    """Pure aggregation used by usage_stats and unit tests (no DB required)."""
+    hosting = hosting if hosting is not None else hosting_breakdown(days=days)
+    turns_map = user_turns_by_conversation or {}
 
     spend = _dec(row.cost_usd for row in rows)
     without = _dec(row.cost_without_cache_usd for row in rows)
@@ -86,15 +94,6 @@ def usage_stats(db: Session, *, days: int = 30) -> dict:
 
     user_turns: list[Decimal] = []
     if by_conversation:
-        turn_rows = db.execute(
-            select(Message.conversation_id, func.count(Message.id))
-            .where(
-                Message.conversation_id.in_(list(by_conversation.keys())),
-                Message.role == MessageRole.user,
-            )
-            .group_by(Message.conversation_id)
-        ).all()
-        turns_map = {row[0]: int(row[1]) for row in turn_rows}
         user_turns = sorted(Decimal(turns_map.get(cid, 1)) for cid in by_conversation)
     avg_user_turns = (_dec(user_turns) / len(user_turns)) if user_turns else Decimal("0")
     p90_user_turns = _quantile(user_turns, 0.9) if user_turns else Decimal("0")
@@ -124,11 +123,6 @@ def usage_stats(db: Session, *, days: int = 30) -> dict:
         bucket["calls"] += 1
         bucket["saved_usd"] += max(row.cost_without_cache_usd - row.cost_usd, Decimal("0"))
 
-    cache_entries = db.execute(
-        select(func.count(SemanticCacheEntry.id), func.coalesce(func.sum(SemanticCacheEntry.hit_count), 0))
-    ).one()
-
-    hosting = hosting_breakdown(days=days)
     hosting_monthly = Decimal(str(hosting["monthly_usd"]))
 
     unit = (mean_cost * MARKUP).quantize(TWOPLACE, rounding=ROUND_HALF_UP)
@@ -251,6 +245,35 @@ def usage_stats(db: Session, *, days: int = 30) -> dict:
             },
         },
     }
+
+
+def usage_stats(db: Session, *, days: int = 30) -> dict:
+    since = _period_start(days)
+    rows = db.execute(select(LlmUsageEvent).where(LlmUsageEvent.created_at >= since)).scalars().all()
+
+    by_conversation_ids = {row.conversation_id for row in rows if row.conversation_id}
+    turns_map: dict = {}
+    if by_conversation_ids:
+        turn_rows = db.execute(
+            select(Message.conversation_id, func.count(Message.id))
+            .where(
+                Message.conversation_id.in_(list(by_conversation_ids)),
+                Message.role == MessageRole.user,
+            )
+            .group_by(Message.conversation_id)
+        ).all()
+        turns_map = {row[0]: int(row[1]) for row in turn_rows}
+
+    cache_row = db.execute(
+        select(func.count(SemanticCacheEntry.id), func.coalesce(func.sum(SemanticCacheEntry.hit_count), 0))
+    ).one()
+    return build_usage_stats_from_rows(
+        rows,
+        days=days,
+        hosting=hosting_breakdown(days=days),
+        cache_entries=(int(cache_row[0] or 0), int(cache_row[1] or 0)),
+        user_turns_by_conversation=turns_map,
+    )
 
 
 def _model_comparison(
