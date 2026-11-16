@@ -72,3 +72,15 @@ Restore with `psql` into a fresh volume. Schedule this (cron / host job) for rea
 ## CI
 
 GitHub Actions runs backend pytest + frontend lint/build on push/PR to `main`.
+
+## Multi-company grounding check
+
+Six demo corpora live under `backend/app/data/companies/`.
+With the stack up:
+
+```bash
+docker compose cp scripts/multi_company_eval.py backend:/tmp/multi_company_eval.py
+docker compose exec -e LIVE=1 -e API_BASE=http://127.0.0.1:8000 -e PYTHONPATH=/app -w /app backend python /tmp/multi_company_eval.py
+```
+
+This swaps Articles per brand, asks policy + trap questions, then restores Cobalt Home.
