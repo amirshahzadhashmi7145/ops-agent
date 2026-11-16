@@ -21,10 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ConversationStatusPill } from "@/components/chat/conversation-status-pill";
 import {
   useConversations,
   useDeleteConversation,
   useEndConversation,
+  useHandoverConversation,
   useReopenConversation,
 } from "@/hooks/use-chat";
 import { useClearMessages, useMessage, useMessages } from "@/hooks/use-messages";
@@ -35,29 +37,13 @@ import type { ConversationListItem, ConversationStatus } from "@/types/chat";
 type Tab = "conversations" | "drafts";
 type StatusFilter = "all" | ConversationStatus;
 
-function StatusPill({ status }: { status: ConversationStatus }) {
-  if (status === "live") {
-    return (
-      <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-        Live
-      </Badge>
-    );
-  }
-  return (
-    <Badge variant="outline" className="gap-1.5 text-muted-foreground">
-      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-      Ended
-    </Badge>
-  );
-}
-
 export default function HistoryPage() {
   const [tab, setTab] = useState<Tab>("conversations");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const { data: conversations = [], isLoading } = useConversations();
   const deleteConversation = useDeleteConversation();
   const endConversation = useEndConversation();
+  const handoverConversation = useHandoverConversation();
   const reopenConversation = useReopenConversation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -73,6 +59,7 @@ export default function HistoryPage() {
 
   const liveCount = conversations.filter((item) => item.status === "live").length;
   const endedCount = conversations.filter((item) => item.status === "ended").length;
+  const escalatedCount = conversations.filter((item) => item.status === "escalated").length;
   const selected = conversations.find((item) => item.id === selectedId) ?? null;
 
   const pillLabel = (message: (typeof drafts)[number]) => {
@@ -117,6 +104,7 @@ export default function HistoryPage() {
                 [
                   ["all", `All (${conversations.length})`],
                   ["live", `Live (${liveCount})`],
+                  ["escalated", `Handed over (${escalatedCount})`],
                   ["ended", `Ended (${endedCount})`],
                 ] as const
               ).map(([key, label]) => (
@@ -160,9 +148,16 @@ export default function HistoryPage() {
                     index={index}
                     onOpen={() => setSelectedId(conversation.id)}
                     onEnd={() => endConversation.mutate(conversation.id)}
+                    onHandover={() =>
+                      handoverConversation.mutate({
+                        id: conversation.id,
+                        reason: "Manual handover from History",
+                      })
+                    }
                     onReopen={() => reopenConversation.mutate(conversation.id)}
                     onDelete={() => deleteConversation.mutate(conversation.id)}
                     ending={endConversation.isPending}
+                    handingOver={handoverConversation.isPending}
                     reopening={reopenConversation.isPending}
                     deleting={deleteConversation.isPending}
                   />
@@ -248,7 +243,7 @@ export default function HistoryPage() {
             <DialogDescription>
               {selected ? (
                 <span className="inline-flex flex-wrap items-center gap-2 pt-1">
-                  <StatusPill status={selected.status} />
+                  <ConversationStatusPill status={selected.status} />
                   <span>
                     {selected.message_count} message{selected.message_count === 1 ? "" : "s"}
                   </span>
@@ -258,6 +253,12 @@ export default function HistoryPage() {
           </DialogHeader>
           {selected ? (
             <div className="space-y-4 text-sm">
+              {selected.status_reason ? (
+                <p className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
+                  <span className="text-muted-foreground">Reason: </span>
+                  {selected.status_reason}
+                </p>
+              ) : null}
               {selected.preview ? (
                 <p className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-muted-foreground">
                   {selected.preview}
@@ -273,13 +274,27 @@ export default function HistoryPage() {
                   </Button>
                 </Link>
                 {selected.status === "live" ? (
-                  <Button
-                    variant="outline"
-                    disabled={endConversation.isPending}
-                    onClick={() => endConversation.mutate(selected.id)}
-                  >
-                    End conversation
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      disabled={handoverConversation.isPending}
+                      onClick={() =>
+                        handoverConversation.mutate({
+                          id: selected.id,
+                          reason: "Manual handover from History",
+                        })
+                      }
+                    >
+                      Hand over
+                    </Button>
+                    <Button
+                      variant="outline"
+                      disabled={endConversation.isPending}
+                      onClick={() => endConversation.mutate(selected.id)}
+                    >
+                      End conversation
+                    </Button>
+                  </>
                 ) : (
                   <Button
                     variant="outline"
@@ -355,9 +370,11 @@ function ConversationRow({
   index,
   onOpen,
   onEnd,
+  onHandover,
   onReopen,
   onDelete,
   ending,
+  handingOver,
   reopening,
   deleting,
 }: {
@@ -365,9 +382,11 @@ function ConversationRow({
   index: number;
   onOpen: () => void;
   onEnd: () => void;
+  onHandover: () => void;
   onReopen: () => void;
   onDelete: () => void;
   ending: boolean;
+  handingOver: boolean;
   reopening: boolean;
   deleting: boolean;
 }) {
@@ -381,13 +400,13 @@ function ConversationRow({
       <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium text-foreground">{conversation.title}</p>
-          <StatusPill status={conversation.status} />
+          <ConversationStatusPill status={conversation.status} />
           <span className="text-xs text-muted-foreground tabular-nums">
             {conversation.message_count} msg
           </span>
         </div>
         <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
-          {conversation.preview || "No messages yet"}
+          {conversation.status_reason || conversation.preview || "No messages yet"}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           Updated <LocalTime value={conversation.updated_at} />
@@ -405,9 +424,14 @@ function ConversationRow({
           </Button>
         </Link>
         {conversation.status === "live" ? (
-          <Button size="sm" variant="ghost" disabled={ending} onClick={onEnd}>
-            End
-          </Button>
+          <>
+            <Button size="sm" variant="ghost" disabled={handingOver} onClick={onHandover}>
+              Hand over
+            </Button>
+            <Button size="sm" variant="ghost" disabled={ending} onClick={onEnd}>
+              End
+            </Button>
+          </>
         ) : (
           <Button size="sm" variant="ghost" disabled={reopening} onClick={onReopen}>
             Reopen

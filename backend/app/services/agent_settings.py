@@ -85,6 +85,15 @@ def build_system_prompt(db: Session, agent: AgentSettings) -> str:
     if escalation:
         base = f"{base}\n\nEscalation guidance:\n{escalation}"
 
+    base = (
+        f"{base}\n\nConversation lifecycle:\n"
+        "- When the customer's issue is fully resolved, call `ticketResolve` with a short reason — "
+        "that closes the conversation automatically.\n"
+        "- When a human must take over (safety, legal, VIP, stuck after tools), call `ticketInternalNote` "
+        "then `ticketEscalate` with queue + reason — that hands the conversation to a human queue.\n"
+        "- Tell the customer clearly that the ticket is closed or that a teammate will continue."
+    )
+
     rules_block = format_agent_rules_prompt(get_agent_rules(db))
     if rules_block:
         return f"{base}\n\n{rules_block}"

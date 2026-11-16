@@ -13,8 +13,22 @@ from app.core.config import settings
 from app.core.database import SessionLocal, get_db
 from app.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from app.models.resource import Resource
-from app.schemas.chat import ChatStreamRequest, ConversationCreate, ConversationDetail, ConversationListItem
+from app.models.sim import OutboundMessage
+from app.schemas.chat import (
+    ChatStreamRequest,
+    ConversationCreate,
+    ConversationDetail,
+    ConversationHandoverRequest,
+    ConversationListItem,
+)
 from app.services.agent_runtime import run_agent_turn
+from app.services.conversation_lifecycle import (
+    apply_lifecycle_action,
+    lifecycle_from_pipeline_trace,
+    mark_ended,
+    mark_escalated,
+    mark_live,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,16 +61,6 @@ def _preview_text(content: str | None, limit: int = 140) -> str | None:
     return cleaned[:limit] + ("…" if len(cleaned) > limit else "")
 
 
-def _mark_live(conversation: Conversation) -> None:
-    conversation.status = ConversationStatus.live
-    conversation.ended_at = None
-
-
-def _mark_ended(conversation: Conversation, when: datetime | None = None) -> None:
-    conversation.status = ConversationStatus.ended
-    conversation.ended_at = when or datetime.now(timezone.utc)
-
-
 def _apply_idle_end(conversation: Conversation, now: datetime) -> bool:
     """End stale live conversations. Returns True if status changed."""
     if conversation.status != ConversationStatus.live:
@@ -66,7 +70,12 @@ def _apply_idle_end(conversation: Conversation, now: datetime) -> bool:
         updated = updated.replace(tzinfo=timezone.utc)
     if updated is None or updated >= now - LIVE_IDLE:
         return False
-    _mark_ended(conversation, when=updated + LIVE_IDLE)
+    mark_ended(
+        conversation,
+        reason="Auto-closed after idle",
+        source="idle",
+        when=updated + LIVE_IDLE,
+    )
     return True
 
 
@@ -80,6 +89,8 @@ def _to_list_item(
         title=conversation.title,
         status=conversation.status.value,
         ended_at=conversation.ended_at,
+        status_reason=conversation.status_reason,
+        status_source=conversation.status_source,
         message_count=message_count,
         preview=preview,
         created_at=conversation.created_at,
@@ -93,10 +104,30 @@ def _to_detail(conversation: Conversation, messages: list[Message]) -> Conversat
         title=conversation.title,
         status=conversation.status.value,
         ended_at=conversation.ended_at,
+        status_reason=conversation.status_reason,
+        status_source=conversation.status_source,
         message_count=len(messages),
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
         messages=messages,
+    )
+
+
+def _queue_handover_draft(db: Session, *, reason: str, queue_parameters: str) -> None:
+    db.add(
+        OutboundMessage(
+            to_address="human-agent-queue@internal",
+            from_address="ops-agent@internal",
+            subject="Ticket handed over to human queue",
+            body=reason,
+            related_entity_type="ticket",
+            related_entity_id=str(uuid.uuid4()),
+            message_metadata={
+                "message_kind": "support_ticket",
+                "queue_parameters": queue_parameters,
+            },
+            read=False,
+        )
     )
 
 
@@ -125,7 +156,7 @@ def list_conversations(
     if dirty:
         db.commit()
 
-    if status in {"live", "ended"}:
+    if status in {"live", "ended", "escalated"}:
         conversations = [c for c in conversations if c.status.value == status]
 
     ids = [c.id for c in conversations]
@@ -140,7 +171,6 @@ def list_conversations(
         )
         counts = {row[0]: int(row[1]) for row in count_rows}
 
-        # Latest message preview per conversation (by created_at).
         latest_ids = (
             db.query(Message.conversation_id, func.max(Message.created_at).label("latest"))
             .filter(Message.conversation_id.in_(ids))
@@ -211,8 +241,32 @@ def end_conversation(
 ) -> ConversationDetail:
     user_email = get_user_email(request)
     conversation = _conversation_or_404(db, conversation_id, user_email)
-    _mark_ended(conversation)
+    mark_ended(conversation, reason="Ended by operator", source="manual")
     conversation.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(conversation)
+    messages = (
+        db.query(Message)
+        .filter(Message.conversation_id == conversation.id)
+        .order_by(Message.created_at.asc())
+        .all()
+    )
+    return _to_detail(conversation, messages)
+
+
+@router.post("/conversations/{conversation_id}/handover", response_model=ConversationDetail)
+def handover_conversation(
+    conversation_id: uuid.UUID,
+    payload: ConversationHandoverRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> ConversationDetail:
+    user_email = get_user_email(request)
+    conversation = _conversation_or_404(db, conversation_id, user_email)
+    reason = payload.reason.strip() or "Handed over to a human agent"
+    mark_escalated(conversation, reason=reason, source="manual")
+    conversation.updated_at = datetime.now(timezone.utc)
+    _queue_handover_draft(db, reason=reason, queue_parameters=payload.queue_parameters.strip())
     db.commit()
     db.refresh(conversation)
     messages = (
@@ -232,7 +286,7 @@ def reopen_conversation(
 ) -> ConversationDetail:
     user_email = get_user_email(request)
     conversation = _conversation_or_404(db, conversation_id, user_email)
-    _mark_live(conversation)
+    mark_live(conversation)
     conversation.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(conversation)
@@ -270,6 +324,14 @@ async def chat_stream(
 
     if payload.conversation_id:
         conversation = _conversation_or_404(db, payload.conversation_id, user_email)
+        if conversation.status in {ConversationStatus.ended, ConversationStatus.escalated}:
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "This conversation is closed or handed over. Reopen it before sending "
+                    "another message."
+                ),
+            )
     else:
         conversation = Conversation(
             user_email=user_email,
@@ -313,7 +375,7 @@ async def chat_stream(
     )
     db.add(user_message)
     conversation.updated_at = datetime.now(timezone.utc)
-    _mark_live(conversation)
+    mark_live(conversation)
     if conversation.title == "New chat":
         conversation.title = _title_from_message(message_text)
     db.commit()
@@ -340,7 +402,6 @@ async def chat_stream(
                         pipeline_trace = event.get("pipeline_trace", [])
                     yield json.dumps(event) + "\n"
             except Exception:  # noqa: BLE001
-                # Log the real error server-side; never leak raw exception detail to the client.
                 logger.exception("Chat turn failed for conversation %s", conversation_id)
                 friendly = "Sorry, something went wrong while processing your request. Please try again."
                 yield json.dumps({"type": "error", "message": friendly}) + "\n"
@@ -357,17 +418,34 @@ async def chat_stream(
             )
             stream_db.add(assistant_message)
             conv = stream_db.get(Conversation, conversation_id)
+            status_event = None
             if conv is not None:
                 conv.updated_at = datetime.now(timezone.utc)
-                _mark_live(conv)
+                action = lifecycle_from_pipeline_trace(pipeline_trace)
+                if action:
+                    apply_lifecycle_action(conv, action)
+                    status_event = {
+                        "type": "conversation_status",
+                        "status": action.status,
+                        "reason": action.reason,
+                        "source": action.source,
+                    }
+                else:
+                    mark_live(conv)
             stream_db.commit()
             stream_db.refresh(assistant_message)
+
+            if status_event:
+                yield json.dumps(status_event) + "\n"
 
             yield json.dumps(
                 {
                     "type": "done",
                     "conversation_id": str(conversation_id),
                     "message_id": str(assistant_message.id),
+                    "status": (
+                        status_event["status"] if status_event else ConversationStatus.live.value
+                    ),
                 }
             ) + "\n"
         finally:

@@ -17,6 +17,7 @@ class MessageRole(str, enum.Enum):
 class ConversationStatus(str, enum.Enum):
     live = "live"
     ended = "ended"
+    escalated = "escalated"
 
 
 class Conversation(Base):
@@ -33,6 +34,8 @@ class Conversation(Base):
         index=True,
     )
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), index=True

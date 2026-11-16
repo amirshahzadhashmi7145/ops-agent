@@ -1,10 +1,12 @@
-export type ConversationStatus = "live" | "ended";
+export type ConversationStatus = "live" | "ended" | "escalated";
 
 export interface ConversationListItem {
   id: string;
   title: string;
   status: ConversationStatus;
   ended_at: string | null;
+  status_reason: string | null;
+  status_source: string | null;
   message_count: number;
   preview: string | null;
   created_at: string;
@@ -24,6 +26,8 @@ export interface ConversationDetail {
   title: string;
   status: ConversationStatus;
   ended_at: string | null;
+  status_reason: string | null;
+  status_source: string | null;
   message_count: number;
   created_at: string;
   updated_at: string;
@@ -64,4 +68,15 @@ export type ChatStreamEvent =
   | { type: "sop_step"; process_id: string; tool: string }
   | { type: "final_answer"; content: string; pipeline_trace?: PipelineTraceEvent[] }
   | { type: "error"; message: string }
-  | { type: "done"; conversation_id: string; message_id: string };
+  | {
+      type: "conversation_status";
+      status: ConversationStatus;
+      reason?: string;
+      source?: string;
+    }
+  | {
+      type: "done";
+      conversation_id: string;
+      message_id: string;
+      status?: ConversationStatus;
+    };

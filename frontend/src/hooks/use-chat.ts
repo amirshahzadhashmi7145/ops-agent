@@ -9,6 +9,7 @@ import {
   endConversation,
   fetchConversation,
   fetchConversations,
+  handoverConversation,
   reopenConversation,
   streamChat,
 } from "@/lib/api";
@@ -59,6 +60,27 @@ export function useEndConversation() {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       queryClient.setQueryData(["conversations", conversation.id], conversation);
       toast.success("Conversation ended");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useHandoverConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      reason,
+      queue_parameters,
+    }: {
+      id: string;
+      reason?: string;
+      queue_parameters?: string;
+    }) => handoverConversation(id, { reason, queue_parameters }),
+    onSuccess: (conversation) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.setQueryData(["conversations", conversation.id], conversation);
+      toast.success("Handed over to human queue");
     },
     onError: (error: Error) => toast.error(error.message),
   });

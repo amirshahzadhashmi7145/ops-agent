@@ -8,14 +8,21 @@ from pydantic import BaseModel, Field
 class ConversationListItem(BaseModel):
     id: uuid.UUID
     title: str
-    status: Literal["live", "ended"] = "live"
+    status: Literal["live", "ended", "escalated"] = "live"
     ended_at: datetime | None = None
+    status_reason: str | None = None
+    status_source: str | None = None
     message_count: int = 0
     preview: str | None = None
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ConversationHandoverRequest(BaseModel):
+    reason: str = Field(default="Handed over to a human agent", max_length=2000)
+    queue_parameters: str = Field(default="", max_length=500)
 
 
 class MessageResponse(BaseModel):
@@ -31,8 +38,10 @@ class MessageResponse(BaseModel):
 class ConversationDetail(BaseModel):
     id: uuid.UUID
     title: str
-    status: Literal["live", "ended"] = "live"
+    status: Literal["live", "ended", "escalated"] = "live"
     ended_at: datetime | None = None
+    status_reason: str | None = None
+    status_source: str | None = None
     message_count: int = 0
     created_at: datetime
     updated_at: datetime

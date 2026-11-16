@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ChatHistoryBar } from "@/components/chat/chat-history-bar";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessageList } from "@/components/chat/chat-message-list";
-import { Badge } from "@/components/ui/badge";
+import { ConversationStatusPill } from "@/components/chat/conversation-status-pill";
 import { Button } from "@/components/ui/button";
 import {
   useConversation,
@@ -15,10 +15,11 @@ import {
   useCreateConversation,
   useDeleteConversation,
   useEndConversation,
+  useHandoverConversation,
   useReopenConversation,
   sendMessageWithStream,
 } from "@/hooks/use-chat";
-import type { ChatMessage, ChatStreamEvent } from "@/types/chat";
+import type { ChatMessage, ChatStreamEvent, ConversationStatus } from "@/types/chat";
 
 export default function ChatPage() {
   return (
@@ -36,22 +37,26 @@ function ChatPageInner() {
   const createConversation = useCreateConversation();
   const deleteConversation = useDeleteConversation();
   const endConversation = useEndConversation();
+  const handoverConversation = useHandoverConversation();
   const reopenConversation = useReopenConversation();
   const { data: conversation, refetch: refetchConversation } = useConversation(activeConversationId);
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [streamingStatus, setStreamingStatus] = useState<string | null>(null);
   const [pendingAssistant, setPendingAssistant] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [turnStatus, setTurnStatus] = useState<ConversationStatus | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (conversation) {
       queueMicrotask(() => {
         setLocalMessages(conversation.messages);
+        setTurnStatus(null);
       });
     } else if (!activeConversationId) {
       queueMicrotask(() => {
         setLocalMessages([]);
+        setTurnStatus(null);
       });
     }
   }, [conversation, activeConversationId]);
@@ -117,6 +122,17 @@ function ChatPageInner() {
               if (event.type === "final_answer") {
                 setPendingAssistant(event.content);
               }
+              if (event.type === "conversation_status") {
+                setTurnStatus(event.status);
+                if (event.status === "ended") {
+                  setStreamingStatus("Conversation closed by assistant");
+                } else if (event.status === "escalated") {
+                  setStreamingStatus("Handed over to a human agent");
+                }
+              }
+              if (event.type === "done" && event.status) {
+                setTurnStatus(event.status);
+              }
             },
           },
           controller.signal,
@@ -146,7 +162,8 @@ function ChatPageInner() {
     abortRef.current?.abort();
   }, []);
 
-  const status = conversation?.status ?? "live";
+  const status = turnStatus ?? conversation?.status ?? "live";
+  const locked = status === "ended" || status === "escalated";
 
   return (
       <div className="flex h-[calc(100vh)] min-h-0 flex-col overflow-hidden">
@@ -158,31 +175,38 @@ function ChatPageInner() {
                   {conversation?.title || "New conversation"}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Follows Workflows, searches Articles, and calls Tools only when needed.
+                  {conversation?.status_reason && locked
+                    ? conversation.status_reason
+                    : "Follows Workflows, searches Articles, and calls Tools only when needed."}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {status === "live" ? (
-                  <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    Live
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="gap-1.5 text-muted-foreground">
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-                    Ended
-                  </Badge>
-                )}
+                <ConversationStatusPill status={status} />
                 {activeConversationId ? (
                   status === "live" ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={endConversation.isPending || isSending}
-                      onClick={() => endConversation.mutate(activeConversationId)}
-                    >
-                      End
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={handoverConversation.isPending || isSending}
+                        onClick={() =>
+                          handoverConversation.mutate({
+                            id: activeConversationId,
+                            reason: "Manual handover from Chat",
+                          })
+                        }
+                      >
+                        Hand over
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={endConversation.isPending || isSending}
+                        onClick={() => endConversation.mutate(activeConversationId)}
+                      >
+                        End
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       size="sm"
@@ -207,7 +231,7 @@ function ChatPageInner() {
           />
 
           <ChatInput
-            disabled={isSending || status === "ended"}
+            disabled={isSending || locked}
             isSending={isSending}
             onSend={handleSend}
             onStop={handleStop}

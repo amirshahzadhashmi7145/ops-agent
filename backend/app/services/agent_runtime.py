@@ -845,6 +845,7 @@ async def run_agent_turn(
                     "name": resource.name,
                     "success": result.get("success", False),
                     "body": result.get("body"),
+                    "arguments": tool_call.arguments or {},
                 }
             )
             messages.append(

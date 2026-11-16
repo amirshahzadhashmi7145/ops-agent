@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { MessageSquare, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
+import { conversationStatusDotClass } from "@/components/chat/conversation-status-pill";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ConversationListItem } from "@/types/chat";
@@ -108,9 +109,15 @@ export function ChatHistoryBar({
                       <span
                         className={cn(
                           "h-1.5 w-1.5 shrink-0 rounded-full",
-                          conversation.status === "live" ? "bg-emerald-500" : "bg-muted-foreground/40",
+                          conversationStatusDotClass(conversation.status ?? "ended"),
                         )}
-                        title={conversation.status === "live" ? "Live" : "Ended"}
+                        title={
+                          conversation.status === "live"
+                            ? "Live"
+                            : conversation.status === "escalated"
+                              ? "Handed over"
+                              : "Ended"
+                        }
                       />
                       <span
                         className={cn(

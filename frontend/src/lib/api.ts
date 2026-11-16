@@ -118,7 +118,9 @@ export function testResourceSaved(
   });
 }
 
-export function fetchConversations(status?: "live" | "ended"): Promise<ConversationListItem[]> {
+export function fetchConversations(
+  status?: "live" | "ended" | "escalated",
+): Promise<ConversationListItem[]> {
   const query = status ? `?status=${status}` : "";
   return apiFetch<ConversationListItem[]>(`/api/conversations${query}`);
 }
@@ -136,6 +138,16 @@ export function createConversation(title = "New chat"): Promise<ConversationDeta
 
 export function endConversation(id: string): Promise<ConversationDetail> {
   return apiFetch<ConversationDetail>(`/api/conversations/${id}/end`, { method: "POST" });
+}
+
+export function handoverConversation(
+  id: string,
+  payload?: { reason?: string; queue_parameters?: string },
+): Promise<ConversationDetail> {
+  return apiFetch<ConversationDetail>(`/api/conversations/${id}/handover`, {
+    method: "POST",
+    body: JSON.stringify(payload ?? {}),
+  });
 }
 
 export function reopenConversation(id: string): Promise<ConversationDetail> {

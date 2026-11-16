@@ -411,17 +411,22 @@ def jira_create_issue(payload: JiraIssueRequest, db: Session = Depends(get_db)) 
 
 @router.post("/ops/tickets/escalate")
 def ticket_escalate(payload: TicketEscalateRequest, db: Session = Depends(get_db)) -> dict:
+    reason = payload.reason or "Escalation requested by SOP."
     _queue_message(
         db,
         to_address="human-agent-queue@internal",
         subject="Ticket escalated to human queue",
-        body=payload.reason or "Escalation requested by SOP.",
+        body=reason,
         related_entity_type="ticket",
         related_entity_id=str(uuid.uuid4()),
         metadata={"message_kind": "support_ticket", "queue_parameters": payload.queue_parameters},
     )
     db.commit()
-    return {"escalated": True}
+    return {
+        "escalated": True,
+        "reason": reason,
+        "queue_parameters": payload.queue_parameters,
+    }
 
 
 @router.post("/ops/tickets/internal-note")
